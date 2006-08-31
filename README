@@ -1,0 +1,35 @@
+************************************************************
+STJERM:
+
+* version WORK
+* a terminal emulator which shows up and hides by pressing the
+  shortcut key
+* by Stjepan Glavina
+
+************************************************************
+REQUIREMENTS:
+
+* mono
+* gtk-sharp-2
+* vte
+
+************************************************************
+INSTALLATION:
+
+Compile:
+    ./compile
+Install (as root):
+    ./install
+
+************************************************************
+KNOWN BUGS:
+
+No known bugs at the moment.
+If you find any, please report them to stjepang AT gmail DOT com.
+
+************************************************************
+CHANGELOG:
+
+0.1:
+    * date: SVN
+    * initial release
