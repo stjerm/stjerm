@@ -34,6 +34,14 @@ namespace Stjerm
 			this.SetColors(new Gdk.Color(0, 0, 0), new Gdk.Color(255, 255, 255), null, 0);
 			this.Font = Pango.FontDescription.FromString("Mono 10");
 			
+			Gtk.TargetEntry te = new Gtk.TargetEntry();
+			te.Flags = Gtk.TargetFlags.Widget;
+			te.Target = "text/uri-list";
+			Gtk.TargetEntry[] tes = new Gtk.TargetEntry[] {te};
+			Gtk.Drag.DestSet(this, Gtk.DestDefaults.All, tes, Gdk.DragAction.Ask);
+			this.DragDrop += this.On_DragDrop;
+			this.MotionNotifyEvent += this.On_Motion;
+			
 			this.menu = new PopupMenu();
 			foreach (Gtk.ImageMenuItem item in this.menu.MenuItems)
 			{
@@ -106,12 +114,22 @@ namespace Stjerm
 			}
 		}
 		
+		private void On_DragDrop(Object o, Gtk.DragDropArgs args)
+		{
+			System.Console.WriteLine("dragdrop");
+		}
+		
+		private void On_Motion(Object o, Gtk.MotionNotifyEventArgs args)
+		{
+			System.Console.WriteLine("motion");
+		}
+		
 		protected override bool OnButtonPressEvent(Gdk.EventButton evnt)
 		{
 			bool ret = base.OnButtonPressEvent(evnt);
 			if (evnt.Button == 3)
 			{
-				menu.Popup(null, null, null, 3, Gtk.Global.CurrentEventTime);
+				this.menu.Popup(null, null, null, 3, Gtk.Global.CurrentEventTime);
 			}
 			return ret;
 		}
