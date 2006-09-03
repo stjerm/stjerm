@@ -45,7 +45,6 @@ namespace Stjerm
 			this.SkipTaskbarHint = true;
 			this.Stick();
 			this.BorderWidth = 8;
-			
 			this.tbook.Show();
 			this.ShowAll();
 		}
