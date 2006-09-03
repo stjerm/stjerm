@@ -27,8 +27,11 @@ namespace Stjerm
 {	
 	public class AppStjerm
 	{
+		public static Config Configuration;
+		
 		public static int Main(string[] args)
 		{
+			Configuration = new Config();
 			Gtk.Application.Init();
 			MainWindow window = new MainWindow();
 			window.Show();
