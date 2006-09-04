@@ -48,7 +48,7 @@ namespace Stjerm
 			
 			try
 			{
-				string line = sr.ReadLine();
+				/*string line = sr.ReadLine();
 				while (line != null)
 				{
 					line = sr.ReadLine();
@@ -56,7 +56,7 @@ namespace Stjerm
 					{
 						val = line.Substring(opt.Length + 1);
 					}
-				}
+				}*/
 			}
 			catch (System.Exception e)
 			{
@@ -87,7 +87,7 @@ namespace Stjerm
 			}
 			catch (Exception e)
 			{
-				Console.Error.WriteLine("ERROR: CAN'T WRITE TO FILE " +
+				Console.Error.WriteLine("ERROR: Can't write to file " +
 										filename.ToString() +
 										"\nError message: " +
 										e.Message);

@@ -43,7 +43,7 @@ namespace Stjerm
 			KeepAbove = true;
 			SkipPagerHint = true;
 			SkipTaskbarHint = true;
-			System.Console.WriteLine("sdf" + AppStjerm.Configuration.GetOption("allworkspaces"));
+			//System.Console.WriteLine(AppStjerm.Configuration.GetOption("allworkspaces"));
 			Stick();
 			BorderWidth = 8;
 			tbook.Show();
