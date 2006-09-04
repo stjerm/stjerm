@@ -31,30 +31,31 @@ namespace Stjerm
 		
 		public MainWindow(): base("Stjerm")
 		{
-			this.DeleteEvent += this.On_Window_Delete;
-			this.ExposeEvent += this.On_Expose;
+			DeleteEvent += On_Window_Delete;
+			ExposeEvent += On_Expose;
 			
-			this.tbook = new TermBook();
-			this.Add(tbook);
-			this.SetSizeRequest(690, 440);
-			this.ResetPositionSize();
-			this.TypeHint = Gdk.WindowTypeHint.Normal;
-			this.Decorated = false;
-			this.KeepAbove = true;
-			this.SkipPagerHint = true;
-			this.SkipTaskbarHint = true;
-			this.Stick();
-			this.BorderWidth = 8;
-			this.tbook.Show();
-			this.ShowAll();
+			tbook = new TermBook();
+			Add(tbook);
+			SetSizeRequest(690, 440);
+			ResetPositionSize();
+			TypeHint = Gdk.WindowTypeHint.Normal;
+			Decorated = false;
+			KeepAbove = true;
+			SkipPagerHint = true;
+			SkipTaskbarHint = true;
+			System.Console.WriteLine("sdf" + AppStjerm.Configuration.GetOption("allworkspaces"));
+			Stick();
+			BorderWidth = 8;
+			tbook.Show();
+			ShowAll();
 		}
 		
 		public void ResetPositionSize()
 		{
 			int sw = Gdk.Screen.Default.Width;
 			int ww, wh;
-			this.GetSize(out ww, out wh);
-			this.Move(sw/2 - ww/2, 0);
+			GetSize(out ww, out wh);
+			Move(sw/2 - ww/2, 0);
 		}
 		
 		private void On_Window_Delete(Object o, Gtk.DeleteEventArgs args)
@@ -65,7 +66,7 @@ namespace Stjerm
 		private void On_Expose(Object o, Gtk.ExposeEventArgs args)
 		{
 			int width, height;
-			this.GetSize(out width, out height);
+			GetSize(out width, out height);
 			Gtk.Widget w = (Gtk.Widget)o;
 			
 			for (int i = 0; i < 5; i++)

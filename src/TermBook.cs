@@ -22,40 +22,41 @@
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 using System;
+using System.Collections;
 
 namespace Stjerm
 {
 	public class TermBook: Gtk.Notebook
 	{
-		private System.Collections.ArrayList boxes;
-		private System.Collections.ArrayList terms;
-		private System.Collections.ArrayList scrolls;
+		private ArrayList boxes;
+		private ArrayList terms;
+		private ArrayList scrolls;
 		
 		public TermBook() : base()
 		{
-			this.SetSizeRequest(650, 400);
-			this.TabPos = Gtk.PositionType.Top;
-			this.Scrollable = false;
-			this.TabBorder = 0;
+			SetSizeRequest(650, 400);
+			TabPos = Gtk.PositionType.Top;
+			Scrollable = false;
+			TabBorder = 0;
 			
-			this.boxes = new System.Collections.ArrayList();
-			this.terms = new System.Collections.ArrayList();
-			this.scrolls = new System.Collections.ArrayList();
-			this.NewTab();
+			boxes = new ArrayList();
+			terms = new ArrayList();
+			scrolls = new ArrayList();
+			NewTab();
 		}
 		
 		public void NewTab()
 		{
-			this.boxes.Add(new Gtk.HBox());
-			Gtk.HBox box = (Gtk.HBox)this.boxes[this.boxes.Count-1];
+			boxes.Add(new Gtk.HBox());
+			Gtk.HBox box = (Gtk.HBox)boxes[boxes.Count-1];
 			
-			this.terms.Add(new STerm());
-			STerm term = (STerm)this.terms[this.terms.Count-1];
-			term.ChildExited += this.On_Term_Child_Exited;
+			terms.Add(new STerm());
+			STerm term = (STerm)terms[terms.Count-1];
+			term.ChildExited += On_Term_Child_Exited;
 			
-			this.scrolls.Add(new Gtk.VScrollbar(term.Adjustment));
+			scrolls.Add(new Gtk.VScrollbar(term.Adjustment));
 			Gtk.VScrollbar scroll = (Gtk.VScrollbar)
-									this.scrolls[this.scrolls.Count-1];
+									scrolls[scrolls.Count-1];
 			
 			box.PackStart(term, true, true, 0);
 			box.PackEnd(scroll, false, false, 0);
@@ -63,31 +64,31 @@ namespace Stjerm
 			box.Show();
 			scroll.Show();
 						
-			this.AppendPage(box, null);
-			this.SetTabLabelPacking(box, true, false,
-			                        Gtk.PackType.Start
+			AppendPage(box, null);
+			SetTabLabelPacking(box, true, false,
+			                   Gtk.PackType.Start
 			);
-			this.CurrentPage = this.terms.Count - 1;
+			CurrentPage = terms.Count - 1;
 			
 			term.GrabFocus();
 		}
 		
 		public void CloseTab()
 		{
-			this.boxes.RemoveAt(this.CurrentPage);
-			this.terms.RemoveAt(this.CurrentPage);
-			this.scrolls.RemoveAt(this.CurrentPage);
-			this.RemovePage(this.CurrentPage);
+			boxes.RemoveAt(CurrentPage);
+			terms.RemoveAt(CurrentPage);
+			Scrolls.RemoveAt(CurrentPage);
+			RemovePage(CurrentPage);
 			
-			if (this.terms.Count < 1)
+			if (terms.Count < 1)
 			{
-				this.NewTab();
+				NewTab();
 			}
 		}
 		
 		private void On_Term_Child_Exited(Object o, System.EventArgs args)
 		{
-			this.CloseTab();
+			CloseTab();
 		}
 	}
 }

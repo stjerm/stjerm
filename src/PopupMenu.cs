@@ -22,28 +22,29 @@
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 using System;
+using System.Collections;
 
 namespace Stjerm
 {
 	public class PopupMenu: Gtk.Menu
 	{
-		private System.Collections.ArrayList items;
+		private ArrayList items;
 		
-		public System.Collections.ArrayList MenuItems
+		public ArrayList MenuItems
 		{
 			get
 			{
-				return this.items;
+				return items;
 			}
 			private set
 			{
-				this.items = value;
+				items = value;
 			}
 		}
 		
 		public PopupMenu()
 		{
-			this.MenuItems = new System.Collections.ArrayList();
+			MenuItems = new ArrayList();
 			
 			string[] lbls = {"New Tab",
 							 "Close Tab",
@@ -74,15 +75,15 @@ namespace Stjerm
 				{
 					Gtk.SeparatorMenuItem sepitem = new Gtk.SeparatorMenuItem();
 					sepitem.Show();
-					this.Append(sepitem);
+					Append(sepitem);
 				}
 				
-				this.MenuItems.Add(new Gtk.ImageMenuItem(lbl));
-				Gtk.ImageMenuItem item = (Gtk.ImageMenuItem)this.MenuItems[i];
+				MenuItems.Add(new Gtk.ImageMenuItem(lbl));
+				Gtk.ImageMenuItem item = (Gtk.ImageMenuItem)MenuItems[i];
 				item.Name = lbl;
 				item.Image = new Gtk.Image(img, Gtk.IconSize.Menu);
 				item.Show();
-				this.Append(item);
+				Append(item);
 			}
 		}
 	}

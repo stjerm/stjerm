@@ -22,6 +22,7 @@
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 using System;
+using System.Collections;
 
 namespace Stjerm
 {
@@ -31,28 +32,18 @@ namespace Stjerm
 		
 		public STerm() : base()
 		{
-			this.SetColors(new Gdk.Color(0, 0, 0), new Gdk.Color(255, 255, 255), null, 0);
-			this.Font = Pango.FontDescription.FromString("Mono 10");
+			SetColors(new Gdk.Color(0, 0, 0), new Gdk.Color(255, 255, 255), null, 0);
+			Font = Pango.FontDescription.FromString("Mono 10");
 			
-			Gtk.TargetEntry te = new Gtk.TargetEntry();
-			te.Flags = Gtk.TargetFlags.Widget;
-			te.Target = "text/uri-list";
-			Gtk.TargetEntry[] tes = new Gtk.TargetEntry[] {te};
-			Gtk.Drag.DestSet(this, Gtk.DestDefaults.All, tes, Gdk.DragAction.Ask);
-			this.DragDrop += this.On_DragDrop;
-			this.MotionNotifyEvent += this.On_Motion;
-			
-			this.menu = new PopupMenu();
-			foreach (Gtk.ImageMenuItem item in this.menu.MenuItems)
+			menu = new PopupMenu();
+			foreach (Gtk.ImageMenuItem item in menu.MenuItems)
 			{
-				item.Activated += this.On_MenuItem_Activated;
+				item.Activated += On_MenuItem_Activated;
 			}
 			
-			string[] envv = new
-						string[Environment.GetEnvironmentVariables().Count];
+			string[] envv = new string[Environment.GetEnvironmentVariables().Count];
 			int i = 0;
-			foreach (System.Collections.DictionaryEntry e in
-					 Environment.GetEnvironmentVariables())
+			foreach (DictionaryEntry e in Environment.GetEnvironmentVariables())
 			{
 				if ((string)e.Key == "" || (string)e.Value == "")
 				{
@@ -62,41 +53,41 @@ namespace Stjerm
 				envv[i] = tmp;
 				i++;
 			}
-			this.ForkCommand(Environment.GetEnvironmentVariable("SHELL"),
-							 Environment.GetCommandLineArgs(), envv,
-							 Environment.CurrentDirectory, false, true, true
+			ForkCommand(Environment.GetEnvironmentVariable("SHELL"),
+					    Environment.GetCommandLineArgs(), envv,
+						Environment.CurrentDirectory, false, true, true
 			);
 		}
 		
 		private void Copy()
 		{
-			this.CopyClipboard();
+			CopyClipboard();
 		}
 		
 		private void Paste()
 		{
-			this.PasteClipboard();
+			PasteClipboard();
 		}
 		
-		private void On_MenuItem_Activated(Object o, System.EventArgs args)
+		private void On_MenuItem_Activated(Object o, EventArgs args)
 		{
 			Gtk.ImageMenuItem item = (Gtk.ImageMenuItem)o;
 			switch (item.Name)
 			{
 				case "New Tab":
-					((TermBook)this.Parent.Parent).NewTab();
+					((TermBook)Parent.Parent).NewTab();
 					break;
 				case "Close Tab":
-					((TermBook)this.Parent.Parent).CloseTab();
+					((TermBook)Parent.Parent).CloseTab();
 					break;
 				case "Copy":
-					this.Copy();
+					Copy();
 					break;
 				case "Paste":
-					this.Paste();
+					Paste();
 					break;
 				case "Reset Position and Size":
-					((MainWindow)this.Parent.Parent.Parent).ResetPositionSize();
+					((MainWindow)Parent.Parent.Parent).ResetPositionSize();
 					break;
 				case "About":
 					AboutDialog d = new AboutDialog();
@@ -114,22 +105,12 @@ namespace Stjerm
 			}
 		}
 		
-		private void On_DragDrop(Object o, Gtk.DragDropArgs args)
-		{
-			System.Console.WriteLine("dragdrop");
-		}
-		
-		private void On_Motion(Object o, Gtk.MotionNotifyEventArgs args)
-		{
-			System.Console.WriteLine("motion");
-		}
-		
 		protected override bool OnButtonPressEvent(Gdk.EventButton evnt)
 		{
 			bool ret = base.OnButtonPressEvent(evnt);
 			if (evnt.Button == 3)
 			{
-				this.menu.Popup(null, null, null, 3, Gtk.Global.CurrentEventTime);
+				menu.Popup(null, null, null, 3, Gtk.Global.CurrentEventTime);
 			}
 			return ret;
 		}
