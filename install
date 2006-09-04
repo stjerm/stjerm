@@ -1,0 +1,15 @@
+#!/bin/sh
+if [ ! -e ./install-settings ]; then
+	echo "Please run ./configure script first!"
+	exit
+fi
+
+prefix=`head -2 ./install-settings | tail -1`
+destdir=`head -3 ./install-settings | tail -1`
+
+mkdir "$destdir/$prefix/share/stjerm"
+cp ./bin/stjerm.exe "$destdir/$prefix/share/stjerm/"
+
+echo -e "#!/bin/sh\nexec mono $destdir/$prefix/share/stjerm/stjerm.exe" > "$destdir/$prefix/bin/stjerm"
+chmod 755 "$destdir/$prefix/bin/stjerm"
+

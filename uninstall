@@ -1,0 +1,11 @@
+#!/bin/sh
+if [ ! -e ./install-settings ]; then
+	echo "Please run ./configure script first!"
+	exit
+fi
+
+prefix=`head -2 ./install-settings | tail -1`
+destdir=`head -3 ./install-settings | tail -1`
+
+rm -rf "$destdir/$prefix/share/stjerm"
+rm -rf "$destdir/$prefix/bin/stjerm"
