@@ -1,11 +1,29 @@
 #!/bin/sh
-if [ ! -e ./install-settings ]; then
-	echo "Please run ./configure script first!"
+usage="Usage: ./uninstall [PREFIX]\n\nPREFIX - prefix directory (default is /usr)\n\nWARNING: Do not use any relative paths as prefix!\nWARNING: If you don't specify PREFIX, /usr will be used!"
+
+if [ ! -z $2 ]; then
+	echo "ERROR: Too many parameters!"
+	echo
+	echo -e $usage
 	exit
 fi
 
-prefix=`head -2 ./install-settings | tail -1`
-destdir=`head -3 ./install-settings | tail -1`
+if [ ! -z $1 ]; then
+	if [ $1 = "--help" ]; then
+		echo -e $usage
+		exit
+	fi
+fi
 
-rm -rf "$destdir/$prefix/share/stjerm"
-rm -rf "$destdir/$prefix/bin/stjerm"
+prefix="/usr"
+
+if [ ! -z $1 ]; then
+	if [ ! -e $1 ]; then
+		echo "ERROR: Directory '$1' does not exist!"
+		exit
+	fi
+	prefix=$1
+fi
+
+rm -rf "$prefix/share/stjerm"
+rm -rf "$prefix/bin/stjerm"
