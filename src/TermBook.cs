@@ -77,7 +77,7 @@ namespace Stjerm
 		{
 			boxes.RemoveAt(CurrentPage);
 			terms.RemoveAt(CurrentPage);
-			Scrolls.RemoveAt(CurrentPage);
+			scrolls.RemoveAt(CurrentPage);
 			RemovePage(CurrentPage);
 			
 			if (terms.Count < 1)
