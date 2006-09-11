@@ -14,12 +14,29 @@ REQUIREMENTS:
 * vte
 
 ************************************************************
-INSTALLATION:
+SIMPLE INSTALLATION:
 
 Compile:
     ./compile
 Install (as root):
     ./install
+
+Uninstall (as root):
+	./uninstall
+
+************************************************************
+ADVANCED INSTALLATION:
+
+Compile:
+    ./compile
+Install (as root):
+    ./install
+To install in a custom directory:
+	./install /path/to/your/directory
+Uninstall:
+	./uninstall
+If you installed Stjerm in a custom directory, you must specify that directory:
+	./uninstall /path/to/your/directory
 
 ************************************************************
 KNOWN BUGS:
