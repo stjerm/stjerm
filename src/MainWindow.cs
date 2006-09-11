@@ -39,12 +39,36 @@ namespace Stjerm
 			SetSizeRequest(690, 440);
 			ResetPositionSize();
 			TypeHint = Gdk.WindowTypeHint.Normal;
-			Decorated = false;
-			KeepAbove = true;
 			SkipPagerHint = true;
 			SkipTaskbarHint = true;
-			//System.Console.WriteLine(AppStjerm.Configuration.GetOption("allworkspaces"));
-			Stick();
+			
+			if (AppStjerm.Configuration.GetOption("sticky") == "1")
+			{
+				Stick();
+			}
+			else
+			{
+				Unstick();
+			}
+			
+			if (AppStjerm.Configuration.GetOption("ontop") == "1")
+			{
+				KeepAbove = true;
+			}
+			else
+			{
+				KeepAbove = false;
+			}
+			
+			if (AppStjerm.Configuration.GetOption("showdeco") == "1")
+			{
+				Decorated = true;
+			}
+			else
+			{
+				Decorated = false;
+			}
+			
 			BorderWidth = 8;
 			tbook.Show();
 			ShowAll();
