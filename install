@@ -1,5 +1,5 @@
 #!/bin/sh
-usage="Usage: ./install [PREFIX]\n\nPREFIX - prefix directory (default is /usr)\n\nWARNING: Do not use any relative paths as prefix!\nNOTE: Stjerm will install all it's files somewhere in PREFIX."
+usage="Usage: ./install [DESTDIR]\nDESTDIR - destination directory (default is /)"
 
 if [ ! -z $2 ]; then
 	echo "ERROR: Too many parameters!"
@@ -15,37 +15,42 @@ if [ ! -z $1 ]; then
 	fi
 fi
 
-prefix="/usr"
+destdir="/"
 
 if [ ! -z $1 ]; then
 	if [ ! -e $1 ]; then
 		echo "ERROR: Directory '$1' does not exist!"
 		exit
 	fi
-	prefix=$1
+	destdir=$1
 fi
 
-if [ ! -e $prefix/share ]; then
-	mkdir "$prefix/share"
-	chmod 755 "$prefix/share"
+if [ ! -e $destdir/usr ]; then
+	mkdir "$destdir/usr"
+	chmod 755 "$destdir/usr"
 fi
 
-if [ ! -e $prefix/share/stjerm ]; then
-	mkdir "$prefix/share/stjerm"
-	chmod 755 "$prefix/share/stjerm"
+if [ ! -e $destdir/share ]; then
+	mkdir "$destdir/usr/share"
+	chmod 755 "$destdir/usr/share"
 fi
 
-if [ ! -e $prefix/bin ]; then
-	mkdir "$prefix/bin"
-	chmod 755 "$prefix/bin"
+if [ ! -e $destdir/share/stjerm ]; then
+	mkdir "$destdir/usr/share/stjerm"
+	chmod 755 "$destdir/usr/share/stjerm"
 fi
 
-cp ./bin/stjerm.exe "$prefix/share/stjerm/"
-chmod 644 "$prefix/share/stjerm/stjerm.exe"
+if [ ! -e $destdir/usr/bin ]; then
+	mkdir "$destdir/usr/bin"
+	chmod 755 "$destdir/usr/bin"
+fi
 
-cp ./README "$prefix/share/stjerm/"
-chmod 644 "$prefix/share/stjerm/README"
+cp ./bin/stjerm.exe "$destdir/usr/share/stjerm/"
+chmod 644 "$destdir/usr/share/stjerm/stjerm.exe"
 
-echo -e "#!/bin/sh\nexec mono /$prefix/share/stjerm/stjerm.exe" > "$prefix/bin/stjerm"
-chmod 755 "$prefix/bin/stjerm"
+cp ./README "$destdir/usr/share/stjerm/"
+chmod 644 "$destdir/usr/share/stjerm/README"
+
+echo -e "#!/bin/sh\nexec mono $destdir/usr/share/stjerm/stjerm.exe" > "$destdir/usr/bin/stjerm"
+chmod 755 "$destdir/usr/bin/stjerm"
 

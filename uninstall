@@ -1,5 +1,5 @@
 #!/bin/sh
-usage="Usage: ./uninstall [PREFIX]\n\nPREFIX - prefix directory (default is /usr)\n\nWARNING: Do not use any relative paths as prefix!\nWARNING: If you don't specify PREFIX, /usr will be used!"
+usage="Usage: ./uninstall [SRCDIR]\nSRCDIR - source directory (default is /)."
 
 if [ ! -z $2 ]; then
 	echo "ERROR: Too many parameters!"
@@ -25,5 +25,5 @@ if [ ! -z $1 ]; then
 	prefix=$1
 fi
 
-rm -rf "$prefix/share/stjerm"
-rm -rf "$prefix/bin/stjerm"
+rm -rf "$prefix/usr/share/stjerm"
+rm -rf "$prefix/usr/bin/stjerm"
