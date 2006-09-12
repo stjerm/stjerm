@@ -51,6 +51,9 @@ chmod 644 "$destdir/usr/share/stjerm/stjerm.exe"
 cp ./README "$destdir/usr/share/stjerm/"
 chmod 644 "$destdir/usr/share/stjerm/README"
 
+cp ./data/stjerm.glade "$destdir/usr/share/stjerm/"
+chmod 644 "$destdir/usr/share/stjerm/stjerm.glade"
+
 echo -e "#!/bin/sh\nexec mono $destdir/usr/share/stjerm/stjerm.exe" > "$destdir/usr/bin/stjerm"
 chmod 755 "$destdir/usr/bin/stjerm"
 
