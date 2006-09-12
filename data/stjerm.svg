@@ -191,15 +191,15 @@
      inkscape:pageshadow="2"
      inkscape:zoom="11.313708"
      inkscape:cx="37.846401"
-     inkscape:cy="14.923396"
+     inkscape:cy="14.879202"
      inkscape:current-layer="layer1"
      showgrid="false"
      inkscape:grid-bbox="true"
      inkscape:document-units="px"
      inkscape:window-width="1163"
      inkscape:window-height="932"
-     inkscape:window-x="67"
-     inkscape:window-y="45"
+     inkscape:window-x="74"
+     inkscape:window-y="33"
      showguides="true"
      inkscape:guide-bbox="true"
      inkscape:showpageshadow="false" />
@@ -300,12 +300,12 @@
     <text
        xml:space="preserve"
        style="font-size:22px;font-style:normal;font-weight:bold;fill:#4d4d4d;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans Mono"
-       x="9.9878845"
-       y="29.084892"
+       x="9.8994961"
+       y="28.908115"
        id="text1925"><tspan
          sodipodi:role="line"
          id="tspan1927"
-         x="9.9878845"
-         y="29.084892">$_</tspan></text>
+         x="9.8994961"
+         y="28.908115">$_</tspan></text>
   </g>
 </svg>
