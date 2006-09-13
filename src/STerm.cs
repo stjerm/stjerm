@@ -105,11 +105,6 @@ namespace Stjerm
 			}
 		}
 		
-		private void On_ClipboardChange(Object o, EventArgs args)
-		{
-			System.Console.WriteLine("clipboard changed");
-		}
-		
 		protected override bool OnButtonPressEvent(Gdk.EventButton evnt)
 		{
 			bool ret = base.OnButtonPressEvent(evnt);
