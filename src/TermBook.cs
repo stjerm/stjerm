@@ -37,7 +37,6 @@ namespace Stjerm
 			SetSizeRequest(650, 400);
 			TabPos = Gtk.PositionType.Top;
 			Scrollable = false;
-			TabBorder = 0;
 			
 			boxes = new ArrayList();
 			terms = new ArrayList();
