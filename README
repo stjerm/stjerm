@@ -14,29 +14,17 @@ REQUIREMENTS:
 * vte
 
 ************************************************************
-SIMPLE INSTALLATION:
+INSTALLATION:
 
-Compile:
-    ./compile
-Install (as root):
-    ./install
+* go to the stjerm directory and run:
+    ./make
+* everything will be put in the newly created "install" directory
+* to install, make a package for your Linux distribution
+* if you don't know how to make a package or you don't want to,
+  install like this (as root!):
+    cp -r install/stjerm /opt
+  Then run Stjerm with this command: /opt/stjerm/bin/stjerm
 
-Uninstall (as root):
-	./uninstall
-
-************************************************************
-ADVANCED INSTALLATION:
-
-Compile:
-    ./compile
-Install (as root):
-    ./install
-To install in a custom directory:
-	./install /path/to/your/directory
-Uninstall:
-	./uninstall
-If you installed Stjerm in a custom directory, you must specify that directory:
-	./uninstall /path/to/your/directory
 
 ************************************************************
 KNOWN BUGS:
