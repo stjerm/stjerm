@@ -4,7 +4,7 @@ if  [ ! -e bin ]; then
 	mkdir bin
 fi
 
-mcs -checked+ -optimize+ -pkg:glib-sharp-2.0 -pkg:gtk-sharp-2.0 -pkg:vte-sharp-2.0 -out:bin/stjerm.exe src/* || exit 1
+mcs -checked+ -optimize+ -pkg:glib-sharp-2.0 -pkg:gtk-sharp-2.0 -pkg:glade-sharp-2.0 -pkg:vte-sharp-2.0 -out:bin/stjerm.exe src/* || exit 1
 
 if [ ! -e ./install ]; then
 	mkdir "./install"
