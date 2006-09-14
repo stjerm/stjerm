@@ -1,10 +1,6 @@
 #!/bin/sh
 
-if  [ ! -e bin ]; then
-	mkdir bin
-fi
-
-mcs -checked+ -optimize+ -pkg:glib-sharp-2.0 -pkg:gtk-sharp-2.0 -pkg:glade-sharp-2.0 -pkg:vte-sharp-2.0 -out:bin/stjerm.exe src/* || exit 1
+mcs -checked+ -optimize+ -pkg:glib-sharp-2.0 -pkg:gtk-sharp-2.0 -pkg:glade-sharp-2.0 -pkg:vte-sharp-2.0 -out:stjerm.exe src/* || exit 1
 
 if [ ! -e ./install ]; then
 	mkdir "./install"
@@ -36,8 +32,9 @@ if [ ! -e ./install/stjerm/usr/bin ]; then
 	chmod 755 "./install/stjerm/usr/bin"
 fi
 
-cp ./bin/stjerm.exe "./install/stjerm/usr/share/stjerm"
+cp ./stjerm.exe "./install/stjerm/usr/share/stjerm"
 chmod 644 "./install/stjerm/usr/share/stjerm/stjerm.exe"
+rm ./stjerm.exe
 
 cp ./README "./install/stjerm/usr/share/stjerm/"
 chmod 644 "./install/stjerm/usr/share/stjerm/README"
@@ -47,5 +44,5 @@ chmod 644 "./install/stjerm/usr/share/stjerm/stjerm.glade"
 
 dir=`dirname $0`
 
-echo -e '#!/bin/sh\nbsname=`basename $0`\ndir=`dirname $0`\nexec mono $dir/../share/stjerm/stjerm.exe' > './install/stjerm/usr/bin/stjerm'
+echo -e '#!/bin/sh\nbsname=`basename $0`\ndir=`dirname $0`\ncd $dir/../share/stjerm\nexec mono stjerm.exe' > './install/stjerm/usr/bin/stjerm'
 chmod 755 "./install/stjerm/usr/bin/stjerm"
