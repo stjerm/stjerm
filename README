@@ -1,0 +1,20 @@
+Requirements
+------------
+In order to build Stjerm you need gtk2 and vte.
+
+
+Installation
+------------
+Edit config.mk if you need some custom compilation and installation settings.
+
+Afterwards enter the following command to build and install Stjerm (if
+necessary as root):
+    make install
+
+
+Running
+------------
+Enter this command to run Stjerm:
+    stjerm
+
+Default keybiding for opening terminal is F1.
