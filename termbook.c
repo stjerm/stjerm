@@ -25,18 +25,27 @@
 #include "stjerm.h"
 
 
-void newTab(void)
+int termsCount = 0;
+GtkWidget *popupMenu;
+
+
+void openTab(void)
 {
 	VteTerminal *term;
 	term = vte_terminal_new();
 	
-	vte_terminal_set_opacity(VTE_TERMINAL(term), 0.9 * 0xffff);
-	vte_terminal_set_background_transparent(VTE_TERMINAL(term), FALSE);
-	
 	GtkWidget *label;
 	label = gtk_label_new("Terminal 1");
-	gtk_notebook_set_tab_pos(GTK_NOTEBOOK(termBook), GTK_POS_TOP);
 	gtk_notebook_append_page(GTK_NOTEBOOK(termBook), GTK_WIDGET(term), label);
 	gtk_notebook_set_tab_label_packing(GTK_NOTEBOOK(termBook), GTK_WIDGET(term),
 	                                   TRUE, FALSE, GTK_PACK_START);
+	vte_terminal_fork_command(VTE_TERMINAL(term), "/bin/bash", NULL, NULL, "/home/stjepan/stjerm", FALSE, TRUE, TRUE);
+	
+	termsCount++;
+}
+
+
+void closeTab(void)
+{
+	
 }
