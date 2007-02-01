@@ -25,8 +25,8 @@ options:
 	
 .c.o:
 	@echo Building...
-	@echo ${CC} -c ${STJERMCFLAGS} $<
-	@${CC} -c ${STJERMCFLAGS} $<
+	@echo ${CC} -Wall -c ${STJERMCFLAGS} $<
+	@${CC} -Wall -c ${STJERMCFLAGS} $<
 	@echo
 	
 stjerm: ${OBJ}
