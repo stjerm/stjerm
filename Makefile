@@ -15,7 +15,7 @@ SRC = main.c
 OBJ = ${SRC:.c=.o}
 
 all: options stjerm
-
+	
 options:
 	@echo Build options:
 	@echo "PREFIX   = $(STJERMPREFIX)"
@@ -28,17 +28,17 @@ options:
 	@echo ${CC} -c ${STJERMCFLAGS} $<
 	@${CC} -c ${STJERMCFLAGS} $<
 	@echo
-
+	
 stjerm: ${OBJ}
 	@echo ${LD} -o $@ ${OBJ} ${STJERMLDFLAGS}
 	@${LD} -o $@ ${OBJ} ${STJERMLDFLAGS}
 	@strip $@
 	@echo
-
+	
 clean:
 	@echo Cleaning...
 	@echo rm -f stjerm ${OBJ}
 	@rm -f stjerm ${OBJ}
 	@echo
-
+	
 .PHONY: all options clean
