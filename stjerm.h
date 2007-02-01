@@ -26,6 +26,9 @@
 #include <gtk/gtk.h>
 
 extern GtkWidget *stWindow;
+extern GtkWidget *termBook;
+
+void newTab(void);
 
 
 #endif /* __STJERM_H__ */
