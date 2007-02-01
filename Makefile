@@ -11,7 +11,7 @@ STJERMLDFLAGS = ${LIBS} ${LDFLAGS}
 CC = cc
 LD = ${CC}
 
-SRC = main.c
+SRC = main.c termbook.c
 OBJ = ${SRC:.c=.o}
 
 all: options stjerm
