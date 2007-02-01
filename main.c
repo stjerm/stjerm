@@ -22,7 +22,10 @@
 
 
 #include <stdio.h>
+#include <X11/Xlib.h>
+#include <X11/Xatom.h>
 #include <gtk/gtk.h>
+#include <gdk/gdkx.h>
 #include "stjerm.h"
 
 
@@ -35,6 +38,19 @@ void centerWindow(GtkWindow* window)
 	int swidth = gdk_screen_get_width(gdk_screen_get_default());
 	gtk_window_move(window, (swidth - 800) / 2, 0);
 }
+
+
+void setOpacity(GtkWindow* window)
+{
+	Window xwin = GDK_WINDOW_XWINDOW(GTK_WIDGET(window)->window);
+	Display *dpy = GDK_WINDOW_XDISPLAY(GTK_WIDGET(window)->window);
+	Atom opacityatom = XInternAtom(dpy, "_NET_WM_WINDOW_OPACITY", False);
+	unsigned int opacity = 0.9 * 0xffffffff;
+	XChangeProperty(dpy, xwin, opacityatom, 
+	                XA_CARDINAL, 32, PropModeReplace, 
+	                (unsigned char *) &opacity, 1L);
+}
+
 
 
 gboolean stWindow_expose_event(GtkWidget *widget, GdkEventExpose *event,
@@ -52,11 +68,6 @@ gboolean stWindow_expose_event(GtkWidget *widget, GdkEventExpose *event,
 	                   widget->style->bg_gc[GTK_STATE_SELECTED],
 	                   TRUE,
 	                   1, 1, winw-2, winh-2);
-	
-	gdk_draw_rectangle(widget->window,
-	                   widget->style->bg_gc[GTK_STATE_ACTIVE],
-	                   TRUE,
-	                   5, 5, winw-10, winh-10);	
 	return FALSE;
 }
 
@@ -67,17 +78,8 @@ int main(int argc, char *argv[])
 	
 	stWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	
-	GdkScreen *screen;
-	GdkColormap *colormap;
-	screen = gtk_widget_get_screen(GTK_WIDGET(stWindow));
-	colormap = gdk_screen_get_rgba_colormap(screen);
-	if (colormap != NULL && gdk_screen_is_composited(screen))
-	{
-		gtk_widget_set_colormap(GTK_WIDGET(stWindow),colormap);
-	}
-	
 	gtk_widget_set_app_paintable(stWindow, TRUE);
-	gtk_container_set_border_width(GTK_CONTAINER(stWindow), 8);
+	gtk_container_set_border_width(GTK_CONTAINER(stWindow), 5);
 	gtk_widget_set_size_request(stWindow, 800, 400);
 	gtk_window_set_decorated(GTK_WINDOW(stWindow), FALSE);
 	gtk_window_set_skip_taskbar_hint(GTK_WINDOW(stWindow), TRUE);
@@ -89,12 +91,12 @@ int main(int argc, char *argv[])
 	g_signal_connect(G_OBJECT(stWindow), "expose-event",
 	                 G_CALLBACK(stWindow_expose_event), NULL);
 	
-	
 	termBook = gtk_notebook_new();
 	gtk_container_add(GTK_CONTAINER(stWindow), termBook);
-	newTab();
+	openTab();
 	
 	gtk_widget_show_all(stWindow);
+	setOpacity(GTK_WINDOW(stWindow));
 	gtk_main();
 	
     return 0;
