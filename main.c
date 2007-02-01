@@ -25,7 +25,40 @@
 #include <gtk/gtk.h>
 #include "stjerm.h"
 
+
 GtkWidget *stWindow;
+GtkWidget *termBook;
+
+
+void centerWindow(GtkWindow* window)
+{
+	int swidth = gdk_screen_get_width(gdk_screen_get_default());
+	gtk_window_move(window, (swidth - 800) / 2, 0);
+}
+
+
+gboolean stWindow_expose_event(GtkWidget *widget, GdkEventExpose *event,
+                               gpointer user_data)
+{
+	gint winw, winh;
+	gtk_window_get_size(GTK_WINDOW(widget), &winw, &winh);
+	
+	gdk_draw_rectangle(widget->window,
+	                   widget->style->black_gc,
+	                   FALSE,
+	                   0, 0, winw-1, winh-1);
+	
+	gdk_draw_rectangle(widget->window,
+	                   widget->style->bg_gc[GTK_STATE_SELECTED],
+	                   TRUE,
+	                   1, 1, winw-2, winh-2);
+	
+	gdk_draw_rectangle(widget->window,
+	                   widget->style->bg_gc[GTK_STATE_ACTIVE],
+	                   TRUE,
+	                   5, 5, winw-10, winh-10);	
+	return FALSE;
+}
 
 
 int main(int argc, char *argv[])
@@ -34,8 +67,35 @@ int main(int argc, char *argv[])
 	
 	stWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	
+	GdkScreen *screen;
+	GdkColormap *colormap;
+	screen = gtk_widget_get_screen(GTK_WIDGET(stWindow));
+	colormap = gdk_screen_get_rgba_colormap(screen);
+	if (colormap != NULL && gdk_screen_is_composited(screen))
+	{
+		gtk_widget_set_colormap(GTK_WIDGET(stWindow),colormap);
+	}
+	
+	gtk_widget_set_app_paintable(stWindow, TRUE);
+	gtk_container_set_border_width(GTK_CONTAINER(stWindow), 8);
+	gtk_widget_set_size_request(stWindow, 800, 400);
+	gtk_window_set_decorated(GTK_WINDOW(stWindow), FALSE);
+	gtk_window_set_skip_taskbar_hint(GTK_WINDOW(stWindow), TRUE);
+	gtk_window_set_skip_pager_hint(GTK_WINDOW(stWindow), TRUE);
+	gtk_window_stick(GTK_WINDOW(stWindow));
+	gtk_window_set_keep_above(GTK_WINDOW(stWindow), TRUE);
+	centerWindow(GTK_WINDOW(stWindow));
+	
+	g_signal_connect(G_OBJECT(stWindow), "expose-event",
+	                 G_CALLBACK(stWindow_expose_event), NULL);
+	
+	
+	termBook = gtk_notebook_new();
+	gtk_container_add(GTK_CONTAINER(stWindow), termBook);
+	newTab();
+	
 	gtk_widget_show_all(stWindow);
-	gtk_main ();
+	gtk_main();
 	
     return 0;
 }
