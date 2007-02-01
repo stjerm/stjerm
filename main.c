@@ -30,12 +30,12 @@ GtkWidget *stWindow;
 
 int main(int argc, char *argv[])
 {
-    gtk_init(&argc, &argv);
-    
-    stWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-    
-    gtk_widget_show_all(stWindow);
-    gtk_main ();
-    
+	gtk_init(&argc, &argv);
+	
+	stWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	
+	gtk_widget_show_all(stWindow);
+	gtk_main ();
+	
     return 0;
 }
