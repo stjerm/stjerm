@@ -22,9 +22,10 @@ options:
 	@echo "CFLAGS   = ${CFLAGS}"
 	@echo "LDFLAGS  = ${LDFLAGS}"
 	@echo
+	@echo "Building..."
+	@echo
 	
 .c.o:
-	@echo Building...
 	@echo ${CC} -Wall -c ${STJERMCFLAGS} $<
 	@${CC} -Wall -c ${STJERMCFLAGS} $<
 	@echo

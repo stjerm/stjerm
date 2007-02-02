@@ -29,17 +29,32 @@ int termsCount = 0;
 GtkWidget *popupMenu;
 
 
+void openTab(void);
+void closeTab(void);
+
+
 void openTab(void)
 {
+	GtkHBox *box;
 	VteTerminal *term;
-	term = vte_terminal_new();
+	GtkVScrollbar *sbar;
+	
+	box = GTK_HBOX(gtk_hbox_new(FALSE, 0));
+	term = VTE_TERMINAL(vte_terminal_new());
+	sbar = GTK_VSCROLLBAR(gtk_vscrollbar_new(vte_terminal_get_adjustment(
+	                                                     VTE_TERMINAL(term))));
+	
+	gtk_box_pack_start(GTK_BOX(box), GTK_WIDGET(term), TRUE, TRUE, 0);
+	gtk_box_pack_end(GTK_BOX(box), GTK_WIDGET(sbar), FALSE, FALSE, 0);
 	
 	GtkWidget *label;
 	label = gtk_label_new("Terminal 1");
-	gtk_notebook_append_page(GTK_NOTEBOOK(termBook), GTK_WIDGET(term), label);
-	gtk_notebook_set_tab_label_packing(GTK_NOTEBOOK(termBook), GTK_WIDGET(term),
+	gtk_notebook_append_page(GTK_NOTEBOOK(termBook), GTK_WIDGET(box), label);
+	gtk_notebook_set_tab_label_packing(GTK_NOTEBOOK(termBook), GTK_WIDGET(box),
 	                                   TRUE, FALSE, GTK_PACK_START);
-	vte_terminal_fork_command(VTE_TERMINAL(term), "/bin/bash", NULL, NULL, "/home/stjepan/stjerm", FALSE, TRUE, TRUE);
+	gtk_notebook_set_show_border(GTK_NOTEBOOK(termBook), FALSE);
+	vte_terminal_fork_command(term, "/bin/bash", NULL, NULL,
+	                          "/home/stjepan/stjerm", FALSE, TRUE, TRUE);
 	
 	termsCount++;
 }

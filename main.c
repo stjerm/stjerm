@@ -26,6 +26,7 @@
 #include <X11/Xatom.h>
 #include <gtk/gtk.h>
 #include <gdk/gdkx.h>
+#include <vte/vte.h>
 #include "stjerm.h"
 
 
@@ -52,7 +53,6 @@ void setOpacity(GtkWindow* window)
 }
 
 
-
 gboolean stWindow_expose_event(GtkWidget *widget, GdkEventExpose *event,
                                gpointer user_data)
 {
@@ -68,6 +68,21 @@ gboolean stWindow_expose_event(GtkWidget *widget, GdkEventExpose *event,
 	                   widget->style->bg_gc[GTK_STATE_SELECTED],
 	                   TRUE,
 	                   1, 1, winw-2, winh-2);
+	return FALSE;
+}
+
+
+gboolean stWindow_show(GtkWidget *widget, gpointer user_data)
+{
+	GList *children;
+	GtkWidget *box;
+	gint currPage;
+	
+	currPage = gtk_notebook_get_current_page(GTK_NOTEBOOK(termBook));
+	box = gtk_notebook_get_nth_page(GTK_NOTEBOOK(termBook), currPage);
+	children = gtk_container_children(GTK_CONTAINER(box));
+	gtk_widget_grab_focus(GTK_WIDGET(g_list_nth_data(children, 0)));
+
 	return FALSE;
 }
 
@@ -88,12 +103,14 @@ int main(int argc, char *argv[])
 	gtk_window_set_keep_above(GTK_WINDOW(stWindow), TRUE);
 	centerWindow(GTK_WINDOW(stWindow));
 	
-	g_signal_connect(G_OBJECT(stWindow), "expose-event",
-	                 G_CALLBACK(stWindow_expose_event), NULL);
-	
 	termBook = gtk_notebook_new();
 	gtk_container_add(GTK_CONTAINER(stWindow), termBook);
 	openTab();
+	
+	g_signal_connect(G_OBJECT(stWindow), "expose-event",
+	                 G_CALLBACK(stWindow_expose_event), NULL);
+	g_signal_connect(G_OBJECT(stWindow), "show",
+	                 G_CALLBACK(stWindow_show), termBook);
 	
 	gtk_widget_show_all(stWindow);
 	setOpacity(GTK_WINDOW(stWindow));

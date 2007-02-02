@@ -28,7 +28,7 @@
 extern GtkWidget *stWindow;
 extern GtkWidget *termBook;
 
-void newTab(void);
+extern void openTab(void);
 
 
 #endif /* __STJERM_H__ */
