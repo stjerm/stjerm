@@ -33,6 +33,9 @@ extern GtkWidget *termbook;
 
 extern void build_mainwindow(void);
 extern void build_termbook(void);
+extern void wait_key(void);
+extern void mainwindow_toggle_visibility(void);
+extern void term_grab_focus(void);
 
 
 #endif /* __STJERM_H__ */
