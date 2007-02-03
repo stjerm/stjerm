@@ -1,6 +1,6 @@
 Requirements
 ------------
-In order to build Stjerm you need gtk2 and vte.
+In order to build Stjerm you need glib, gtk2 and vte.
 
 
 Installation
