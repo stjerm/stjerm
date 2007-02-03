@@ -28,12 +28,13 @@
 
 
 GtkWidget *popupmenu;
-static int termcount;
+int open_count;
 
 void build_termbook(void);
 static void build_popupmenu(void);
 static void open_tab(void);
 static void close_tab(void);
+void term_grab_focus(void);
 static gboolean term_button_press(GtkWidget*, GdkEventButton*, gpointer);
 static void popupmenu_activate(gchar*);
 
@@ -42,7 +43,8 @@ void build_termbook(void)
 {
 	build_popupmenu();
 	termbook = gtk_notebook_new();
-	termcount = 0;
+	
+	open_count = 0;
 	open_tab();
 }
 
@@ -84,7 +86,7 @@ void build_popupmenu(void)
 
 static void open_tab(void)
 {
-	termcount++;
+	open_count++;
 	
 	GtkHBox *box;
 	VteTerminal *term;
@@ -98,6 +100,29 @@ static void open_tab(void)
 	vte_terminal_fork_command(term, "/bin/sh", NULL, NULL,
 	                          currdir, FALSE, TRUE, TRUE);
 	
+	GdkColor fore, back, tint, highlight, cursor, black;
+	black.red = black.green = black.blue = 0x0000;
+	
+	back.red   = 0x0000;
+	back.green = 0x0000;
+	back.blue  = 0x0000;
+
+    fore.red   = 0xffff;
+    fore.green = 0xffff;
+    fore.blue  = 0xffff;
+
+    highlight.red = highlight.green = highlight.blue = 0xc000;
+    cursor.red = 0xffff;
+    cursor.green = cursor.blue = 0x8000;
+    tint.red = tint.green = tint.blue = 0;
+    tint = black;
+    
+    vte_terminal_set_background_tint_color (VTE_TERMINAL(term), &tint);
+    vte_terminal_set_colors (VTE_TERMINAL(term), &fore, &back, NULL, 0);
+    
+    
+	vte_terminal_set_color_foreground(VTE_TERMINAL(term), &fore);
+	
 	gtk_widget_show(GTK_WIDGET(box));
 	gtk_widget_show(GTK_WIDGET(term));
 	gtk_widget_show(GTK_WIDGET(sbar));
@@ -110,7 +135,7 @@ static void open_tab(void)
 	
 	GtkWidget *label;
 	char str[20];
-	sprintf(str, "Terminal %i", termcount);
+	sprintf(str, "Terminal %i", open_count);
 	label = gtk_label_new(str);
 	
 	gtk_notebook_append_page(GTK_NOTEBOOK(termbook), GTK_WIDGET(box), label);
@@ -121,7 +146,25 @@ static void open_tab(void)
 
 static void close_tab(void)
 {
-	termcount--;
+	gint currpage = gtk_notebook_get_current_page(GTK_NOTEBOOK(termbook));
+	gtk_notebook_remove_page(GTK_NOTEBOOK(termbook), currpage);
+}
+
+
+void term_grab_focus(void)
+{
+	gtk_window_present(GTK_WINDOW(mainwindow));
+	
+	GList *children;
+	GtkWidget *box;
+	gint currPage;
+	
+	currPage = gtk_notebook_get_current_page(GTK_NOTEBOOK(termbook));
+	box = gtk_notebook_get_nth_page(GTK_NOTEBOOK(termbook), currPage);
+	children = gtk_container_get_children(GTK_CONTAINER(box));
+	gtk_widget_grab_focus(GTK_WIDGET(g_list_nth_data(children, 0)));
+
+	g_list_free(children);
 }
 
 
@@ -143,5 +186,9 @@ static void popupmenu_activate(gchar *label)
 	if (!strcmp(label, "Open Tab"))
 	{
 		open_tab();
+	}
+	else if (!strcmp(label, "Close Tab"))
+	{
+		close_tab();
 	}
 }
