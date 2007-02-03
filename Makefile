@@ -4,14 +4,14 @@ STJERMPREFIX = $(shell if [ ! -z $(PREFIX) ]; then echo $(PREFIX); else \
 echo "/usr/local"; fi)
 
 INCS = -I. -I${PREFIX}/include `pkg-config --cflags gtk+-2.0 vte`
-LIBS = -L${PREFIX}/lib `pkg-config --libs gtk+-2.0 vte`
+LIBS = -L${PREFIX}/lib `pkg-config --libs gtk+-2.0 vte gthread-2.0`
 STJERMCFLAGS = ${INCS} -DSTJERM_VERSION=\"${STJERM_VERSION}\" ${CFLAGS}
 STJERMLDFLAGS = ${LIBS} ${LDFLAGS} 
 
 CC = cc
 LD = ${CC}
 
-SRC = main.c mainwindow.c termbook.c
+SRC = main.c mainwindow.c termbook.c waitkey.c
 OBJ = ${SRC:.c=.o}
 
 all: options stjerm
