@@ -20,47 +20,128 @@
  * Boston, MA  02110-1301  USA
  */
 
+
 #include <gtk/gtk.h>
 #include <vte/vte.h>
+#include <string.h>
 #include "stjerm.h"
 
 
-int termsCount = 0;
-GtkWidget *popupMenu;
+GtkWidget *popupmenu;
+static int termcount;
+
+void build_termbook(void);
+static void build_popupmenu(void);
+static void open_tab(void);
+static void close_tab(void);
+static gboolean term_button_press(GtkWidget*, GdkEventButton*, gpointer);
+static void popupmenu_activate(gchar*);
 
 
-void openTab(void);
-void closeTab(void);
-
-
-void openTab(void)
+void build_termbook(void)
 {
+	build_popupmenu();
+	termbook = gtk_notebook_new();
+	termcount = 0;
+	open_tab();
+}
+
+
+void build_popupmenu(void)
+{
+	popupmenu = gtk_menu_new();
+	
+	GtkWidget *menuitem;
+	GtkWidget *img;
+	
+	gchar *labels[] = { "Open Tab", "Close Tab", "Copy", "Paste", "Preferences",
+	                    "About", "Quit" };
+	gchar *stocks[] = { GTK_STOCK_ADD, GTK_STOCK_CLOSE, GTK_STOCK_COPY,
+	                    GTK_STOCK_PASTE, GTK_STOCK_PREFERENCES, GTK_STOCK_ABOUT,
+	                    GTK_STOCK_QUIT };
+	
+	int i;
+	for (i = 0; i < 7; i++)
+	{
+		if (i == 2 || i == 4 || i == 5)
+		{
+			menuitem = gtk_separator_menu_item_new();
+			gtk_menu_shell_append(GTK_MENU_SHELL(popupmenu), menuitem);
+			gtk_widget_show(GTK_WIDGET(menuitem));
+		}
+		
+		menuitem = gtk_image_menu_item_new_with_label(labels[i]);
+		img = gtk_image_new_from_stock(stocks[i], GTK_ICON_SIZE_MENU);
+		gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menuitem), GTK_WIDGET(img));
+		g_signal_connect_swapped(G_OBJECT(menuitem), "activate",
+		                         G_CALLBACK(popupmenu_activate),
+		                         (gpointer)labels[i]);
+		gtk_menu_shell_append(GTK_MENU_SHELL(popupmenu), menuitem);
+		gtk_widget_show(GTK_WIDGET(menuitem));
+	}
+}
+
+
+static void open_tab(void)
+{
+	termcount++;
+	
 	GtkHBox *box;
 	VteTerminal *term;
 	GtkVScrollbar *sbar;
 	
 	box = GTK_HBOX(gtk_hbox_new(FALSE, 0));
 	term = VTE_TERMINAL(vte_terminal_new());
-	sbar = GTK_VSCROLLBAR(gtk_vscrollbar_new(vte_terminal_get_adjustment(
-	                                                     VTE_TERMINAL(term))));
+	sbar = GTK_VSCROLLBAR(gtk_vscrollbar_new(
+	                          vte_terminal_get_adjustment(VTE_TERMINAL(term))));
+	
+	vte_terminal_fork_command(term, "/bin/sh", NULL, NULL,
+	                          currdir, FALSE, TRUE, TRUE);
+	
+	gtk_widget_show(GTK_WIDGET(box));
+	gtk_widget_show(GTK_WIDGET(term));
+	gtk_widget_show(GTK_WIDGET(sbar));
+	
+	g_signal_connect_swapped(G_OBJECT(term), "button-press-event",
+	                         G_CALLBACK(term_button_press), NULL);
 	
 	gtk_box_pack_start(GTK_BOX(box), GTK_WIDGET(term), TRUE, TRUE, 0);
 	gtk_box_pack_end(GTK_BOX(box), GTK_WIDGET(sbar), FALSE, FALSE, 0);
 	
 	GtkWidget *label;
-	label = gtk_label_new("Terminal 1");
-	gtk_notebook_append_page(GTK_NOTEBOOK(termBook), GTK_WIDGET(box), label);
-	gtk_notebook_set_tab_label_packing(GTK_NOTEBOOK(termBook), GTK_WIDGET(box),
-	                                   TRUE, FALSE, GTK_PACK_START);
-	gtk_notebook_set_show_border(GTK_NOTEBOOK(termBook), FALSE);
-	vte_terminal_fork_command(term, "/bin/bash", NULL, NULL,
-	                          "/home/stjepan/stjerm", FALSE, TRUE, TRUE);
+	char str[20];
+	sprintf(str, "Terminal %i", termcount);
+	label = gtk_label_new(str);
 	
-	termsCount++;
+	gtk_notebook_append_page(GTK_NOTEBOOK(termbook), GTK_WIDGET(box), label);
+	gtk_notebook_set_tab_label_packing(GTK_NOTEBOOK(termbook), GTK_WIDGET(box),
+	                                   TRUE, FALSE, GTK_PACK_START);
 }
 
 
-void closeTab(void)
+static void close_tab(void)
 {
+	termcount--;
+}
+
+
+static gboolean term_button_press(GtkWidget *widget, GdkEventButton *event,
+                                  gpointer user_data)
+{
+	if (event->type == GDK_BUTTON_PRESS && event->button == 3)
+	{
+		gtk_menu_popup(GTK_MENU(popupmenu), NULL, NULL, NULL, NULL, event->button,
+		               event->time);
+	}
 	
+	return FALSE;
+}
+
+
+static void popupmenu_activate(gchar *label)
+{
+	if (!strcmp(label, "Open Tab"))
+	{
+		open_tab();
+	}
 }
