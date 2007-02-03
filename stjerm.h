@@ -20,15 +20,19 @@
  * Boston, MA  02110-1301  USA
  */
 
+
 #ifndef __STJERM_H__
 #define __STJERM_H__
 
 #include <gtk/gtk.h>
 
-extern GtkWidget *stWindow;
-extern GtkWidget *termBook;
 
-extern void openTab(void);
+extern char *currdir;
+extern GtkWidget *mainwindow;
+extern GtkWidget *termbook;
+
+extern void build_mainwindow(void);
+extern void build_termbook(void);
 
 
 #endif /* __STJERM_H__ */
