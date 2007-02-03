@@ -34,8 +34,10 @@ GtkWidget *termbook;
 void build_mainwindow(void);
 static void mainwindow_reset_position(void);
 static void mainwindow_reset_opacity(void);
+void mainwindow_toggle_visibility(void);
 static gboolean mainwindow_expose_event(GtkWidget *, GdkEventExpose*, gpointer);
 static gboolean mainwindow_show(GtkWidget*t, gpointer);
+static gboolean mainwindow_realize(GtkWidget*t, gpointer);
 
 
 void build_mainwindow(void)
@@ -84,6 +86,20 @@ static void mainwindow_reset_opacity(void)
 }
 
 
+void mainwindow_toggle_visibility(void)
+{
+	if (GTK_WIDGET_VISIBLE(mainwindow))
+	{
+		gtk_widget_hide(GTK_WIDGET(mainwindow));
+	}
+	else
+	{
+		gtk_widget_show_all(GTK_WIDGET(mainwindow));
+		gtk_window_stick(GTK_WINDOW(mainwindow));
+	}
+}
+
+
 static gboolean mainwindow_expose_event(GtkWidget *widget, GdkEventExpose *event,
                                  gpointer user_data)
 {
@@ -105,16 +121,7 @@ static gboolean mainwindow_expose_event(GtkWidget *widget, GdkEventExpose *event
 
 static gboolean mainwindow_show(GtkWidget *widget, gpointer user_data)
 {
-	GList *children;
-	GtkWidget *box;
-	gint currPage;
-	
-	currPage = gtk_notebook_get_current_page(GTK_NOTEBOOK(termbook));
-	box = gtk_notebook_get_nth_page(GTK_NOTEBOOK(termbook), currPage);
-	children = gtk_container_get_children(GTK_CONTAINER(box));
-	gtk_widget_grab_focus(GTK_WIDGET(g_list_nth_data(children, 0)));
-	
-	g_list_free (children);
+	term_grab_focus();
 
 	return FALSE;
 }
