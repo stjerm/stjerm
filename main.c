@@ -33,12 +33,13 @@ char *currdir;
 int main(int argc, char *argv[])
 {
 	currdir = argv[0];
-	gtk_init(&argc, &argv);
-	build_mainwindow();
 	
+	gtk_init(&argc, &argv);
 	if (!g_thread_supported())
 		g_thread_init(NULL);
 	gdk_threads_init();
+	
+	build_mainwindow();
 	
 	g_thread_create((GThreadFunc)wait_key, NULL, FALSE, NULL);
 	gtk_main();
