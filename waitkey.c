@@ -39,19 +39,15 @@ void wait_key(void)
     
     if (!(dpy = XOpenDisplay(NULL)))
     {
-		fprintf(stderr, "error: can not open dpy %s", XDisplayName(NULL));
+		fprintf(stderr, "error: can not open display %s", XDisplayName(NULL));
 		exit(1);
 	}
 	screen = DefaultScreen(dpy);
 	root = RootWindow(dpy, screen);
 	
 	
-	KeySym opt_key = XK_Return;
-	// CTRL: ControlMask
-	// ALT:  Mod1Mask
-	// WIN:  Mod4Mask
-	// NONE: 0
-	unsigned int modmask = Mod1Mask | ShiftMask;
+	KeySym opt_key = XK_f;
+	unsigned int modmask = Mod1Mask;
 	
 	
 	int i, j;
