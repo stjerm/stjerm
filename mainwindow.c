@@ -31,13 +31,14 @@
 GtkWidget *mainwindow;
 GtkWidget *termbook;
 
+static Window mw_xwin;
+static Display *dpy;
+static Atom opacityatom;
+
 void build_mainwindow(void);
-static void mainwindow_reset_position(void);
-static void mainwindow_reset_opacity(void);
 void mainwindow_toggle_visibility(void);
+static void mainwindow_set_opacity(float);
 static gboolean mainwindow_expose_event(GtkWidget *, GdkEventExpose*, gpointer);
-static gboolean mainwindow_show(GtkWidget*t, gpointer);
-static gboolean mainwindow_realize(GtkWidget*t, gpointer);
 
 
 void build_mainwindow(void)
@@ -48,41 +49,27 @@ void build_mainwindow(void)
 	gtk_container_set_border_width(GTK_CONTAINER(mainwindow), 5);
 	gtk_widget_set_size_request(mainwindow, 800, 400);
 	gtk_window_set_decorated(GTK_WINDOW(mainwindow), FALSE);
-	gtk_window_set_skip_taskbar_hint(GTK_WINDOW(mainwindow), TRUE);
-	gtk_window_set_skip_pager_hint(GTK_WINDOW(mainwindow), TRUE);
-	gtk_window_stick(GTK_WINDOW(mainwindow));
 	gtk_window_set_keep_above(GTK_WINDOW(mainwindow), TRUE);
+	gtk_window_stick(GTK_WINDOW(mainwindow));
+		
+	int swidth = gdk_screen_get_width(gdk_screen_get_default());
+	gtk_window_move(GTK_WINDOW(mainwindow), (swidth - 800) / 2, 25);
 	
 	build_termbook();
 	gtk_container_add(GTK_CONTAINER(mainwindow), termbook);
 	
 	g_signal_connect(G_OBJECT(mainwindow), "expose-event",
 	                 G_CALLBACK(mainwindow_expose_event), NULL);
-	g_signal_connect(G_OBJECT(mainwindow), "show",
-	                 G_CALLBACK(mainwindow_show), termbook);
 	
-	mainwindow_reset_position();
 	gtk_widget_show_all(mainwindow);
-	mainwindow_reset_opacity();
-}
-
-
-static void mainwindow_reset_position(void)
-{
-	int swidth = gdk_screen_get_width(gdk_screen_get_default());
-	gtk_window_move(GTK_WINDOW(mainwindow), (swidth - 800) / 2, 0);
-}
-
-
-static void mainwindow_reset_opacity(void)
-{
-	Window xwin = GDK_WINDOW_XWINDOW(GTK_WIDGET(mainwindow)->window);
-	Display *dpy = GDK_WINDOW_XDISPLAY(GTK_WIDGET(mainwindow)->window);
-	Atom opacityatom = XInternAtom(dpy, "_NET_WM_WINDOW_OPACITY", False);
-	unsigned int opacity = 0.9 * 0xffffffff;
-	XChangeProperty(dpy, xwin, opacityatom, 
-	                XA_CARDINAL, 32, PropModeReplace, 
-	                (unsigned char *) &opacity, 1L);
+	gtk_window_present(GTK_WINDOW(mainwindow));
+	term_grab_focus();
+	
+	mw_xwin = GDK_WINDOW_XWINDOW(GTK_WIDGET(mainwindow)->window);
+	dpy = GDK_WINDOW_XDISPLAY(GTK_WIDGET(mainwindow)->window);
+	opacityatom = XInternAtom(dpy, "_NET_WM_WINDOW_OPACITY", False);
+	
+	mainwindow_set_opacity(0.9f);
 }
 
 
@@ -94,9 +81,17 @@ void mainwindow_toggle_visibility(void)
 	}
 	else
 	{
-		gtk_widget_show_all(GTK_WIDGET(mainwindow));
-		gtk_window_stick(GTK_WINDOW(mainwindow));
+		gtk_window_present(GTK_WINDOW(mainwindow));
+		term_grab_focus();
 	}
+}
+
+
+static void mainwindow_set_opacity(float opacity)
+{
+	unsigned int op = opacity * 0xffffffff;
+	XChangeProperty(dpy, mw_xwin, opacityatom, XA_CARDINAL, 32, PropModeReplace, 
+	                (unsigned char *) &op, 1L);
 }
 
 
@@ -115,13 +110,5 @@ static gboolean mainwindow_expose_event(GtkWidget *widget, GdkEventExpose *event
 	                   widget->style->bg_gc[GTK_STATE_SELECTED],
 	                   TRUE,
 	                   1, 1, winw-2, winh-2);
-	return FALSE;
-}
-
-
-static gboolean mainwindow_show(GtkWidget *widget, gpointer user_data)
-{
-	term_grab_focus();
-
 	return FALSE;
 }
