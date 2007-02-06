@@ -50,6 +50,8 @@ void build_mainwindow(void)
 	gtk_widget_set_size_request(mainwindow, 800, 400);
 	gtk_window_set_decorated(GTK_WINDOW(mainwindow), FALSE);
 	gtk_window_set_keep_above(GTK_WINDOW(mainwindow), TRUE);
+	gtk_window_set_skip_taskbar_hint(GTK_WINDOW(mainwindow), TRUE);
+	gtk_window_set_skip_pager_hint(GTK_WINDOW(mainwindow), TRUE);
 	gtk_window_stick(GTK_WINDOW(mainwindow));
 		
 	int swidth = gdk_screen_get_width(gdk_screen_get_default());
@@ -81,8 +83,12 @@ void mainwindow_toggle_visibility(void)
 	}
 	else
 	{
+		gdk_threads_enter();
 		gtk_window_present(GTK_WINDOW(mainwindow));
+		gtk_window_stick(GTK_WINDOW(mainwindow));
 		term_grab_focus();
+		gdk_flush();
+		gdk_threads_leave();
 	}
 }
 
