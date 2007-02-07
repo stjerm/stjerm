@@ -26,6 +26,16 @@
 
 #include <gtk/gtk.h>
 
+#define TERM_ICONIFY_WINDOW    0
+#define TERM_DEICONIFY_WINDOW  1
+#define TERM_RAISE_WINDOW      2
+#define TERM_LOWER_WINDOW      3
+#define TERM_MAXIMIZE_WINDOW   4
+#define TERM_RESTORE_WINDOW    5
+#define TERM_REFRESH_WINDOW    6
+#define TERM_RESIZE_WINDOW     7
+#define TERM_MOVE_WINDOW       8
+
 
 extern char *currdir;
 extern GtkWidget *mainwindow;
@@ -36,6 +46,10 @@ extern void build_termbook(void);
 extern void wait_key(void);
 extern void mainwindow_toggle_visibility(void);
 extern void term_grab_focus(void);
+extern void open_tab(void);
+extern void close_tab(void);
+extern void next_tab(void);
+extern void previous_tab(void);
 
 
 #endif /* __STJERM_H__ */
