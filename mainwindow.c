@@ -42,6 +42,7 @@ static void mainwindow_connect_shortcuts(void);
 static void mainwindow_reset_position(void);
 static void mainwindow_reset_opacity(void);
 static gboolean mainwindow_expose_event(GtkWidget*, GdkEventExpose*, gpointer);
+static void mainwindow_destroy(GtkWidget*, gpointer);
 
 
 void build_mainwindow(void)
@@ -65,6 +66,8 @@ void build_mainwindow(void)
 	
 	g_signal_connect(G_OBJECT(mainwindow), "expose-event",
 	                 G_CALLBACK(mainwindow_expose_event), NULL);
+	g_signal_connect(G_OBJECT(mainwindow), "destroy",
+	                 G_CALLBACK(mainwindow_destroy), NULL);
 	
 	gtk_widget_show_all(mainwindow);
 	gtk_window_present(GTK_WINDOW(mainwindow));
@@ -147,4 +150,10 @@ static gboolean mainwindow_expose_event(GtkWidget *widget, GdkEventExpose *event
 	                   TRUE,
 	                   1, 1, winw-2, winh-2);
 	return FALSE;
+}
+
+
+static void mainwindow_destroy(GtkWidget *widget, gpointer user_data)
+{
+	gtk_main_quit();
 }
