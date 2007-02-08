@@ -27,8 +27,7 @@
 #include "stjerm.h"
 
 
-GtkWidget *popupmenu;
-int open_count;
+static GtkWidget *popupmenu;
 
 void build_termbook(void);
 void term_grab_focus(void);
@@ -50,7 +49,6 @@ void build_termbook(void)
 	build_popupmenu();
 	termbook = gtk_notebook_new();
 	
-	open_count = 0;
 	open_tab();
 }
 
@@ -74,8 +72,6 @@ void term_grab_focus(void)
 
 void open_tab(void)
 {
-	open_count++;
-	
 	GtkHBox *box;
 	VteTerminal *term;
 	GtkVScrollbar *sbar;
@@ -88,27 +84,14 @@ void open_tab(void)
 	vte_terminal_fork_command(term, "/bin/bash", NULL, NULL,
 	                          currdir, TRUE, TRUE, TRUE);
 	
-	GdkColor fore, back, tint, highlight, cursor, black;
-	black.red = black.green = black.blue = 0x0000;
-	
+	GdkColor fore, back;
 	back.red   = 0x0000;
 	back.green = 0x0000;
 	back.blue  = 0x0000;
-	
 	fore.red   = 0xffff;
 	fore.green = 0xffff;
 	fore.blue  = 0xffff;
-	
-	highlight.red = highlight.green = highlight.blue = 0xc000;
-	cursor.red = 0xffff;
-	cursor.green = cursor.blue = 0x8000;
-	tint.red = tint.green = tint.blue = 0;
-	tint = black;
-	
-	vte_terminal_set_background_tint_color (VTE_TERMINAL(term), &tint);
-	vte_terminal_set_colors (VTE_TERMINAL(term), &fore, &back, NULL, 0);
-	
-	vte_terminal_set_color_foreground(VTE_TERMINAL(term), &fore);
+	vte_terminal_set_colors(VTE_TERMINAL(term), &fore, &back, NULL, 0);
 	
 	gtk_widget_show(GTK_WIDGET(box));
 	gtk_widget_show(GTK_WIDGET(term));
@@ -120,9 +103,7 @@ void open_tab(void)
 	gtk_box_pack_end(GTK_BOX(box), GTK_WIDGET(sbar), FALSE, FALSE, 0);
 	
 	GtkWidget *label;
-	char str[20];
-	sprintf(str, "Terminal %i", open_count);
-	label = gtk_label_new(str);
+	label = gtk_label_new("Terminal");
 	
 	gtk_notebook_append_page(GTK_NOTEBOOK(termbook), GTK_WIDGET(box), label);
 	gtk_notebook_set_tab_label_packing(GTK_NOTEBOOK(termbook), GTK_WIDGET(box),
@@ -234,8 +215,8 @@ static gboolean term_button_press(GtkWidget *widget, GdkEventButton *event,
 {
 	if (event->type == GDK_BUTTON_PRESS && event->button == 3)
 	{
-		gtk_menu_popup(GTK_MENU(popupmenu), NULL, NULL, NULL, NULL, event->button,
-		               event->time);
+		gtk_menu_popup(GTK_MENU(popupmenu), NULL, NULL, NULL, NULL,
+		               event->button, event->time);
 	}
 	
 	return FALSE;
@@ -250,6 +231,17 @@ static void term_eof_or_child_exited(VteTerminal *term, gpointer user_data)
 
 static void popupmenu_activate(gchar *label)
 {
+	VteTerminal *term;
+	GList *children;
+	GtkWidget *box;
+	gint currPage;
+	
+	currPage = gtk_notebook_get_current_page(GTK_NOTEBOOK(termbook));
+	box = gtk_notebook_get_nth_page(GTK_NOTEBOOK(termbook), currPage);
+	children = gtk_container_get_children(GTK_CONTAINER(box));
+	term = VTE_TERMINAL(g_list_nth_data(children, 0));
+	g_list_free(children);
+	
 	if (!strcmp(label, "Open Tab"))
 	{
 		open_tab();
@@ -257,6 +249,22 @@ static void popupmenu_activate(gchar *label)
 	else if (!strcmp(label, "Close Tab"))
 	{
 		close_tab();
+	}
+	else if (!strcmp(label, "Copy"))
+	{
+		vte_terminal_copy_clipboard(term);
+	}
+	else if (!strcmp(label, "Paste"))
+	{
+		vte_terminal_paste_clipboard(term);
+	}
+	else if (!strcmp(label, "About"))
+	{
+		
+	}
+	else if (!strcmp(label, "Quit"))
+	{
+		gtk_widget_destroy(GTK_WIDGET(mainwindow));
 	}
 	/* PREFERENCES:
 	   * font
@@ -329,12 +337,6 @@ static void term_app_request_resize_move(VteTerminal *term, guint x, guint y,
 	}
 	if (event == TERM_MOVE_WINDOW)
 	{
-		GList *list;
-		GtkWidget *box;
-		
-		box = gtk_notebook_get_nth_page(GTK_NOTEBOOK(termbook),
-		                 gtk_notebook_get_current_page(GTK_NOTEBOOK(termbook)));
-		list = gtk_container_children(GTK_CONTAINER(box));
-		gtk_widget_grab_focus(list->data);
+		gdk_window_move(GTK_WIDGET(mainwindow)->window, x, y);
 	}
 }
