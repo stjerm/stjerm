@@ -21,6 +21,7 @@
  */
 
 
+#include <stdlib.h>
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
 #include <gtk/gtk.h>
@@ -33,6 +34,8 @@ char *currdir;
 int main(int argc, char *argv[])
 {
 	currdir = argv[0];
+	
+	srand((unsigned)time(0));
 	
 	gtk_init(&argc, &argv);
 	if (!g_thread_supported())
