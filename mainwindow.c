@@ -56,11 +56,16 @@ void build_mainwindow(void)
 	gtk_window_set_keep_above(GTK_WINDOW(mainwindow), TRUE);
 	gtk_window_set_skip_taskbar_hint(GTK_WINDOW(mainwindow), TRUE);
 	gtk_window_set_skip_pager_hint(GTK_WINDOW(mainwindow), TRUE);
+	gtk_window_set_resizable(GTK_WINDOW(mainwindow), FALSE);
 	gtk_window_stick(GTK_WINDOW(mainwindow));
 	mainwindow_reset_position();
 	
+	GtkWidget *box = gtk_vbox_new(FALSE, 0);
+	build_colortabs();
 	build_termbook();
-	gtk_container_add(GTK_CONTAINER(mainwindow), termbook);
+	gtk_box_pack_start(GTK_BOX(box), colortabs, FALSE, TRUE, 0);
+	gtk_box_pack_end(GTK_BOX(box), termbook, TRUE, TRUE, 0);
+	gtk_container_add(GTK_CONTAINER(mainwindow), box);
 	
 	mainwindow_connect_shortcuts();
 	
@@ -122,7 +127,7 @@ static void mainwindow_connect_shortcuts(void)
 static void mainwindow_reset_position(void)
 {
 	int swidth = gdk_screen_get_width(gdk_screen_get_default());
-	gtk_window_move(GTK_WINDOW(mainwindow), (swidth - 800) / 2, 25);
+	gtk_window_move(GTK_WINDOW(mainwindow), (swidth - 800) / 2, 0);
 }
 
 
