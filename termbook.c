@@ -48,6 +48,8 @@ void build_termbook(void)
 {
 	build_popupmenu();
 	termbook = gtk_notebook_new();
+	gtk_notebook_set_show_tabs(GTK_NOTEBOOK(termbook), FALSE);
+	gtk_notebook_set_show_border(GTK_NOTEBOOK(termbook), FALSE);
 	
 	open_tab();
 }
@@ -102,12 +104,15 @@ void open_tab(void)
 	gtk_box_pack_start(GTK_BOX(box), GTK_WIDGET(term), TRUE, TRUE, 0);
 	gtk_box_pack_end(GTK_BOX(box), GTK_WIDGET(sbar), FALSE, FALSE, 0);
 	
-	GtkWidget *label;
-	label = gtk_label_new("Terminal");
+	char name[12];
+	sprintf(name, "%i %i %i", rand() % 150 + 50, rand() % 150 + 50, rand() % 150 + 50);
+	gtk_widget_set_name(GTK_WIDGET(box), name);
 	
-	gtk_notebook_append_page(GTK_NOTEBOOK(termbook), GTK_WIDGET(box), label);
+	gtk_notebook_append_page(GTK_NOTEBOOK(termbook), GTK_WIDGET(box), NULL);
 	gtk_notebook_set_tab_label_packing(GTK_NOTEBOOK(termbook), GTK_WIDGET(box),
 	                                   TRUE, FALSE, GTK_PACK_START);
+	
+	colortabs_reload();
 }
 
 
@@ -115,6 +120,9 @@ void close_tab(void)
 {
 	gint currpage = gtk_notebook_get_current_page(GTK_NOTEBOOK(termbook));
 	gtk_notebook_remove_page(GTK_NOTEBOOK(termbook), currpage);
+	
+	colortabs_reload();
+	
 	if (gtk_notebook_get_n_pages(GTK_NOTEBOOK(termbook)) == 0)
 		open_tab();
 }
@@ -126,9 +134,13 @@ void next_tab(void)
 	if (npages < 2) return;
 	
 	gint currpage = gtk_notebook_get_current_page(GTK_NOTEBOOK(termbook));
-	if (currpage == npages - 1) return;
 	
-	gtk_notebook_set_current_page(GTK_NOTEBOOK(termbook), currpage + 1);
+	gint page = currpage + 1;
+	if (currpage == npages - 1) page = 0;
+	
+	gtk_notebook_set_current_page(GTK_NOTEBOOK(termbook), page);
+	
+	colortabs_reload();
 }
 
 
@@ -138,9 +150,13 @@ void previous_tab(void)
 	if (npages < 2) return;
 	
 	gint currpage = gtk_notebook_get_current_page(GTK_NOTEBOOK(termbook));
-	if (currpage == 0) return;
 	
-	gtk_notebook_set_current_page(GTK_NOTEBOOK(termbook), currpage - 1);
+	gint page = currpage - 1;
+	if (currpage == 0) page = npages - 1;
+	
+	gtk_notebook_set_current_page(GTK_NOTEBOOK(termbook), page);
+	
+	colortabs_reload();
 }
 
 
