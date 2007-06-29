@@ -1,22 +1,18 @@
 Requirements
 ------------
-In order to build and run Stjerm you need pkgconfig, glib, gtk2 and vte.
+pkgconfig, gtk2, vte
 
 
 Installation
 ------------
-Enter the following command to build and install Stjerm (if
-necessary as root):
-	make install
+    make
+    sudo make install
+< NOT FINISHED >
 
-You can also use some custom options like PREFIX (default is /usr/local),
-CFLAGS or LDFLAGS.
-Example:
-	PREFIX=/usr CFLAGS="-O3 -march=i686" make install
 
 Running
 ------------
-Enter this command to run Stjerm:
-	stjerm
+Run this command:
+    stjerm -h
+to list all available options.
 
-The default keybiding for opening the terminal is F1.
