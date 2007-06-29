@@ -37,16 +37,11 @@
 #define TERM_MOVE_WINDOW       8
 
 
-extern char *currdir;
-extern GtkWidget *mainwindow;
-extern GtkWidget *termbook;
-extern GtkWidget *colortabs;
-
 extern void build_mainwindow(void);
-extern void build_termbook(void);
+extern GtkWidget* build_term(void);
 extern void mainwindow_toggle_visibility(void);
 
-extern void wait_key(void);
+extern void grab_key(void);
 
 extern void term_grab_focus(void);
 extern void open_tab(void);
@@ -58,3 +53,4 @@ extern void build_colortabs(void);
 extern void colortabs_reload(void);
 
 #endif /* __STJERM_H__ */
+
