@@ -23,27 +23,24 @@
 
 #include <gtk/gtk.h>
 #include <vte/vte.h>
-#include <string.h>
 #include "stjerm.h"
 
 
 extern GtkWidget *mainwindow;
+extern GtkWidget *popupmenu;
 GtkWidget *term;
-GtkWidget *popupmenu;
 
 GtkWidget* build_term(void);
 static void term_connect_signals(GtkWidget*);
-static void build_popupmenu(void);
 static gboolean term_button_press(GtkWidget*, GdkEventButton*, gpointer);
 static void term_eof_or_child_exited(VteTerminal*, gpointer);
-static void popupmenu_activate(gchar*);
 static void term_app_request(VteTerminal*, gpointer);
 static void term_app_request_resize_move(VteTerminal*, guint, guint, gpointer);
 
 
 GtkWidget* build_term(void)
 {
-	build_popupmenu();
+	if (!popupmenu) build_popupmenu();
 	
 	term = vte_terminal_new();
 	
@@ -64,38 +61,6 @@ GtkWidget* build_term(void)
 	term_connect_signals(term);
 	
 	return GTK_WIDGET(term);
-}
-
-
-void build_popupmenu(void)
-{
-	popupmenu = gtk_menu_new();
-	
-	GtkWidget *menuitem;
-	GtkWidget *img;
-	
-	gchar *labels[] = { "Copy", "Paste", "Quit" };
-	gchar *stocks[] = { GTK_STOCK_COPY, GTK_STOCK_PASTE, GTK_STOCK_QUIT };
-	
-	int i;
-	for (i = 0; i < 3; i++)
-	{
-		if (i == 2)
-		{
-			menuitem = gtk_separator_menu_item_new();
-			gtk_menu_shell_append(GTK_MENU_SHELL(popupmenu), menuitem);
-			gtk_widget_show(GTK_WIDGET(menuitem));
-		}
-		
-		menuitem = gtk_image_menu_item_new_with_label(labels[i]);
-		img = gtk_image_new_from_stock(stocks[i], GTK_ICON_SIZE_MENU);
-		gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menuitem), GTK_WIDGET(img));
-		g_signal_connect_swapped(G_OBJECT(menuitem), "activate",
-		                         G_CALLBACK(popupmenu_activate),
-		                         (gpointer)labels[i]);
-		gtk_menu_shell_append(GTK_MENU_SHELL(popupmenu), menuitem);
-		gtk_widget_show(GTK_WIDGET(menuitem));
-	}
 }
 
 
@@ -147,23 +112,6 @@ static void term_eof_or_child_exited(VteTerminal *term, gpointer user_data)
 {
 	vte_terminal_fork_command(VTE_TERMINAL(term), "/bin/bash", NULL, NULL,
 	                          "", TRUE, TRUE, TRUE);
-}
-
-
-static void popupmenu_activate(gchar *label)
-{
-	if (!strcmp(label, "Copy"))
-	{
-		vte_terminal_copy_clipboard(VTE_TERMINAL(term));
-	}
-	else if (!strcmp(label, "Paste"))
-	{
-		vte_terminal_paste_clipboard(VTE_TERMINAL(term));
-	}
-	else if (!strcmp(label, "Quit"))
-	{
-		gtk_widget_destroy(GTK_WIDGET(mainwindow));
-	}
 }
 
 
