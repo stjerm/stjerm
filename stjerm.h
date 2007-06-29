@@ -39,18 +39,10 @@
 
 extern void build_mainwindow(void);
 extern GtkWidget* build_term(void);
+extern void build_popupmenu(void);
 extern void mainwindow_toggle_visibility(void);
-
 extern void grab_key(void);
 
-extern void term_grab_focus(void);
-extern void open_tab(void);
-extern void close_tab(void);
-extern void next_tab(void);
-extern void previous_tab(void);
-
-extern void build_colortabs(void);
-extern void colortabs_reload(void);
 
 #endif /* __STJERM_H__ */
 
