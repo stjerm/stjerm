@@ -1,0 +1,232 @@
+/*
+ * term.c
+ * This file is part of Stjerm
+ *
+ * Copyright (C) 2007 - Stjepan Glavina
+ *
+ * Stjerm is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Stjerm is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Stjerm; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Boston, MA  02110-1301  USA
+ */
+
+
+#include <gtk/gtk.h>
+#include <vte/vte.h>
+#include <string.h>
+#include "stjerm.h"
+
+
+extern GtkWidget *mainwindow;
+GtkWidget *term;
+GtkWidget *popupmenu;
+
+GtkWidget* build_term(void);
+static void term_connect_signals(GtkWidget*);
+static void build_popupmenu(void);
+static gboolean term_button_press(GtkWidget*, GdkEventButton*, gpointer);
+static void term_eof_or_child_exited(VteTerminal*, gpointer);
+static void popupmenu_activate(gchar*);
+static void term_app_request(VteTerminal*, gpointer);
+static void term_app_request_resize_move(VteTerminal*, guint, guint, gpointer);
+
+
+GtkWidget* build_term(void)
+{
+	build_popupmenu();
+	
+	term = vte_terminal_new();
+	
+	vte_terminal_fork_command(VTE_TERMINAL(term), "/bin/bash", NULL, NULL,
+	                          "", TRUE, TRUE, TRUE);
+	
+	GdkColor fore, back;
+	back.red   = 0x0000;
+	back.green = 0x0000;
+	back.blue  = 0x0000;
+	fore.red   = 0xffff;
+	fore.green = 0xffff;
+	fore.blue  = 0xffff;
+	vte_terminal_set_colors(VTE_TERMINAL(term), &fore, &back, NULL, 0);
+	
+	gtk_widget_show(GTK_WIDGET(term));
+	
+	term_connect_signals(term);
+	
+	return GTK_WIDGET(term);
+}
+
+
+void build_popupmenu(void)
+{
+	popupmenu = gtk_menu_new();
+	
+	GtkWidget *menuitem;
+	GtkWidget *img;
+	
+	gchar *labels[] = { "Copy", "Paste", "Quit" };
+	gchar *stocks[] = { GTK_STOCK_COPY, GTK_STOCK_PASTE, GTK_STOCK_QUIT };
+	
+	int i;
+	for (i = 0; i < 3; i++)
+	{
+		if (i == 2)
+		{
+			menuitem = gtk_separator_menu_item_new();
+			gtk_menu_shell_append(GTK_MENU_SHELL(popupmenu), menuitem);
+			gtk_widget_show(GTK_WIDGET(menuitem));
+		}
+		
+		menuitem = gtk_image_menu_item_new_with_label(labels[i]);
+		img = gtk_image_new_from_stock(stocks[i], GTK_ICON_SIZE_MENU);
+		gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menuitem), GTK_WIDGET(img));
+		g_signal_connect_swapped(G_OBJECT(menuitem), "activate",
+		                         G_CALLBACK(popupmenu_activate),
+		                         (gpointer)labels[i]);
+		gtk_menu_shell_append(GTK_MENU_SHELL(popupmenu), menuitem);
+		gtk_widget_show(GTK_WIDGET(menuitem));
+	}
+}
+
+
+static void term_connect_signals(GtkWidget *term)
+{
+	g_signal_connect_swapped(G_OBJECT(term), "button-press-event",
+	                         G_CALLBACK(term_button_press), NULL);
+	
+	g_signal_connect (G_OBJECT(term), "eof",
+                      G_CALLBACK(term_eof_or_child_exited), NULL);
+    g_signal_connect (G_OBJECT(term), "child-exited",
+                      G_CALLBACK(term_eof_or_child_exited), NULL);
+	
+	g_signal_connect(G_OBJECT(term), "iconify-window",
+	                 G_CALLBACK(term_app_request), (gpointer)TERM_ICONIFY_WINDOW);
+	g_signal_connect(G_OBJECT(term), "deiconify-window",
+	                 G_CALLBACK(term_app_request), (gpointer)TERM_DEICONIFY_WINDOW);
+	g_signal_connect(G_OBJECT(term), "raise-window",
+	                 G_CALLBACK(term_app_request), (gpointer)TERM_RAISE_WINDOW);
+	g_signal_connect(G_OBJECT(term), "lower-window",
+	                 G_CALLBACK(term_app_request), (gpointer)TERM_LOWER_WINDOW);
+	g_signal_connect(G_OBJECT(term), "maximize-window",
+	                 G_CALLBACK(term_app_request), (gpointer)TERM_MAXIMIZE_WINDOW);
+	g_signal_connect(G_OBJECT(term), "restore-window",
+	                 G_CALLBACK(term_app_request), (gpointer)TERM_RESTORE_WINDOW);
+	g_signal_connect(G_OBJECT(term), "refresh-window",
+	                 G_CALLBACK(term_app_request), (gpointer)TERM_REFRESH_WINDOW);
+	g_signal_connect(G_OBJECT(term), "resize-window",
+	                 G_CALLBACK(term_app_request_resize_move), (gpointer)TERM_RESIZE_WINDOW);
+	g_signal_connect(G_OBJECT(term), "move-window",
+	                 G_CALLBACK(term_app_request_resize_move), (gpointer)TERM_MOVE_WINDOW);
+}
+
+
+static gboolean term_button_press(GtkWidget *widget, GdkEventButton *event,
+                                  gpointer user_data)
+{
+	if (event->type == GDK_BUTTON_PRESS && event->button == 3)
+	{
+		gtk_menu_popup(GTK_MENU(popupmenu), NULL, NULL, NULL, NULL,
+		               event->button, event->time);
+	}
+	
+	return FALSE;
+}
+
+
+static void term_eof_or_child_exited(VteTerminal *term, gpointer user_data)
+{
+	vte_terminal_fork_command(VTE_TERMINAL(term), "/bin/bash", NULL, NULL,
+	                          "", TRUE, TRUE, TRUE);
+}
+
+
+static void popupmenu_activate(gchar *label)
+{
+	if (!strcmp(label, "Copy"))
+	{
+		vte_terminal_copy_clipboard(VTE_TERMINAL(term));
+	}
+	else if (!strcmp(label, "Paste"))
+	{
+		vte_terminal_paste_clipboard(VTE_TERMINAL(term));
+	}
+	else if (!strcmp(label, "Quit"))
+	{
+		gtk_widget_destroy(GTK_WIDGET(mainwindow));
+	}
+}
+
+
+static void term_app_request(VteTerminal *term, gpointer user_data)
+{
+	int event = GPOINTER_TO_INT(user_data);
+	
+	if (event == TERM_ICONIFY_WINDOW)
+	{
+		gdk_window_iconify(GTK_WIDGET(mainwindow)->window);
+	}
+	if (event == TERM_DEICONIFY_WINDOW)
+	{
+		gdk_window_deiconify(GTK_WIDGET(mainwindow)->window);
+	}
+	if (event == TERM_RAISE_WINDOW)
+	{
+		gdk_window_raise(GTK_WIDGET(mainwindow)->window);
+	}
+	if (event == TERM_LOWER_WINDOW)
+	{
+		gdk_window_lower(GTK_WIDGET(mainwindow)->window);
+	}
+	if (event == TERM_MAXIMIZE_WINDOW)
+	{
+		gdk_window_maximize(GTK_WIDGET(mainwindow)->window);
+	}
+	if (event == TERM_RESTORE_WINDOW)
+	{
+		gdk_window_unmaximize(GTK_WIDGET(mainwindow)->window);
+	}
+	if (event == TERM_REFRESH_WINDOW)
+	{
+		GdkRectangle rect;
+		rect.x = rect.y = 0;
+		rect.width = mainwindow->allocation.width;
+		rect.height = mainwindow->allocation.height;
+		gdk_window_invalidate_rect(GTK_WIDGET(mainwindow)->window, &rect, TRUE);
+	}
+}
+
+
+static void term_app_request_resize_move(VteTerminal *term, guint x, guint y,
+                                         gpointer user_data)
+{
+	int event = GPOINTER_TO_INT(user_data);
+	
+	if (event == TERM_RESIZE_WINDOW)
+	{
+		gint owidth, oheight, xpad, ypad;
+		
+		gtk_window_get_size(GTK_WINDOW(mainwindow), &owidth, &oheight);
+		owidth -= term->char_width * term->column_count;
+		oheight -= term->char_height * term->row_count;
+		
+		vte_terminal_get_padding(term, &xpad, &ypad);
+		owidth -= xpad;
+		oheight -= ypad;
+		gtk_window_resize(GTK_WINDOW(mainwindow), x+owidth, y+oheight);
+	}
+	if (event == TERM_MOVE_WINDOW)
+	{
+		gdk_window_move(GTK_WIDGET(mainwindow)->window, x, y);
+	}
+}
+
