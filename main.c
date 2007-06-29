@@ -21,17 +21,19 @@
  */
 
 
-#include <stdlib.h>
-#include <X11/Xlib.h>
-#include <X11/Xatom.h>
 #include <gtk/gtk.h>
 #include "stjerm.h"
 
 
+int sargc;
+char **sargv;
+
+
 int main(int argc, char *argv[])
 {
-	srand((unsigned)time(0));
-	
+	sargc = argc;
+	sargv = argv;
+
 	gtk_init(&argc, &argv);
 	if (!g_thread_supported())
 		g_thread_init(NULL);
