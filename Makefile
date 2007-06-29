@@ -1,45 +1,28 @@
 STJERM_VERSION = 0.1svn
 
-STJERMPREFIX = $(shell if [ ! -z $(PREFIX) ]; then echo $(PREFIX); else \
-echo "/usr/local"; fi)
-
-INCS = -I. -I${PREFIX}/include `pkg-config --cflags gtk+-2.0 vte`
-LIBS = -L${PREFIX}/lib `pkg-config --libs gtk+-2.0 vte gthread-2.0`
-STJERMCFLAGS = ${INCS} -DSTJERM_VERSION=\"${STJERM_VERSION}\" ${CFLAGS}
-STJERMLDFLAGS = ${LIBS} ${LDFLAGS} 
-
-CC = cc
-LD = ${CC}
+INCS = -I. -I/usr/include `pkg-config --cflags gtk+-2.0 vte` \
+	   -DSTJERM_VERSION=\"${STJERM_VERSION}\" ${CFLAGS}
+LIBS = -L/usr/lib `pkg-config --libs gtk+-2.0 vte gthread-2.0` ${LDFLAGS}
 
 SRC = main.c mainwindow.c term.c grabkey.c
 OBJ = ${SRC:.c=.o}
 
-all: options stjerm
-	
-options:
-	@echo Build options:
-	@echo "PREFIX   = $(STJERMPREFIX)"
-	@echo "CFLAGS   = ${CFLAGS}"
-	@echo "LDFLAGS  = ${LDFLAGS}"
-	@echo
-	@echo "Building..."
-	@echo
+all: stjerm
 	
 .c.o:
-	@echo ${CC} -Wall -c ${STJERMCFLAGS} $<
-	@${CC} -Wall -c ${STJERMCFLAGS} $<
+	@echo cc -Wall -c ${INCS} $<
+	@cc -Wall -c ${INCS} $<
 	@echo
 	
 stjerm: ${OBJ}
-	@echo ${LD} -o $@ ${OBJ} ${STJERMLDFLAGS}
-	@${LD} -o $@ ${OBJ} ${STJERMLDFLAGS}
-	@strip $@
+	@echo cc -o $@ ${OBJ} ${LIBS}
+	@cc -o $@ ${OBJ} ${LIBS}
 	@echo
 	
 clean:
-	@echo Cleaning...
 	@echo rm -f stjerm ${OBJ}
 	@rm -f stjerm ${OBJ}
 	@echo
 	
 .PHONY: all options clean
+
