@@ -29,16 +29,14 @@
 
 
 GtkWidget *mainwindow;
-GtkWidget *termbook;
+extern GtkWidget *term;
 
-static GtkAccelGroup *accelgroup;
 static Window mw_xwin;
 static Display *dpy;
 static Atom opacityatom;
 
 void build_mainwindow(void);
 void mainwindow_toggle_visibility(void);
-static void mainwindow_connect_shortcuts(void);
 static void mainwindow_reset_position(void);
 static void mainwindow_reset_opacity(void);
 static gboolean mainwindow_expose_event(GtkWidget*, GdkEventExpose*, gpointer);
@@ -60,14 +58,8 @@ void build_mainwindow(void)
 	gtk_window_stick(GTK_WINDOW(mainwindow));
 	mainwindow_reset_position();
 	
-	GtkWidget *box = gtk_vbox_new(FALSE, 0);
-	build_colortabs();
-	build_termbook();
-	gtk_box_pack_start(GTK_BOX(box), colortabs, FALSE, TRUE, 0);
-	gtk_box_pack_end(GTK_BOX(box), termbook, TRUE, TRUE, 0);
-	gtk_container_add(GTK_CONTAINER(mainwindow), box);
-	
-	mainwindow_connect_shortcuts();
+	build_term();
+	gtk_container_add(GTK_CONTAINER(mainwindow), term);
 	
 	g_signal_connect(G_OBJECT(mainwindow), "expose-event",
 	                 G_CALLBACK(mainwindow_expose_event), NULL);
@@ -76,7 +68,7 @@ void build_mainwindow(void)
 	
 	gtk_widget_show_all(mainwindow);
 	gtk_window_present(GTK_WINDOW(mainwindow));
-	term_grab_focus();
+	gtk_widget_grab_focus(GTK_WIDGET(term));
 	
 	mw_xwin = GDK_WINDOW_XWINDOW(GTK_WIDGET(mainwindow)->window);
 	dpy = GDK_WINDOW_XDISPLAY(GTK_WIDGET(mainwindow)->window);
@@ -97,30 +89,11 @@ void mainwindow_toggle_visibility(void)
 		gdk_threads_enter();
 		gtk_window_present(GTK_WINDOW(mainwindow));
 		gtk_window_stick(GTK_WINDOW(mainwindow));
-		term_grab_focus();
+		gtk_widget_grab_focus(GTK_WIDGET(term));
 		gdk_flush();
 		gdk_threads_leave();
 		mainwindow_reset_position();
 	}
-}
-
-
-static void mainwindow_connect_shortcuts(void)
-{
-	accelgroup = gtk_accel_group_new();
-	gtk_window_add_accel_group(GTK_WINDOW(mainwindow), accelgroup);
-	
-	GClosure *open_tab_closure  = g_cclosure_new_swap((GCallback)open_tab, NULL, NULL); ;
-	gtk_accel_group_connect(accelgroup, 'i', GDK_MOD1_MASK, GTK_ACCEL_VISIBLE, open_tab_closure);
-	
-	GClosure *close_tab_closure  = g_cclosure_new_swap((GCallback)close_tab, NULL, NULL); ;
-	gtk_accel_group_connect(accelgroup, 'u', GDK_MOD1_MASK, GTK_ACCEL_VISIBLE, close_tab_closure);
-	
-	GClosure *next_tab_closure  = g_cclosure_new_swap((GCallback)next_tab, NULL, NULL); ;
-	gtk_accel_group_connect(accelgroup, 'k', GDK_MOD1_MASK, GTK_ACCEL_VISIBLE, next_tab_closure);
-	
-	GClosure *previous_tab_closure  = g_cclosure_new_swap((GCallback)previous_tab, NULL, NULL); ;
-	gtk_accel_group_connect(accelgroup, 'j', GDK_MOD1_MASK, GTK_ACCEL_VISIBLE, previous_tab_closure);
 }
 
 
@@ -162,3 +135,4 @@ static void mainwindow_destroy(GtkWidget *widget, gpointer user_data)
 {
 	gtk_main_quit();
 }
+
