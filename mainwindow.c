@@ -1,5 +1,5 @@
 /*
- * window.c
+ * mainwindow.c
  * This file is part of Stjerm
  *
  * Copyright (C) 2007 - Stjepan Glavina
@@ -49,7 +49,8 @@ void build_mainwindow(void)
 	
 	gtk_widget_set_app_paintable(mainwindow, TRUE);
 	gtk_container_set_border_width(GTK_CONTAINER(mainwindow), 5);
-	gtk_widget_set_size_request(mainwindow, 800, 400);
+	gtk_widget_set_size_request(mainwindow, conf_get_width(),
+	                                        conf_get_height());
 	gtk_window_set_decorated(GTK_WINDOW(mainwindow), FALSE);
 	gtk_window_set_keep_above(GTK_WINDOW(mainwindow), TRUE);
 	gtk_window_set_skip_taskbar_hint(GTK_WINDOW(mainwindow), TRUE);
@@ -60,13 +61,13 @@ void build_mainwindow(void)
 	
 	build_term();
 	gtk_container_add(GTK_CONTAINER(mainwindow), term);
+	gtk_widget_show(GTK_WIDGET(term));
 	
 	g_signal_connect(G_OBJECT(mainwindow), "expose-event",
 	                 G_CALLBACK(mainwindow_expose_event), NULL);
 	g_signal_connect(G_OBJECT(mainwindow), "destroy",
 	                 G_CALLBACK(mainwindow_destroy), NULL);
 	
-	gtk_widget_show_all(mainwindow);
 	gtk_window_present(GTK_WINDOW(mainwindow));
 	gtk_widget_grab_focus(GTK_WIDGET(term));
 	
@@ -106,7 +107,7 @@ static void mainwindow_reset_position(void)
 
 static void mainwindow_reset_opacity(void)
 {
-	unsigned int op = 0.9f * 0xffffffff;
+	unsigned int op = conf_get_opacity() * 0xffffffff;
 	XChangeProperty(dpy, mw_xwin, opacityatom, XA_CARDINAL, 32, PropModeReplace, 
 	                (unsigned char *) &op, 1L);
 }                             

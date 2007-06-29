@@ -25,6 +25,7 @@
 #define __STJERM_H__
 
 #include <gtk/gtk.h>
+#include <X11/Xlib.h>
 
 #define TERM_ICONIFY_WINDOW    0
 #define TERM_DEICONIFY_WINDOW  1
@@ -36,12 +37,32 @@
 #define TERM_RESIZE_WINDOW     7
 #define TERM_MOVE_WINDOW       8
 
+#define TRANS_FAKE 0
+#define TRANS_REAL 1
+#define TRANS_BEST 2
+
+#define POS_TOP 0
+#define POS_BOTTOM 1
+
 
 extern void build_mainwindow(void);
-extern GtkWidget* build_term(void);
+extern void build_term(void);
 extern void build_popupmenu(void);
+
 extern void mainwindow_toggle_visibility(void);
 extern void grab_key(void);
+
+extern char* conf_get_font(void);
+extern float conf_get_opacity(void);
+extern int conf_get_transparency(void);
+extern GdkColor conf_get_bg(void);
+extern GdkColor conf_get_fg(void);
+extern unsigned int conf_get_mod(void);
+extern KeySym conf_get_key(void);
+extern int conf_get_width(void);
+extern int conf_get_height(void);
+extern int conf_get_position(void);
+
 
 
 #endif /* __STJERM_H__ */

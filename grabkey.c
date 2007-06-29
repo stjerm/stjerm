@@ -46,8 +46,8 @@ void grab_key(void)
 	root = RootWindow(dpy, screen);
 	
 	
-	KeySym opt_key = XK_f;
-	unsigned int modmask = Mod1Mask;
+	KeySym opt_key = conf_get_key();
+	unsigned int modmask = conf_get_mod();
 	
 	
 	int i, j;
