@@ -4,7 +4,7 @@ INCS = -I. -I/usr/include `pkg-config --cflags gtk+-2.0 vte` \
 	   -DSTJERM_VERSION=\"${STJERM_VERSION}\" ${CFLAGS}
 LIBS = -L/usr/lib `pkg-config --libs gtk+-2.0 vte gthread-2.0` ${LDFLAGS}
 
-SRC = main.c mainwindow.c term.c popupmenu.c grabkey.c
+SRC = main.c mainwindow.c term.c popupmenu.c config.c grabkey.c
 OBJ = ${SRC:.c=.o}
 
 all: stjerm
