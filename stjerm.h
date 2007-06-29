@@ -49,7 +49,7 @@ extern void build_mainwindow(void);
 extern void build_term(void);
 extern void build_popupmenu(void);
 
-extern void mainwindow_toggle_visibility(void);
+extern void mainwindow_show(void);
 extern void grab_key(void);
 
 extern char* conf_get_font(void);
