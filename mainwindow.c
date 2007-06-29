@@ -36,9 +36,10 @@ static Display *dpy;
 static Atom opacityatom;
 
 void build_mainwindow(void);
-void mainwindow_toggle_visibility(void);
+void mainwindow_show(void);
 static void mainwindow_reset_position(void);
 static void mainwindow_reset_opacity(void);
+static void mainwindow_focus_out_event(GtkWindow*, GdkEvent*, gpointer);
 static gboolean mainwindow_expose_event(GtkWidget*, GdkEventExpose*, gpointer);
 static void mainwindow_destroy(GtkWidget*, gpointer);
 
@@ -63,6 +64,8 @@ void build_mainwindow(void)
 	gtk_container_add(GTK_CONTAINER(mainwindow), term);
 	gtk_widget_show(GTK_WIDGET(term));
 	
+	g_signal_connect(G_OBJECT(mainwindow), "focus-out-event",
+	                 G_CALLBACK(mainwindow_focus_out_event), NULL);
 	g_signal_connect(G_OBJECT(mainwindow), "expose-event",
 	                 G_CALLBACK(mainwindow_expose_event), NULL);
 	g_signal_connect(G_OBJECT(mainwindow), "destroy",
@@ -79,22 +82,16 @@ void build_mainwindow(void)
 }
 
 
-void mainwindow_toggle_visibility(void)
+void mainwindow_show(void)
 {
-	if (GTK_WIDGET_VISIBLE(mainwindow))
-	{
-		gtk_widget_hide(GTK_WIDGET(mainwindow));
-	}
-	else
-	{
-		gdk_threads_enter();
-		gtk_window_present(GTK_WINDOW(mainwindow));
-		gtk_window_stick(GTK_WINDOW(mainwindow));
-		gtk_widget_grab_focus(GTK_WIDGET(term));
-		gdk_flush();
-		gdk_threads_leave();
-		mainwindow_reset_position();
-	}
+	printf("showing....\n");
+	gdk_threads_enter();
+	gtk_window_present(GTK_WINDOW(mainwindow));
+	gtk_window_stick(GTK_WINDOW(mainwindow));
+	gtk_widget_grab_focus(GTK_WIDGET(term));
+	gdk_flush();
+	gdk_threads_leave();
+	mainwindow_reset_position();
 }
 
 
@@ -111,6 +108,12 @@ static void mainwindow_reset_opacity(void)
 	XChangeProperty(dpy, mw_xwin, opacityatom, XA_CARDINAL, 32, PropModeReplace, 
 	                (unsigned char *) &op, 1L);
 }                             
+
+
+static void mainwindow_focus_out_event(GtkWindow* window, GdkEvent* event, gpointer userdata)
+{
+	gtk_widget_hide(GTK_WIDGET(mainwindow));
+}
 
 
 static gboolean mainwindow_expose_event(GtkWidget *widget, GdkEventExpose *event,
