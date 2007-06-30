@@ -26,6 +26,7 @@
 #include <X11/keysym.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include "stjerm.h"
 
 
@@ -101,20 +102,27 @@ void conf_init(void)
 		}
 		else if (!strcmp(sargv[i], "-m"))
 		{
-			if (!strcmp(sargv[i+1], "Shift")) _mod = ShiftMask;
-			else if (!strcmp(sargv[i+1], "Control")) _mod = ControlMask;
-			else if (!strcmp(sargv[i+1], "Alt")) _mod = Mod1Mask;
-			else if (!strcmp(sargv[i+1], "None")) _mod = 0;
-			else
-			{
-				fprintf(stderr, "error: wrong mod key is defined (note that it is case sensitive!)\n");
-				exit(1);
-			}
+			sargv[i+1][0] = tolower(sargv[i+1][0]);
+			if (!strcmp(sargv[i+1], "shift")) _mod = ShiftMask;
+			else if (!strcmp(sargv[i+1], "control")) _mod = ControlMask;
+			else if (!strcmp(sargv[i+1], "ctrl")) _mod = ControlMask;
+			else if (!strcmp(sargv[i+1], "alt")) _mod = Mod1Mask;
+			else if (!strcmp(sargv[i+1], "mod1")) _mod = Mod1Mask;
+			else if (!strcmp(sargv[i+1], "none")) _mod = 0;
+			else _mod = 0;
 		}
 		else if (!strcmp(sargv[i], "-k"))
 		{
 			keyoption = TRUE;
+
+			sargv[i+1][0] = tolower(sargv[i+1][0]);
 			_key = XStringToKeysym(sargv[i+1]);
+
+			if (!_key)
+			{
+				sargv[i+1][0] = toupper(sargv[i+1][0]);
+				_key = XStringToKeysym(sargv[i+1]);
+			}
 		}
 		else if (!strcmp(sargv[i], "-w"))
 		{
