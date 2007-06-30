@@ -48,6 +48,8 @@
 #define POS_RIGHT  3
 
 
+extern void print_help(void);
+
 extern void build_mainwindow(void);
 extern void build_term(void);
 extern void build_popupmenu(void);
@@ -68,7 +70,6 @@ extern KeySym conf_get_key(void);
 extern int conf_get_width(void);
 extern int conf_get_height(void);
 extern void conf_get_position(int*, int*);
-extern int conf_get_hidefl(void);
 
 
 #endif /* __STJERM_H__ */
