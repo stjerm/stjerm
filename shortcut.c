@@ -28,7 +28,7 @@
 #include "stjerm.h"
 
 
-Display *dpy;
+static Display *_dpy;
 Window root;
 int screen;
 KeySym opt_key;
@@ -42,25 +42,25 @@ void wait_key(void);
 
 void init_key(void)
 {
-    if (!(dpy = XOpenDisplay(NULL)))
+    if (!(_dpy = XOpenDisplay(NULL)))
     {
 		fprintf(stderr, "error: can not open display %s", XDisplayName(NULL));
 		exit(1);
 	}
-	screen = DefaultScreen(dpy);
-	root = RootWindow(dpy, screen);
+	screen = DefaultScreen(_dpy);
+	root = RootWindow(_dpy, screen);
 	
 	opt_key = conf_get_key();
 	modmask = conf_get_mod();
 	
 	int i, j;
-	XModifierKeymap *modmap = XGetModifierMapping(dpy);
+	XModifierKeymap *modmap = XGetModifierMapping(_dpy);
 	for (i = 0; i < 8; i++)
 	{
 		for (j = 0; j < modmap->max_keypermod; j++)
 		{
 			if (modmap->modifiermap[i * modmap->max_keypermod + j] ==
-			    XKeysymToKeycode(dpy, XK_Num_Lock))
+			    XKeysymToKeycode(_dpy, XK_Num_Lock))
 			{
 				numlockmask = (1 << i);
 			}
@@ -72,16 +72,16 @@ void init_key(void)
 
 void grab_key(void)
 {
-	XGrabKey(dpy, XKeysymToKeycode(dpy, opt_key), modmask, root, True,
+	XGrabKey(_dpy, XKeysymToKeycode(_dpy, opt_key), modmask, root, True,
 	         GrabModeAsync, GrabModeAsync);
-	XGrabKey(dpy, XKeysymToKeycode(dpy, opt_key), LockMask|modmask, root, True,
+	XGrabKey(_dpy, XKeysymToKeycode(_dpy, opt_key), LockMask|modmask, root, True,
 	         GrabModeAsync, GrabModeAsync);
 	
 	if (numlockmask)
 	{
-		XGrabKey(dpy, XKeysymToKeycode(dpy, opt_key), numlockmask|modmask,
+		XGrabKey(_dpy, XKeysymToKeycode(_dpy, opt_key), numlockmask|modmask,
 		         root, True, GrabModeAsync, GrabModeAsync);
-		XGrabKey(dpy, XKeysymToKeycode(dpy, opt_key),
+		XGrabKey(_dpy, XKeysymToKeycode(_dpy, opt_key),
 		         numlockmask|LockMask|modmask, root, True,
 		         GrabModeAsync, GrabModeAsync);
 	}
@@ -93,12 +93,12 @@ void wait_key(void)
 	XEvent event;
 	while (1)
 	{
-		XNextEvent(dpy, &event);
+		XNextEvent(_dpy, &event);
 
 		if (event.type == KeyPress)
 		{
-			if (XKeycodeToKeysym(dpy, event.xkey.keycode, 0) == opt_key)
-				mainwindow_show();
+			if (XKeycodeToKeysym(_dpy, event.xkey.keycode, 0) == opt_key)
+				mainwindow_present();
 		}
 	}
 }
