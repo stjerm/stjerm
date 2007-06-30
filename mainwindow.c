@@ -67,10 +67,8 @@ void build_mainwindow(void)
 	gtk_container_add(GTK_CONTAINER(mainwindow), term);
 	gtk_widget_show(GTK_WIDGET(term));
 	
-	if (conf_get_hidefl())
-		g_signal_connect(G_OBJECT(mainwindow), "focus-out-event",
-	                     G_CALLBACK(mainwindow_focus_out_event), NULL);
-
+	g_signal_connect(G_OBJECT(mainwindow), "focus-out-event",
+	                 G_CALLBACK(mainwindow_focus_out_event), NULL);
 	g_signal_connect(G_OBJECT(mainwindow), "show",
 	                 G_CALLBACK(mainwindow_show), NULL);
 	g_signal_connect(G_OBJECT(mainwindow), "expose-event",
