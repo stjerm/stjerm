@@ -41,7 +41,6 @@ int main(int argc, char *argv[])
 	
 	build_mainwindow();
 	
-	g_thread_create((GThreadFunc)grab_key, NULL, FALSE, NULL);
 	gdk_threads_enter();
 	gtk_main();
 	gdk_threads_leave();
