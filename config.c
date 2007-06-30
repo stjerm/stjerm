@@ -44,7 +44,6 @@ static int _height;
 static int _pos;
 static int _posx;
 static int _posy;
-static gboolean _hidefl;
 
 void conf_init(void);
 char* conf_get_font(void);
@@ -57,28 +56,26 @@ KeySym conf_get_key(void);
 int conf_get_width(void);
 int conf_get_height(void);
 void conf_get_position(int*, int*);
-gboolean conf_get_hidefl(void);
 
 
 void conf_init(void)
 {
-	// todo: if mod and key are not specified, show help and quit
-	// btw, in help note that mod and key is case sensitive
 	strcpy(_font, "Bitstream Vera Sans Mono 10");
 	_opacity = 0.9f;
 	_trans = TRANS_BEST;
 	_width = 800;
 	_height = 400;
 	_pos = POS_TOP;
-	_hidefl = TRUE;
 	gdk_color_parse("black", &_bg);
 	gdk_color_parse("white", &_fg);
+	_mod = 0;
+	_key = 0;
 
+	gboolean keyoption = FALSE;
 	int i;
 	for (i = 1; i < sargc; i++)
 	{
-		if (strcmp(sargv[i], "-n") != 0 )
-			if (i + 1 >= sargc) continue;
+		if (i + 1 >= sargc) continue;
 
 		if (!strcmp(sargv[i], "-fn"))
 		{
@@ -110,11 +107,13 @@ void conf_init(void)
 			else if (!strcmp(sargv[i+1], "None")) _mod = 0;
 			else
 			{
-				// todo: error - quit
+				fprintf(stderr, "error: wrong mod key is defined (note that it is case sensitive!)\n");
+				exit(1);
 			}
 		}
 		else if (!strcmp(sargv[i], "-k"))
 		{
+			keyoption = TRUE;
 			_key = XStringToKeysym(sargv[i+1]);
 		}
 		else if (!strcmp(sargv[i], "-w"))
@@ -132,10 +131,17 @@ void conf_init(void)
 			else if (!strcmp(sargv[i+1], "left"))   _pos = POS_LEFT;
 			else if (!strcmp(sargv[i+1], "right"))  _pos = POS_RIGHT;
 		}
-		else if (!strcmp(sargv[i], "-n"))
-		{
-			_hidefl = FALSE;
-		}
+	}
+
+	if (keyoption == FALSE)
+	{
+		print_help();
+		exit(1);
+	}
+	else if (keyoption == TRUE && _key == 0)
+	{
+		fprintf(stderr, "error: wrong shortcut key is defined (see /usr/include/X11/keysymdef.h)\n");
+		exit(1);
 	}
 
 	int scrw = gdk_screen_get_width(gdk_screen_get_default());
@@ -222,11 +228,5 @@ void conf_get_position(int *x, int *y)
 {
 	*x = _posx;
 	*y = _posy;
-}
-
-
-gboolean conf_get_hidefl(void)
-{
-	return _hidefl;
 }
 
