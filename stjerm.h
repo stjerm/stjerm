@@ -50,7 +50,9 @@ extern void build_term(void);
 extern void build_popupmenu(void);
 
 extern void mainwindow_show(void);
+extern void init_key(void);
 extern void grab_key(void);
+extern void wait_key(void);
 
 extern char* conf_get_font(void);
 extern float conf_get_opacity(void);
