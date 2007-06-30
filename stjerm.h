@@ -24,6 +24,7 @@
 #ifndef __STJERM_H__
 #define __STJERM_H__
 
+
 #include <gtk/gtk.h>
 #include <X11/Xlib.h>
 
@@ -41,19 +42,22 @@
 #define TRANS_REAL 1
 #define TRANS_BEST 2
 
-#define POS_TOP 0
+#define POS_TOP    0
 #define POS_BOTTOM 1
+#define POS_LEFT   2
+#define POS_RIGHT  3
 
 
 extern void build_mainwindow(void);
 extern void build_term(void);
 extern void build_popupmenu(void);
 
-extern void mainwindow_show(void);
+extern void mainwindow_present(void);
 extern void init_key(void);
 extern void grab_key(void);
 extern void wait_key(void);
 
+extern void conf_init(void);
 extern char* conf_get_font(void);
 extern float conf_get_opacity(void);
 extern int conf_get_transparency(void);
@@ -63,8 +67,8 @@ extern unsigned int conf_get_mod(void);
 extern KeySym conf_get_key(void);
 extern int conf_get_width(void);
 extern int conf_get_height(void);
-extern int conf_get_position(void);
-
+extern void conf_get_position(int*, int*);
+extern int conf_get_hidefl(void);
 
 
 #endif /* __STJERM_H__ */
