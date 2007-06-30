@@ -31,15 +31,15 @@
 GtkWidget *mainwindow;
 extern GtkWidget *term;
 
-static Window mw_xwin;
-static Display *dpy;
-static Atom opacityatom;
+Window mw_xwin;
+Display *dpy;
+Atom opacityatom;
 
 void build_mainwindow(void);
 void mainwindow_show(void);
 static void mainwindow_reset_position(void);
 static void mainwindow_reset_opacity(void);
-static void mainwindow_focus_out_event(GtkWindow*, GdkEvent*, gpointer);
+static void mainwindow_focus_out_event(GtkWindow*, GdkEventFocus*, gpointer);
 static gboolean mainwindow_expose_event(GtkWidget*, GdkEventExpose*, gpointer);
 static void mainwindow_destroy(GtkWidget*, gpointer);
 
@@ -79,12 +79,15 @@ void build_mainwindow(void)
 	opacityatom = XInternAtom(dpy, "_NET_WM_WINDOW_OPACITY", False);
 	
 	mainwindow_reset_opacity();
+
+	init_key();
+	grab_key();
+	g_thread_create((GThreadFunc)wait_key, NULL, FALSE, NULL);
 }
 
 
 void mainwindow_show(void)
 {
-	printf("showing....\n");
 	gdk_threads_enter();
 	gtk_window_present(GTK_WINDOW(mainwindow));
 	gtk_window_stick(GTK_WINDOW(mainwindow));
@@ -110,14 +113,23 @@ static void mainwindow_reset_opacity(void)
 }                             
 
 
-static void mainwindow_focus_out_event(GtkWindow* window, GdkEvent* event, gpointer userdata)
+extern Window root;
+static void mainwindow_focus_out_event(GtkWindow* window,
+                                       GdkEventFocus* event,
+									   gpointer userdata)
 {
+	int revert;
+	Window w;
+	XGetInputFocus(dpy, &w, &revert);
+	if (w == mw_xwin) return;
+
 	gtk_widget_hide(GTK_WIDGET(mainwindow));
 }
 
 
-static gboolean mainwindow_expose_event(GtkWidget *widget, GdkEventExpose *event,
-                                 gpointer user_data)
+static gboolean mainwindow_expose_event(GtkWidget *widget,
+                                        GdkEventExpose *event,
+                                        gpointer user_data)
 {
 	gint winw, winh;
 	gtk_window_get_size(GTK_WINDOW(widget), &winw, &winh);
