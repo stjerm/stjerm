@@ -39,6 +39,7 @@ int main(int argc, char *argv[])
 		g_thread_init(NULL);
 	gdk_threads_init();
 	
+	conf_init();
 	build_mainwindow();
 	
 	gdk_threads_enter();
