@@ -7,12 +7,11 @@ Installation
 ------------
     make
     sudo make install
-< NOT FINISHED >
 
 
 Running
 ------------
-Run this command:
-    stjerm -h
-to list all available options.
+Simply run:
+    stjerm
+and all available options will be listed.
 
