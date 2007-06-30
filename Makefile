@@ -23,6 +23,19 @@ clean:
 	@echo rm -f stjerm ${OBJ}
 	@rm -f stjerm ${OBJ}
 	@echo
+
+install: all
+	@echo installing:
+	@mkdir -p ${DESTDIR}/usr/bin
+	@echo cp stjerm ${DESTDIR}/usr/bin/stjerm
+	@cp stjerm ${DESTDIR}/usr/bin/stjerm
+	@echo chmod 755 ${DESTDIR}/usr/bin/stjerm
+	@chmod 755 ${DESTDIR}/usr/bin/stjerm
+
+uninstall:
+	@echo removing:
+	@echo rm -f ${DESTDIR}/usr/bin/stjerm
+	@rm -f ${DESTDIR}/usr/bin/stjerm
 	
-.PHONY: all options clean
+.PHONY: all clean install uninstall
 
