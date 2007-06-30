@@ -115,6 +115,13 @@ void build_mainwindow(void)
 
 void mainwindow_present(void)
 {
+	if (GTK_WIDGET_VISIBLE(mainwindow))
+	{
+		// we should hide it, not present
+		gtk_widget_hide(GTK_WIDGET(mainwindow));
+		return;
+	}
+
 	gdk_threads_enter();
 	gtk_window_present(GTK_WINDOW(mainwindow));
 	gtk_window_stick(GTK_WINDOW(mainwindow));
