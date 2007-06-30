@@ -28,6 +28,39 @@
 int sargc;
 char **sargv;
 
+void print_help(void);
+
+void print_help(void)
+{
+	printf("stjerm version %s\n\n"
+           "Usage: %s "
+	       "[-fn FONT] "
+	       "[-bg COLOR] "
+	       "[-fg COLOR] "
+	       "[-t TYPE] "
+	       "[-o OPACITY]\n       "
+	       "[-w WIDTH] "
+	       "[-h HEIGHT] "
+	       "[-p POSITION] "
+	       "[-m MOD] "
+	       "-k KEY\n\n"
+	       "Options:\n"
+	       "  -fn FONT         Terminal font\n"
+	       "  -bg COLOR        Background color\n"
+	       "  -fg COLOR        Foreground color\n"
+	       "  -t TYPE          Transparency type: fake, real, best\n"
+	       "  -o OPACITY       Opacity\n"
+	       "  -w WIDTH         Window width\n"
+	       "  -h HEIGHT        Window height\n"
+	       "  -p POSITION      Window position: top, bottom, left, right\n"
+	       "  -m MOD           Mod key: Shift, Control, Alt, None\n"
+	       "  -k KEY           Shortcut key (See /usr/include/X11/keysymdef.h)\n\n"
+	       "NOTE: Mod key and shortcut key options are case sensitive!\n"
+	       "      Shortcut key is a required option.\n",
+	       STJERM_VERSION,
+		   sargv[0]);
+}
+
 
 int main(int argc, char *argv[])
 {
