@@ -25,6 +25,8 @@
 #include <X11/Xatom.h>
 #include <gtk/gtk.h>
 #include <gdk/gdkx.h>
+#include <vte/vte.h>
+#include <stdlib.h>
 #include "stjerm.h"
 
 
@@ -32,13 +34,14 @@ GtkWidget *mainwindow;
 extern GtkWidget *term;
 
 Window mw_xwin;
-Display *dpy;
+Display *dpy = 0;
 Atom opacityatom;
 
 void build_mainwindow(void);
-void mainwindow_show(void);
+void mainwindow_present(void);
 static void mainwindow_reset_position(void);
-static void mainwindow_reset_opacity(void);
+static void mainwindow_set_opacity(void);
+static void mainwindow_show(GtkWidget*, gpointer);
 static void mainwindow_focus_out_event(GtkWindow*, GdkEventFocus*, gpointer);
 static gboolean mainwindow_expose_event(GtkWidget*, GdkEventExpose*, gpointer);
 static void mainwindow_destroy(GtkWidget*, gpointer);
@@ -64,21 +67,47 @@ void build_mainwindow(void)
 	gtk_container_add(GTK_CONTAINER(mainwindow), term);
 	gtk_widget_show(GTK_WIDGET(term));
 	
-	g_signal_connect(G_OBJECT(mainwindow), "focus-out-event",
-	                 G_CALLBACK(mainwindow_focus_out_event), NULL);
+	if (conf_get_hidefl())
+		g_signal_connect(G_OBJECT(mainwindow), "focus-out-event",
+	                     G_CALLBACK(mainwindow_focus_out_event), NULL);
+
+	g_signal_connect(G_OBJECT(mainwindow), "show",
+	                 G_CALLBACK(mainwindow_show), NULL);
 	g_signal_connect(G_OBJECT(mainwindow), "expose-event",
 	                 G_CALLBACK(mainwindow_expose_event), NULL);
 	g_signal_connect(G_OBJECT(mainwindow), "destroy",
 	                 G_CALLBACK(mainwindow_destroy), NULL);
 	
-	gtk_window_present(GTK_WINDOW(mainwindow));
-	gtk_widget_grab_focus(GTK_WIDGET(term));
-	
-	mw_xwin = GDK_WINDOW_XWINDOW(GTK_WIDGET(mainwindow)->window);
-	dpy = GDK_WINDOW_XDISPLAY(GTK_WIDGET(mainwindow)->window);
-	opacityatom = XInternAtom(dpy, "_NET_WM_WINDOW_OPACITY", False);
-	
-	mainwindow_reset_opacity();
+	if (conf_get_transparency() == TRANS_FAKE)
+	{
+		vte_terminal_set_background_saturation(VTE_TERMINAL(term),
+		                                       1.0 - conf_get_opacity());
+		vte_terminal_set_background_transparent(VTE_TERMINAL(term), TRUE);
+	}
+	else if (conf_get_transparency() == TRANS_BEST)
+	{
+		GdkScreen *screen;
+		GdkColormap *colormap;
+
+		screen = gdk_screen_get_default();
+		colormap = gdk_screen_get_rgba_colormap(screen);
+		
+		if (colormap != NULL && gdk_screen_is_composited(screen))
+		{
+			gtk_widget_set_colormap(GTK_WIDGET(mainwindow), colormap);
+			gdk_screen_set_default_colormap(screen, colormap);
+		}
+		else
+		{
+			fprintf(stderr, "error: no composite manager running");
+			exit(1);
+		}
+
+		vte_terminal_set_background_transparent(VTE_TERMINAL(term), FALSE);
+		vte_terminal_set_opacity(VTE_TERMINAL(term),
+		                         conf_get_opacity() * 0xffff);
+	}
+	// "real" transparency is initalized after the first "show" window event
 
 	init_key();
 	grab_key();
@@ -86,7 +115,7 @@ void build_mainwindow(void)
 }
 
 
-void mainwindow_show(void)
+void mainwindow_present(void)
 {
 	gdk_threads_enter();
 	gtk_window_present(GTK_WINDOW(mainwindow));
@@ -100,17 +129,35 @@ void mainwindow_show(void)
 
 static void mainwindow_reset_position(void)
 {
-	int swidth = gdk_screen_get_width(gdk_screen_get_default());
-	gtk_window_move(GTK_WINDOW(mainwindow), (swidth - 800) / 2, 0);
+	int x, y;
+	conf_get_position(&x, &y);
+	gtk_window_move(GTK_WINDOW(mainwindow), x, y);
 }
 
 
-static void mainwindow_reset_opacity(void)
+static void mainwindow_set_opacity(void)
 {
+	if (conf_get_opacity() >= 1.0f) return;
+
 	unsigned int op = conf_get_opacity() * 0xffffffff;
 	XChangeProperty(dpy, mw_xwin, opacityatom, XA_CARDINAL, 32, PropModeReplace, 
 	                (unsigned char *) &op, 1L);
 }                             
+
+
+static void mainwindow_show(GtkWidget *widget, gpointer userdata)
+{
+	if (dpy != NULL) return;
+
+	mw_xwin = GDK_WINDOW_XWINDOW(GTK_WIDGET(mainwindow)->window);
+	dpy = GDK_WINDOW_XDISPLAY(GTK_WIDGET(mainwindow)->window);
+
+	if (conf_get_transparency() == TRANS_REAL)
+	{
+		opacityatom = XInternAtom(dpy, "_NET_WM_WINDOW_OPACITY", False);
+		mainwindow_set_opacity();
+	}
+}
 
 
 extern Window root;
@@ -123,6 +170,7 @@ static void mainwindow_focus_out_event(GtkWindow* window,
 	XGetInputFocus(dpy, &w, &revert);
 	if (w == mw_xwin) return;
 
+	// now we're sure focus wasn't lost just by pressing the shortcut key
 	gtk_widget_hide(GTK_WIDGET(mainwindow));
 }
 
