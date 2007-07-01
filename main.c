@@ -54,7 +54,7 @@ void print_help(void)
 	       "  -h HEIGHT        Window height\n"
 	       "  -p POSITION      Window position: top, bottom, left, right\n"
 	       "  -m MOD           Mod key used in combination with shortcut key: shift,\n"
-	       "                   control, alt\n"
+	       "                   control, alt, windows\n"
 	       "  -k KEY           Shortcut key (a required option!)\n\n"
 	       "Examples: %s -fn \"Bitstream Vera Sans Mono 12\" -bg white -k F12\n"
 	       "          %s -bg black -fg green -w 800 -h 405 -p bottom -m alt -k f\n"

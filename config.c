@@ -108,6 +108,8 @@ void conf_init(void)
 			else if (!strcmp(sargv[i+1], "ctrl")) _mod = ControlMask;
 			else if (!strcmp(sargv[i+1], "alt")) _mod = Mod1Mask;
 			else if (!strcmp(sargv[i+1], "mod1")) _mod = Mod1Mask;
+			else if (!strcmp(sargv[i+1], "windows")) _mod = Mod4Mask;
+			else if (!strcmp(sargv[i+1], "win")) _mod = Mod4Mask;
 			else if (!strcmp(sargv[i+1], "none")) _mod = 0;
 			else _mod = 0;
 		}
