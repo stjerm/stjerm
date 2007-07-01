@@ -30,6 +30,7 @@
 extern GtkWidget *mainwindow;
 extern GtkWidget *term;
 GtkWidget *popupmenu = NULL;
+gboolean popupmenu_shown;
 
 void build_popupmenu(void);
 static void popupmenu_activate(gchar*);
@@ -38,6 +39,7 @@ static void popupmenu_activate(gchar*);
 void build_popupmenu(void)
 {
 	popupmenu = gtk_menu_new();
+	popupmenu_shown = FALSE;
 	
 	GtkWidget *menuitem;
 	GtkWidget *img;
@@ -81,5 +83,7 @@ static void popupmenu_activate(gchar *label)
 	{
 		gtk_widget_destroy(GTK_WIDGET(mainwindow));
 	}
+	
+	popupmenu_shown = FALSE;
 }
 

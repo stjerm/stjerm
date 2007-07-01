@@ -30,8 +30,9 @@
 #include "stjerm.h"
 
 
-GtkWidget *mainwindow;
 extern GtkWidget *term;
+extern gboolean popupmenu_shown;
+GtkWidget *mainwindow;
 
 Window mw_xwin;
 Display *dpy = 0;
@@ -165,7 +166,6 @@ static void mainwindow_show(GtkWidget *widget, gpointer userdata)
 }
 
 
-extern Window root;
 static void mainwindow_focus_out_event(GtkWindow* window,
                                        GdkEventFocus* event,
 									   gpointer userdata)
@@ -174,8 +174,11 @@ static void mainwindow_focus_out_event(GtkWindow* window,
 	Window w;
 	XGetInputFocus(dpy, &w, &revert);
 	if (w == mw_xwin) return;
+	// focus wasn't lost just by pressing the shortcut key
+	
+	if (popupmenu_shown == TRUE) return;
+	// focus wasn't lost by popping up popupmenu
 
-	// now we're sure focus wasn't lost just by pressing the shortcut key
 	gtk_widget_hide(GTK_WIDGET(mainwindow));
 }
 

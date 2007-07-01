@@ -28,6 +28,7 @@
 
 extern GtkWidget *mainwindow;
 extern GtkWidget *popupmenu;
+extern gboolean popupmenu_shown;
 GtkWidget *term;
 
 void build_term(void);
@@ -96,6 +97,7 @@ static gboolean term_button_press(GtkWidget *widget, GdkEventButton *event,
 {
 	if (event->type == GDK_BUTTON_PRESS && event->button == 3)
 	{
+		popupmenu_shown = TRUE;
 		gtk_menu_popup(GTK_MENU(popupmenu), NULL, NULL, NULL, NULL,
 		               event->button, event->time);
 	}
