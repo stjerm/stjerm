@@ -45,6 +45,7 @@ static int _height;
 static int _pos;
 static int _posx;
 static int _posy;
+static int _scrollpos;
 
 void conf_init(void);
 char* conf_get_font(void);
@@ -57,6 +58,7 @@ KeySym conf_get_key(void);
 int conf_get_width(void);
 int conf_get_height(void);
 void conf_get_position(int*, int*);
+int conf_get_scrollbar(void);
 
 
 void conf_init(void)
@@ -71,6 +73,7 @@ void conf_init(void)
 	gdk_color_parse("white", &_fg);
 	_mod = 0;
 	_key = 0;
+	_scrollpos = -1;
 
 	gboolean keyoption = FALSE;
 	int i;
@@ -144,6 +147,11 @@ void conf_init(void)
 			else if (!strcmp(sargv[i+1], "topright"))    _pos = POS_TOPRIGHT;
 			else if (!strcmp(sargv[i+1], "bottomleft"))  _pos = POS_BOTTOMLEFT;
 			else if (!strcmp(sargv[i+1], "bottomright")) _pos = POS_BOTTOMRIGHT;
+		}
+		else if (!strcmp(sargv[i], "-s"))
+		{
+			if      (!strcmp(sargv[i+1], "left"))  _scrollpos = POS_LEFT;
+			else if (!strcmp(sargv[i+1], "right")) _scrollpos = POS_RIGHT;
 		}
 	}
 
@@ -262,5 +270,11 @@ void conf_get_position(int *x, int *y)
 {
 	*x = _posx;
 	*y = _posy;
+}
+
+
+int conf_get_scrollbar(void)
+{
+	return _scrollpos;
 }
 

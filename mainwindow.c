@@ -65,8 +65,34 @@ void build_mainwindow(void)
 	mainwindow_reset_position();
 	
 	build_term();
-	gtk_container_add(GTK_CONTAINER(mainwindow), term);
 	gtk_widget_show(GTK_WIDGET(term));
+	
+	if (conf_get_scrollbar() == -1)
+	{
+		gtk_container_add(GTK_CONTAINER(mainwindow), term);
+	}
+	else
+	{
+		GtkHBox *box;
+		GtkVScrollbar *sbar;
+		box = GTK_HBOX(gtk_hbox_new(FALSE, 0));
+		sbar = GTK_VSCROLLBAR(gtk_vscrollbar_new(
+		              vte_terminal_get_adjustment(VTE_TERMINAL(term))));
+
+		if (conf_get_scrollbar() == POS_LEFT)
+		{
+			gtk_box_pack_start(GTK_BOX(box), GTK_WIDGET(sbar), FALSE, FALSE, 0);
+			gtk_box_pack_end(GTK_BOX(box), GTK_WIDGET(term), TRUE, TRUE, 0);
+		}
+		else // (conf_get_scrollbar() == POS_RIGHT)
+		{
+			gtk_box_pack_start(GTK_BOX(box), GTK_WIDGET(term), TRUE, TRUE, 0);
+			gtk_box_pack_end(GTK_BOX(box), GTK_WIDGET(sbar), FALSE, FALSE, 0);
+		}
+
+		gtk_widget_show_all(GTK_WIDGET(box));
+		gtk_container_add(GTK_CONTAINER(mainwindow), GTK_WIDGET(box));
+	}
 	
 	g_signal_connect(G_OBJECT(mainwindow), "focus-out-event",
 	                 G_CALLBACK(mainwindow_focus_out_event), NULL);

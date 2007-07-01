@@ -42,6 +42,7 @@ void print_help(void)
 	       "[-w WIDTH] "
 	       "[-h HEIGHT] "
 	       "[-p POSITION] "
+		   "[-s POSITION] "
 	       "[-m MOD] "
 	       "-k KEY\n\n"
 	       "Options:\n"
@@ -53,11 +54,12 @@ void print_help(void)
 	       "  -w WIDTH         Window width\n"
 	       "  -h HEIGHT        Window height\n"
 	       "  -p POSITION      Window position: top, bottom, left, right\n"
+		   "  -s POSITION      Scrollbar position: left, right, none\n"
 	       "  -m MOD           Mod key used in combination with shortcut key: shift,\n"
-	       "                   control, alt, windows\n"
+	       "                   control, alt, windows, none\n"
 	       "  -k KEY           Shortcut key (a required option!)\n\n"
 	       "Examples: %s -fn \"Bitstream Vera Sans Mono 12\" -bg white -k F12\n"
-	       "          %s -bg black -fg green -w 800 -h 405 -p bottom -m alt -k f\n"
+	       "          %s -bg black -fg green -w 800 -h 405 -s right -m alt -k f\n"
 	       "          %s -w 500 -h 450 -p left -t best -o 0.9 -m shift -k tab\n",
 	       STJERM_VERSION,
 		   sargv[0], sargv[0], sargv[0], sargv[0]);
