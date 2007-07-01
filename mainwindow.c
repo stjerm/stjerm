@@ -80,7 +80,7 @@ void build_mainwindow(void)
 	if (conf_get_transparency() == TRANS_FAKE)
 	{
 		vte_terminal_set_background_saturation(VTE_TERMINAL(term),
-		                                       1.0 - conf_get_opacity());
+		                                       1.0 - conf_get_opacity()/100);
 		vte_terminal_set_background_transparent(VTE_TERMINAL(term), TRUE);
 	}
 	else if (conf_get_transparency() == TRANS_BEST)
@@ -104,7 +104,7 @@ void build_mainwindow(void)
 
 		vte_terminal_set_background_transparent(VTE_TERMINAL(term), FALSE);
 		vte_terminal_set_opacity(VTE_TERMINAL(term),
-		                         conf_get_opacity() * 0xffff);
+		                         conf_get_opacity()/100 * 0xffff);
 	}
 	// "real" transparency is initalized after the first "show" window event
 
@@ -143,9 +143,7 @@ static void mainwindow_reset_position(void)
 
 static void mainwindow_set_opacity(void)
 {
-	if (conf_get_opacity() >= 1.0f) return;
-
-	unsigned int op = conf_get_opacity() * 0xffffffff;
+	unsigned int op = conf_get_opacity()/100 * 0xffffffff;
 	XChangeProperty(dpy, mw_xwin, opacityatom, XA_CARDINAL, 32, PropModeReplace, 
 	                (unsigned char *) &op, 1L);
 }                             

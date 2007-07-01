@@ -49,7 +49,7 @@ void print_help(void)
 	       "  -bg COLOR        Background color\n"
 	       "  -fg COLOR        Foreground color\n"
 	       "  -t TYPE          Transparency type: fake, real, best\n"
-	       "  -o OPACITY       Opacity\n"
+	       "  -o OPACITY       Opacity (range: 10 - 100)\n"
 	       "  -w WIDTH         Window width\n"
 	       "  -h HEIGHT        Window height\n"
 	       "  -p POSITION      Window position: top, bottom, left, right\n"
