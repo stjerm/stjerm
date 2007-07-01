@@ -134,10 +134,14 @@ void conf_init(void)
 		}
 		else if (!strcmp(sargv[i], "-p"))
 		{
-			if      (!strcmp(sargv[i+1], "top"))    _pos = POS_TOP;
-			else if (!strcmp(sargv[i+1], "bottom")) _pos = POS_BOTTOM;
-			else if (!strcmp(sargv[i+1], "left"))   _pos = POS_LEFT;
-			else if (!strcmp(sargv[i+1], "right"))  _pos = POS_RIGHT;
+			if      (!strcmp(sargv[i+1], "top"))         _pos = POS_TOP;
+			else if (!strcmp(sargv[i+1], "bottom"))      _pos = POS_BOTTOM;
+			else if (!strcmp(sargv[i+1], "left"))        _pos = POS_LEFT;
+			else if (!strcmp(sargv[i+1], "right"))       _pos = POS_RIGHT;
+			else if (!strcmp(sargv[i+1], "topleft"))     _pos = POS_TOPLEFT;
+			else if (!strcmp(sargv[i+1], "topright"))    _pos = POS_TOPRIGHT;
+			else if (!strcmp(sargv[i+1], "bottomleft"))  _pos = POS_BOTTOMLEFT;
+			else if (!strcmp(sargv[i+1], "bottomright")) _pos = POS_BOTTOMRIGHT;
 		}
 	}
 
@@ -170,10 +174,30 @@ void conf_init(void)
 		_posx = 0;
 		_posy = (scrh - _height) / 2;
 	}
-	else // (_pos == POS_RIGHT)
+	else if (_pos == POS_RIGHT)
 	{
 		_posx = scrw - _width;
 		_posy = (scrh - _height) / 2;
+	}
+	else if (_pos == POS_TOPLEFT)
+	{
+		_posx = 0;
+		_posy = 0;
+	}
+	else if (_pos == POS_TOPRIGHT)
+	{
+		_posx = scrw - _width;
+		_posy = 0;
+	}
+	else if (_pos == POS_BOTTOMLEFT)
+	{
+		_posx = 0;
+		_posy = scrh - _height;
+	}
+	else if (_pos == POS_BOTTOMRIGHT)
+	{
+		_posx = scrw - _width;
+		_posy = scrh - _height;
 	}
 }
 

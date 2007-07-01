@@ -43,10 +43,14 @@
 #define TRANS_BEST 2
 #define TRANS_NONE 3
 
-#define POS_TOP    0
-#define POS_BOTTOM 1
-#define POS_LEFT   2
-#define POS_RIGHT  3
+#define POS_TOP         0
+#define POS_BOTTOM      1
+#define POS_LEFT        2
+#define POS_RIGHT       3
+#define POS_TOPLEFT     4
+#define POS_TOPRIGHT    5
+#define POS_BOTTOMLEFT  6
+#define POS_BOTTOMRIGHT 7
 
 
 extern void print_help(void);

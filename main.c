@@ -48,7 +48,7 @@ void print_help(void)
 	       "  -fn FONT         Terminal font\n"
 	       "  -bg COLOR        Background color\n"
 	       "  -fg COLOR        Foreground color\n"
-	       "  -t TYPE          Transparency type: fake, real, best\n"
+	       "  -t TYPE          Transparency type: fake, real, best, none\n"
 	       "  -o OPACITY       Opacity (range: 10 - 100)\n"
 	       "  -w WIDTH         Window width\n"
 	       "  -h HEIGHT        Window height\n"
