@@ -41,6 +41,7 @@
 #define TRANS_FAKE 0
 #define TRANS_REAL 1
 #define TRANS_BEST 2
+#define TRANS_NONE 3
 
 #define POS_TOP    0
 #define POS_BOTTOM 1

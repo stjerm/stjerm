@@ -63,7 +63,7 @@ void conf_init(void)
 {
 	strcpy(_font, "Bitstream Vera Sans Mono 10");
 	_opacity = 0.9f;
-	_trans = TRANS_BEST;
+	_trans = TRANS_NONE;
 	_width = 800;
 	_height = 400;
 	_pos = POS_TOP;
