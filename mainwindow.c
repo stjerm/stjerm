@@ -39,7 +39,7 @@ static Display *dpy = 0;
 Atom opacityatom;
 
 void build_mainwindow(void);
-void mainwindow_present(void);
+void mainwindow_toggle(void);
 static void mainwindow_reset_position(void);
 static void mainwindow_show(GtkWidget*, gpointer);
 static void mainwindow_focus_out_event(GtkWindow*, GdkEventFocus*, gpointer);
@@ -55,11 +55,9 @@ void build_mainwindow(void)
 	gtk_widget_set_size_request(mainwindow, conf_get_width(),
 	                                        conf_get_height());
 	gtk_window_set_decorated(GTK_WINDOW(mainwindow), FALSE);
-	gtk_window_set_keep_above(GTK_WINDOW(mainwindow), TRUE);
 	gtk_window_set_skip_taskbar_hint(GTK_WINDOW(mainwindow), TRUE);
 	gtk_window_set_skip_pager_hint(GTK_WINDOW(mainwindow), TRUE);
 	gtk_window_set_resizable(GTK_WINDOW(mainwindow), FALSE);
-	gtk_window_stick(GTK_WINDOW(mainwindow));
 	mainwindow_reset_position();
 	
 	build_term();
@@ -138,18 +136,24 @@ void mainwindow_present(void)
 {
 	if (GTK_WIDGET_VISIBLE(mainwindow))
 	{
-		// we should hide it, not present
+		gdk_threads_enter();
 		gtk_widget_hide(GTK_WIDGET(mainwindow));
+		gdk_flush();
+		gdk_threads_leave();
 		return;
 	}
 
 	gdk_threads_enter();
-	gtk_window_present(GTK_WINDOW(mainwindow));
+	if (gtk_window_is_active(GTK_WINDOW(mainwindow)) == FALSE)
+		gtk_window_present(GTK_WINDOW(mainwindow));
+	else
+		gtk_widget_show(mainwindow);
 	gtk_window_stick(GTK_WINDOW(mainwindow));
-	gtk_widget_grab_focus(GTK_WIDGET(term));
-	gdk_flush();
-	gdk_threads_leave();
+	gtk_window_set_keep_above(GTK_WINDOW(mainwindow), TRUE);
 	mainwindow_reset_position();
+	gdk_flush();
+	gdk_window_focus(mainwindow->window, gtk_get_current_event_time());
+	gdk_threads_leave();
 }
 
 

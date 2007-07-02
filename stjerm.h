@@ -58,7 +58,7 @@ extern void build_mainwindow(void);
 extern void build_term(void);
 extern void build_popupmenu(void);
 
-extern void mainwindow_present(void);
+extern void mainwindow_toggle(void);
 extern void init_key(void);
 extern void grab_key(void);
 extern void wait_key(void);
