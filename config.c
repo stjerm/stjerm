@@ -38,6 +38,7 @@ static char _font[100];
 static float _opacity;
 static GdkColor _bg;
 static GdkColor _fg;
+static int _border;
 static unsigned int _mod;
 static KeySym _key;
 static int _width;
@@ -52,6 +53,7 @@ char* conf_get_font(void);
 float conf_get_opacity(void);
 GdkColor conf_get_bg(void);
 GdkColor conf_get_fg(void);
+int conf_get_border(void);
 unsigned int conf_get_mod(void);
 KeySym conf_get_key(void);
 int conf_get_width(void);
@@ -62,23 +64,42 @@ int conf_get_scrollbar(void);
 
 void conf_init(void)
 {
-	// Xdefaults compatibility (only font, bg, fg and scrollbar)
+	// Xdefaults compatibility (font, bg, fg and scrollbar)
 	Display *dpy = GDK_DISPLAY_XDISPLAY(gdk_display_get_default());
+	char *op;
 
-	char *fn = XGetDefault(dpy, "stjerm", "font");
-	if (fn) strcpy(_font, fn);
+	if ((op = XGetDefault(dpy, "stjerm", "font"))) strcpy(_font, op);
 	else strcpy(_font, "Bitstream Vera Sans Mono 10");
 
-	if (!gdk_color_parse(XGetDefault(dpy, "stjerm", "background"), &_bg))
-		gdk_color_parse("black", &_bg);
-	if (!gdk_color_parse(XGetDefault(dpy, "stjerm", "foreground"), &_fg))
-		gdk_color_parse("white", &_fg);
-
-	if (!strcmp(XGetDefault(dpy, "stjerm", "scrollBar"), "true"))
-		_scrollpos = POS_RIGHT;
+	if ((op = XGetDefault(dpy, "stjerm", "background")))
+	{
+		if (!gdk_color_parse(op, &_bg)) gdk_color_parse("black", &_bg);
+	}
 	else
-		_scrollpos = -1;
+	{
+		gdk_color_parse("black", &_bg);
+	}
 
+	if ((op = XGetDefault(dpy, "stjerm", "foreground")))
+	{
+		if (!gdk_color_parse(op, &_fg)) gdk_color_parse("white", &_fg);
+	}
+	else
+	{
+		gdk_color_parse("white", &_fg);
+	}
+
+	if ((op = XGetDefault(dpy, "stjerm", "scrollBar")))
+	{
+		if (!strcmp(op, "true")) _scrollpos = POS_RIGHT;
+		else _scrollpos = -1;
+	}
+	else
+	{
+		_scrollpos = -1;
+	}
+
+	_border = BORDER_NONE;
 	_opacity = 100.0f;
 	_width = 800;
 	_height = 400;
@@ -108,6 +129,12 @@ void conf_init(void)
 		{
 			gdk_color_parse(sargv[i+1], &_fg);
 		}
+		else if (!strcmp(sargv[i], "-b"))
+		{
+			if (!strcmp(sargv[i+1], "thin")) _border = BORDER_THIN;
+			else if (!strcmp(sargv[i+1], "thick")) _border = BORDER_THICK;
+			else _border = BORDER_NONE;
+		}
 		else if (!strcmp(sargv[i], "-m"))
 		{
 			sargv[i+1][0] = tolower(sargv[i+1][0]);
@@ -118,7 +145,6 @@ void conf_init(void)
 			else if (!strcmp(sargv[i+1], "mod1")) _mod = Mod1Mask;
 			else if (!strcmp(sargv[i+1], "windows")) _mod = Mod4Mask;
 			else if (!strcmp(sargv[i+1], "win")) _mod = Mod4Mask;
-			else if (!strcmp(sargv[i+1], "none")) _mod = 0;
 			else _mod = 0;
 		}
 		else if (!strcmp(sargv[i], "-k"))
@@ -238,6 +264,12 @@ GdkColor conf_get_bg(void)
 GdkColor conf_get_fg(void)
 {
 	return _fg;
+}
+
+
+int conf_get_border(void)
+{
+	return _border;
 }
 
 
