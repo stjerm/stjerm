@@ -36,7 +36,6 @@ extern char **sargv;
 extern GtkWidget *mainwindow;
 static char _font[100];
 static float _opacity;
-static int _trans;
 static GdkColor _bg;
 static GdkColor _fg;
 static unsigned int _mod;
@@ -51,7 +50,6 @@ static int _scrollpos;
 void conf_init(void);
 char* conf_get_font(void);
 float conf_get_opacity(void);
-int conf_get_transparency(void);
 GdkColor conf_get_bg(void);
 GdkColor conf_get_fg(void);
 unsigned int conf_get_mod(void);
@@ -81,8 +79,7 @@ void conf_init(void)
 	else
 		_scrollpos = -1;
 
-	_opacity = 85.0f;
-	_trans = TRANS_NONE;
+	_opacity = 100.0f;
 	_width = 800;
 	_height = 400;
 	_pos = POS_TOP;
@@ -102,12 +99,6 @@ void conf_init(void)
 		else if (!strcmp(sargv[i], "-o"))
 		{
 			_opacity = atof(sargv[i+1]);
-		}
-		else if (!strcmp(sargv[i], "-t"))
-		{
-			if      (!strcmp(sargv[i+1], "fake")) _trans = TRANS_FAKE;
-			else if (!strcmp(sargv[i+1], "real")) _trans = TRANS_REAL;
-			else if (!strcmp(sargv[i+1], "best")) _trans = TRANS_BEST;
 		}
 		else if (!strcmp(sargv[i], "-bg"))
 		{
@@ -235,12 +226,6 @@ char* conf_get_font(void)
 float conf_get_opacity(void)
 {
 	return _opacity;
-}
-
-
-int conf_get_transparency(void)
-{
-	return _trans;
 }
 
 

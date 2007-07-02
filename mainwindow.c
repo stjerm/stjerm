@@ -41,7 +41,6 @@ Atom opacityatom;
 void build_mainwindow(void);
 void mainwindow_present(void);
 static void mainwindow_reset_position(void);
-static void mainwindow_set_opacity(void);
 static void mainwindow_show(GtkWidget*, gpointer);
 static void mainwindow_focus_out_event(GtkWindow*, GdkEventFocus*, gpointer);
 static gboolean mainwindow_expose_event(GtkWidget*, GdkEventExpose*, gpointer);
@@ -103,36 +102,26 @@ void build_mainwindow(void)
 	g_signal_connect(G_OBJECT(mainwindow), "destroy",
 	                 G_CALLBACK(mainwindow_destroy), NULL);
 	
-	if (conf_get_transparency() == TRANS_FAKE)
+	if (conf_get_opacity() < 100)
 	{
-		vte_terminal_set_background_saturation(VTE_TERMINAL(term),
-		                                       1.0 - conf_get_opacity()/100);
-		vte_terminal_set_background_transparent(VTE_TERMINAL(term), TRUE);
-	}
-	else if (conf_get_transparency() == TRANS_BEST)
-	{
-		GdkScreen *screen;
-		GdkColormap *colormap;
+		GdkScreen *screen = gdk_screen_get_default();
+		GdkColormap *colormap = gdk_screen_get_rgba_colormap(screen);
 
-		screen = gdk_screen_get_default();
-		colormap = gdk_screen_get_rgba_colormap(screen);
-		
 		if (colormap != NULL && gdk_screen_is_composited(screen))
 		{
 			gtk_widget_set_colormap(GTK_WIDGET(mainwindow), colormap);
 			gdk_screen_set_default_colormap(screen, colormap);
+			vte_terminal_set_background_transparent(VTE_TERMINAL(term), FALSE);
+			vte_terminal_set_opacity(VTE_TERMINAL(term),
+			                         conf_get_opacity()/100 * 0xffff);
 		}
 		else
 		{
-			fprintf(stderr, "error: no composite manager running");
-			exit(1);
+			vte_terminal_set_background_saturation(VTE_TERMINAL(term),
+			                                       1.0 - conf_get_opacity()/100);
+			vte_terminal_set_background_transparent(VTE_TERMINAL(term), TRUE);
 		}
-
-		vte_terminal_set_background_transparent(VTE_TERMINAL(term), FALSE);
-		vte_terminal_set_opacity(VTE_TERMINAL(term),
-		                         conf_get_opacity()/100 * 0xffff);
 	}
-	// "real" transparency is initalized after the first "show" window event
 
 	init_key();
 	grab_key();
@@ -167,26 +156,12 @@ static void mainwindow_reset_position(void)
 }
 
 
-static void mainwindow_set_opacity(void)
-{
-	unsigned int op = conf_get_opacity()/100 * 0xffffffff;
-	XChangeProperty(dpy, mw_xwin, opacityatom, XA_CARDINAL, 32, PropModeReplace, 
-	                (unsigned char *) &op, 1L);
-}                             
-
-
 static void mainwindow_show(GtkWidget *widget, gpointer userdata)
 {
 	if (dpy != NULL) return;
 
 	mw_xwin = GDK_WINDOW_XWINDOW(GTK_WIDGET(mainwindow)->window);
 	dpy = GDK_DISPLAY_XDISPLAY(gdk_display_get_default());
-
-	if (conf_get_transparency() == TRANS_REAL)
-	{
-		opacityatom = XInternAtom(dpy, "_NET_WM_WINDOW_OPACITY", False);
-		mainwindow_set_opacity();
-	}
 }
 
 

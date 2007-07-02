@@ -67,7 +67,6 @@ extern void wait_key(void);
 extern void conf_init(void);
 extern char* conf_get_font(void);
 extern float conf_get_opacity(void);
-extern int conf_get_transparency(void);
 extern GdkColor conf_get_bg(void);
 extern GdkColor conf_get_fg(void);
 extern unsigned int conf_get_mod(void);
