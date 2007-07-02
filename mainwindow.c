@@ -35,7 +35,7 @@ extern gboolean popupmenu_shown;
 GtkWidget *mainwindow;
 
 Window mw_xwin;
-Display *dpy = 0;
+static Display *dpy = 0;
 Atom opacityatom;
 
 void build_mainwindow(void);
@@ -180,7 +180,7 @@ static void mainwindow_show(GtkWidget *widget, gpointer userdata)
 	if (dpy != NULL) return;
 
 	mw_xwin = GDK_WINDOW_XWINDOW(GTK_WIDGET(mainwindow)->window);
-	dpy = GDK_WINDOW_XDISPLAY(GTK_WIDGET(mainwindow)->window);
+	dpy = GDK_DISPLAY_XDISPLAY(gdk_display_get_default());
 
 	if (conf_get_transparency() == TRANS_REAL)
 	{
