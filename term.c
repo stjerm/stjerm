@@ -111,6 +111,8 @@ static void term_eof_or_child_exited(VteTerminal *term, gpointer user_data)
 	vte_terminal_reset(VTE_TERMINAL(term), FALSE, TRUE);
 	vte_terminal_fork_command(VTE_TERMINAL(term), "/bin/bash", NULL, NULL,
 	                          "", TRUE, TRUE, TRUE);
+
+	gtk_widget_hide(GTK_WIDGET(mainwindow));
 }
 
 
