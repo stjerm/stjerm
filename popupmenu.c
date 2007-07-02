@@ -34,6 +34,7 @@ gboolean popupmenu_shown;
 
 void build_popupmenu(void);
 static void popupmenu_activate(gchar*);
+static void popupmenu_deactivate(GtkMenuShell*, gpointer);
 
 
 void build_popupmenu(void)
@@ -66,6 +67,9 @@ void build_popupmenu(void)
 		gtk_menu_shell_append(GTK_MENU_SHELL(popupmenu), menuitem);
 		gtk_widget_show(GTK_WIDGET(menuitem));
 	}
+
+	g_signal_connect_swapped(G_OBJECT(popupmenu), "deactivate",
+	                         G_CALLBACK(popupmenu_deactivate), NULL);
 }
 
 
@@ -84,6 +88,12 @@ static void popupmenu_activate(gchar *label)
 		gtk_widget_destroy(GTK_WIDGET(mainwindow));
 	}
 	
+	popupmenu_shown = FALSE;
+}
+
+
+static void popupmenu_deactivate(GtkMenuShell *menushell, gpointer userdata)
+{
 	popupmenu_shown = FALSE;
 }
 
