@@ -60,7 +60,7 @@ void print_help(void)
 	       "  -k KEY           Shortcut key (a required option!)\n\n"
 	       "Examples: %s -fn \"Bitstream Vera Sans Mono 12\" -bg white -k F12\n"
 	       "          %s -bg black -fg green -w 800 -h 405 -s right -m alt -k f\n"
-	       "          %s -w 500 -h 450 -p left -t best -o 0.9 -m shift -k tab\n",
+	       "          %s -b thick -w 500 -p left -t best -o 90 -m shift -k tab\n",
 	       STJERM_VERSION,
 		   sargv[0], sargv[0], sargv[0], sargv[0]);
 }
