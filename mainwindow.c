@@ -194,20 +194,17 @@ static gboolean mainwindow_expose_event(GtkWidget *widget,
 	gint winw, winh;
 	gtk_window_get_size(GTK_WINDOW(widget), &winw, &winh);
 
-	if (conf_get_border() == BORDER_THIN)
-	{
-		gdk_draw_rectangle(widget->window,
-			               widget->style->black_gc,
-			               FALSE,
-			               0, 0, winw-1, winh-1);
-	}
-	else // (conf_get_border() == BORDER_THICK)
-	{
-		gdk_draw_rectangle(widget->window,
-		                   widget->style->bg_gc[GTK_STATE_SELECTED],
-		                   TRUE,
-		                   1, 1, winw-2, winh-2);
-	}
+	gdk_draw_rectangle(widget->window,
+		               widget->style->black_gc,
+		               FALSE,
+		               0, 0, winw-1, winh-1);
+
+	if (conf_get_border() == BORDER_THIN) return FALSE;
+
+	gdk_draw_rectangle(widget->window,
+	                   widget->style->bg_gc[GTK_STATE_SELECTED],
+	                   TRUE,
+	                   1, 1, winw-2, winh-2);
 
 	return FALSE;
 }
