@@ -38,10 +38,9 @@
 #define TERM_RESIZE_WINDOW     7
 #define TERM_MOVE_WINDOW       8
 
-#define TRANS_FAKE 0
-#define TRANS_REAL 1
-#define TRANS_BEST 2
-#define TRANS_NONE 3
+#define BORDER_THIN  0
+#define BORDER_THICK 1
+#define BORDER_NONE  2
 
 #define POS_TOP         0
 #define POS_BOTTOM      1
@@ -69,6 +68,7 @@ extern char* conf_get_font(void);
 extern float conf_get_opacity(void);
 extern GdkColor conf_get_bg(void);
 extern GdkColor conf_get_fg(void);
+extern int conf_get_border(void);
 extern unsigned int conf_get_mod(void);
 extern KeySym conf_get_key(void);
 extern int conf_get_width(void);

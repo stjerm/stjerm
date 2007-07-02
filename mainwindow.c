@@ -52,7 +52,6 @@ void build_mainwindow(void)
 	mainwindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	
 	gtk_widget_set_app_paintable(mainwindow, TRUE);
-	gtk_container_set_border_width(GTK_CONTAINER(mainwindow), 5);
 	gtk_widget_set_size_request(mainwindow, conf_get_width(),
 	                                        conf_get_height());
 	gtk_window_set_decorated(GTK_WINDOW(mainwindow), FALSE);
@@ -92,13 +91,19 @@ void build_mainwindow(void)
 		gtk_widget_show_all(GTK_WIDGET(box));
 		gtk_container_add(GTK_CONTAINER(mainwindow), GTK_WIDGET(box));
 	}
-	
+	int border = conf_get_border();
+	if (border == BORDER_THIN)
+		gtk_container_set_border_width(GTK_CONTAINER(mainwindow), 1);
+	else if (border == BORDER_THICK)
+		gtk_container_set_border_width(GTK_CONTAINER(mainwindow), 5);
+	if (border != BORDER_NONE)
+		g_signal_connect(G_OBJECT(mainwindow), "expose-event",
+		                 G_CALLBACK(mainwindow_expose_event), NULL);
+
 	g_signal_connect(G_OBJECT(mainwindow), "focus-out-event",
 	                 G_CALLBACK(mainwindow_focus_out_event), NULL);
 	g_signal_connect(G_OBJECT(mainwindow), "show",
 	                 G_CALLBACK(mainwindow_show), NULL);
-	g_signal_connect(G_OBJECT(mainwindow), "expose-event",
-	                 G_CALLBACK(mainwindow_expose_event), NULL);
 	g_signal_connect(G_OBJECT(mainwindow), "destroy",
 	                 G_CALLBACK(mainwindow_destroy), NULL);
 	
@@ -188,16 +193,22 @@ static gboolean mainwindow_expose_event(GtkWidget *widget,
 {
 	gint winw, winh;
 	gtk_window_get_size(GTK_WINDOW(widget), &winw, &winh);
-	
-	gdk_draw_rectangle(widget->window,
-	                   widget->style->black_gc,
-	                   FALSE,
-	                   0, 0, winw-1, winh-1);
-	
-	gdk_draw_rectangle(widget->window,
-	                   widget->style->bg_gc[GTK_STATE_SELECTED],
-	                   TRUE,
-	                   1, 1, winw-2, winh-2);
+
+	if (conf_get_border() == BORDER_THIN)
+	{
+		gdk_draw_rectangle(widget->window,
+			               widget->style->black_gc,
+			               FALSE,
+			               0, 0, winw-1, winh-1);
+	}
+	else // (conf_get_border() == BORDER_THICK)
+	{
+		gdk_draw_rectangle(widget->window,
+		                   widget->style->bg_gc[GTK_STATE_SELECTED],
+		                   TRUE,
+		                   1, 1, winw-2, winh-2);
+	}
+
 	return FALSE;
 }
 
