@@ -151,8 +151,8 @@ void mainwindow_toggle(void)
 	gtk_window_stick(GTK_WINDOW(mainwindow));
 	gtk_window_set_keep_above(GTK_WINDOW(mainwindow), TRUE);
 	mainwindow_reset_position();
-	gdk_flush();
 	gdk_window_focus(mainwindow->window, gtk_get_current_event_time());
+	gdk_flush();
 	gdk_threads_leave();
 }
 
