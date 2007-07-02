@@ -48,6 +48,11 @@ static int _posx;
 static int _posy;
 static int _scrollpos;
 
+static void set_border(char*);
+static void set_mod(char*);
+static void set_key(char*);
+static void set_pos(char *v);
+
 void conf_init(void);
 char* conf_get_font(void);
 float conf_get_opacity(void);
@@ -62,9 +67,58 @@ void conf_get_position(int*, int*);
 int conf_get_scrollbar(void);
 
 
+void set_border(char *v)
+{
+	if (!strcmp(v, "thin")) _border = BORDER_THIN;
+	else if (!strcmp(v, "thick")) _border = BORDER_THICK;
+	else _border = BORDER_NONE;
+}
+
+
+void set_mod(char *v)
+{
+	v[0] = tolower(v[0]);
+	if (!strcmp(v, "shift")) _mod = ShiftMask;
+	else if (!strcmp(v, "control")) _mod = ControlMask;
+	else if (!strcmp(v, "ctrl")) _mod = ControlMask;
+	else if (!strcmp(v, "alt")) _mod = Mod1Mask;
+	else if (!strcmp(v, "mod1")) _mod = Mod1Mask;
+	else if (!strcmp(v, "windows")) _mod = Mod4Mask;
+	else if (!strcmp(v, "win")) _mod = Mod4Mask;
+	else _mod = 0;
+}
+
+
+void set_key(char *v)
+{
+	_key = 0;
+
+	v[0] = tolower(v[0]);
+	_key = XStringToKeysym(v);
+
+	if (!_key)
+	{
+		v[0] = toupper(v[0]);
+		_key = XStringToKeysym(v);
+	}
+}
+
+
+void set_pos(char *v)
+{
+	if      (!strcmp(v, "top"))         _pos = POS_TOP;
+	else if (!strcmp(v, "bottom"))      _pos = POS_BOTTOM;
+	else if (!strcmp(v, "left"))        _pos = POS_LEFT;
+	else if (!strcmp(v, "right"))       _pos = POS_RIGHT;
+	else if (!strcmp(v, "topleft"))     _pos = POS_TOPLEFT;
+	else if (!strcmp(v, "topright"))    _pos = POS_TOPRIGHT;
+	else if (!strcmp(v, "bottomleft"))  _pos = POS_BOTTOMLEFT;
+	else if (!strcmp(v, "bottomright")) _pos = POS_BOTTOMRIGHT;
+}
+
+
 void conf_init(void)
 {
-	// Xdefaults compatibility (font, bg, fg and scrollbar)
 	Display *dpy = GDK_DISPLAY_XDISPLAY(gdk_display_get_default());
 	char *op;
 
@@ -75,37 +129,45 @@ void conf_init(void)
 	{
 		if (!gdk_color_parse(op, &_bg)) gdk_color_parse("black", &_bg);
 	}
-	else
-	{
-		gdk_color_parse("black", &_bg);
-	}
+	else gdk_color_parse("black", &_bg);
 
 	if ((op = XGetDefault(dpy, "stjerm", "foreground")))
 	{
 		if (!gdk_color_parse(op, &_fg)) gdk_color_parse("white", &_fg);
 	}
-	else
-	{
-		gdk_color_parse("white", &_fg);
-	}
+	else gdk_color_parse("white", &_fg);
 
-	if ((op = XGetDefault(dpy, "stjerm", "scrollBar")))
+	if ((op = XGetDefault(dpy, "stjerm", "scrollBar")) || XGetDefault(dpy, "stjerm", "scrollbar"))
 	{
-		if (!strcmp(op, "true")) _scrollpos = POS_RIGHT;
+		if (!op) op = XGetDefault(dpy, "stjerm", "scrollbar");
+		if      (!strcmp(op, "true"))  _scrollpos = POS_RIGHT;
+		else if (!strcmp(op, "left"))  _scrollpos = POS_LEFT;
+		else if (!strcmp(op, "right")) _scrollpos = POS_RIGHT;
 		else _scrollpos = -1;
 	}
-	else
-	{
-		_scrollpos = -1;
-	}
+	else _scrollpos = -1;
 
-	_border = BORDER_NONE;
-	_opacity = 100.0f;
-	_width = 800;
-	_height = 400;
-	_pos = POS_TOP;
-	_mod = 0;
-	_key = 0;
+	if ((op = XGetDefault(dpy, "stjerm", "border"))) set_border(op);
+	else _border = BORDER_NONE;
+
+	if ((op = XGetDefault(dpy, "stjerm", "opacity"))) _opacity = atof(op);
+	else _opacity = 100.0f;
+	
+	if ((op = XGetDefault(dpy, "stjerm", "width"))) _width = atoi(op);
+	else _width = 800;
+
+	if ((op = XGetDefault(dpy, "stjerm", "height"))) _height = atoi(op);
+	else _height = 400;
+
+	if ((op = XGetDefault(dpy, "stjerm", "position"))) set_pos(op);
+	else _pos = POS_TOP;
+
+	if ((op = XGetDefault(dpy, "stjerm", "mod"))) set_mod(op);
+	else _mod = 0;
+
+	if ((op = XGetDefault(dpy, "stjerm", "key"))) set_key(op);
+	else _key = 0;
+
 
 	gboolean keyoption = FALSE;
 	int i;
@@ -113,72 +175,16 @@ void conf_init(void)
 	{
 		if (i + 1 >= sargc) continue;
 
-		if (!strcmp(sargv[i], "-fn"))
-		{
-			strcpy(_font, sargv[i+1]);
-		}
-		else if (!strcmp(sargv[i], "-o"))
-		{
-			_opacity = atof(sargv[i+1]);
-		}
-		else if (!strcmp(sargv[i], "-bg"))
-		{
-			gdk_color_parse(sargv[i+1], &_bg);
-		}
-		else if (!strcmp(sargv[i], "-fg"))
-		{
-			gdk_color_parse(sargv[i+1], &_fg);
-		}
-		else if (!strcmp(sargv[i], "-b"))
-		{
-			if (!strcmp(sargv[i+1], "thin")) _border = BORDER_THIN;
-			else if (!strcmp(sargv[i+1], "thick")) _border = BORDER_THICK;
-			else _border = BORDER_NONE;
-		}
-		else if (!strcmp(sargv[i], "-m"))
-		{
-			sargv[i+1][0] = tolower(sargv[i+1][0]);
-			if (!strcmp(sargv[i+1], "shift")) _mod = ShiftMask;
-			else if (!strcmp(sargv[i+1], "control")) _mod = ControlMask;
-			else if (!strcmp(sargv[i+1], "ctrl")) _mod = ControlMask;
-			else if (!strcmp(sargv[i+1], "alt")) _mod = Mod1Mask;
-			else if (!strcmp(sargv[i+1], "mod1")) _mod = Mod1Mask;
-			else if (!strcmp(sargv[i+1], "windows")) _mod = Mod4Mask;
-			else if (!strcmp(sargv[i+1], "win")) _mod = Mod4Mask;
-			else _mod = 0;
-		}
-		else if (!strcmp(sargv[i], "-k"))
-		{
-			keyoption = TRUE;
-
-			sargv[i+1][0] = tolower(sargv[i+1][0]);
-			_key = XStringToKeysym(sargv[i+1]);
-
-			if (!_key)
-			{
-				sargv[i+1][0] = toupper(sargv[i+1][0]);
-				_key = XStringToKeysym(sargv[i+1]);
-			}
-		}
-		else if (!strcmp(sargv[i], "-w"))
-		{
-			_width = atoi(sargv[i+1]);
-		}
-		else if (!strcmp(sargv[i], "-h"))
-		{
-			_height = atoi(sargv[i+1]);
-		}
-		else if (!strcmp(sargv[i], "-p"))
-		{
-			if      (!strcmp(sargv[i+1], "top"))         _pos = POS_TOP;
-			else if (!strcmp(sargv[i+1], "bottom"))      _pos = POS_BOTTOM;
-			else if (!strcmp(sargv[i+1], "left"))        _pos = POS_LEFT;
-			else if (!strcmp(sargv[i+1], "right"))       _pos = POS_RIGHT;
-			else if (!strcmp(sargv[i+1], "topleft"))     _pos = POS_TOPLEFT;
-			else if (!strcmp(sargv[i+1], "topright"))    _pos = POS_TOPRIGHT;
-			else if (!strcmp(sargv[i+1], "bottomleft"))  _pos = POS_BOTTOMLEFT;
-			else if (!strcmp(sargv[i+1], "bottomright")) _pos = POS_BOTTOMRIGHT;
-		}
+		if (!strcmp(sargv[i], "-fn")) strcpy(_font, sargv[i+1]);
+		else if (!strcmp(sargv[i], "-o")) _opacity = atof(sargv[i+1]);
+		else if (!strcmp(sargv[i], "-bg")) gdk_color_parse(sargv[i+1], &_bg);
+		else if (!strcmp(sargv[i], "-fg")) gdk_color_parse(sargv[i+1], &_fg);
+		else if (!strcmp(sargv[i], "-b")) set_border(sargv[i+1]);
+		else if (!strcmp(sargv[i], "-m")) set_mod(sargv[i+1]);
+		else if (!strcmp(sargv[i], "-k")) { keyoption = TRUE; set_key(sargv[i+1]); }
+		else if (!strcmp(sargv[i], "-w")) _width = atoi(sargv[i+1]);
+		else if (!strcmp(sargv[i], "-h")) _height = atoi(sargv[i+1]);
+		else if (!strcmp(sargv[i], "-p")) set_pos(sargv[i+1]);
 		else if (!strcmp(sargv[i], "-s"))
 		{
 			if      (!strcmp(sargv[i+1], "left"))  _scrollpos = POS_LEFT;
@@ -186,16 +192,17 @@ void conf_init(void)
 		}
 	}
 
-	if (keyoption == FALSE)
+	if (keyoption == FALSE && _key == 0)
 	{
-		print_help();
+		fprintf(stderr, "error: shortcut key is not defined");
 		exit(1);
 	}
 	else if (keyoption == TRUE && _key == 0)
 	{
-		fprintf(stderr, "error: wrong shortcut key is defined (see /usr/include/X11/keysymdef.h)\n");
+		fprintf(stderr, "error: wrong shortcut key is defined\n");
 		exit(1);
 	}
+
 
 	int scrw = gdk_screen_get_width(gdk_screen_get_default());
 	int scrh = gdk_screen_get_height(gdk_screen_get_default());
