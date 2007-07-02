@@ -81,7 +81,11 @@ void conf_init(void)
 	else
 		_scrollpos = -1;
 
-
+	_opacity = 85.0f;
+	_trans = TRANS_NONE;
+	_width = 800;
+	_height = 400;
+	_pos = POS_TOP;
 	_mod = 0;
 	_key = 0;
 
