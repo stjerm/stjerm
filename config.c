@@ -22,6 +22,7 @@
 
 
 #include <gtk/gtk.h>
+#include <gdk/gdkx.h>
 #include <X11/Xlib.h>
 #include <X11/keysym.h>
 #include <stdlib.h>
@@ -63,17 +64,26 @@ int conf_get_scrollbar(void);
 
 void conf_init(void)
 {
-	strcpy(_font, "Bitstream Vera Sans Mono 10");
-	_opacity = 85.0f;
-	_trans = TRANS_NONE;
-	_width = 800;
-	_height = 400;
-	_pos = POS_TOP;
-	gdk_color_parse("black", &_bg);
-	gdk_color_parse("white", &_fg);
+	// Xdefaults compatibility (only font, bg, fg and scrollbar)
+	Display *dpy = GDK_DISPLAY_XDISPLAY(gdk_display_get_default());
+
+	char *fn = XGetDefault(dpy, "stjerm", "font");
+	if (fn) strcpy(_font, fn);
+	else strcpy(_font, "Bitstream Vera Sans Mono 10");
+
+	if (!gdk_color_parse(XGetDefault(dpy, "stjerm", "background"), &_bg))
+		gdk_color_parse("black", &_bg);
+	if (!gdk_color_parse(XGetDefault(dpy, "stjerm", "foreground"), &_fg))
+		gdk_color_parse("white", &_fg);
+
+	if (!strcmp(XGetDefault(dpy, "stjerm", "scrollBar"), "true"))
+		_scrollpos = POS_RIGHT;
+	else
+		_scrollpos = -1;
+
+
 	_mod = 0;
 	_key = 0;
-	_scrollpos = -1;
 
 	gboolean keyoption = FALSE;
 	int i;
