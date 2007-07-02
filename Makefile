@@ -1,4 +1,4 @@
-STJERM_VERSION = 0.4
+STJERM_VERSION = 0.5
 
 INCS = -I. -I/usr/include `pkg-config --cflags gtk+-2.0 vte` \
 	   -DSTJERM_VERSION=\"${STJERM_VERSION}\" ${CFLAGS}
@@ -25,7 +25,6 @@ clean:
 	@echo
 
 install: all
-	@echo installing:
 	@mkdir -p ${DESTDIR}/usr/bin
 	@echo cp stjerm ${DESTDIR}/usr/bin/stjerm
 	@cp stjerm ${DESTDIR}/usr/bin/stjerm
@@ -33,7 +32,6 @@ install: all
 	@chmod 755 ${DESTDIR}/usr/bin/stjerm
 
 uninstall:
-	@echo removing:
 	@echo rm -f ${DESTDIR}/usr/bin/stjerm
 	@rm -f ${DESTDIR}/usr/bin/stjerm
 	
