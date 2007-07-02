@@ -132,7 +132,7 @@ void build_mainwindow(void)
 }
 
 
-void mainwindow_present(void)
+void mainwindow_toggle(void)
 {
 	if (GTK_WIDGET_VISIBLE(mainwindow))
 	{
