@@ -1,4 +1,4 @@
-STJERM_VERSION = 0.5
+STJERM_VERSION = 0.6
 
 INCS = -I. -I/usr/include `pkg-config --cflags gtk+-2.0 vte` \
 	   -DSTJERM_VERSION=\"${STJERM_VERSION}\" ${CFLAGS}
