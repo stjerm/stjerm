@@ -44,7 +44,7 @@ void print_help(void)
 	       "[-p POSITION] "
 		   "[-s POSITION] "
 	       "[-m MOD] "
-	       "[-k KEY]\n\n"
+	       "-k KEY\n\n"
 	       "Options:\n"
 	       "  -fn FONT         Terminal font\n"
 	       "  -bg COLOR        Background color\n"
@@ -57,7 +57,7 @@ void print_help(void)
 		   "  -s POSITION      Scrollbar position: left, right, none\n"
 	       "  -m MOD           Mod key used in combination with shortcut key: shift,\n"
 	       "                   control, alt, windows, none\n"
-	       "  -k KEY           Shortcut key\n\n"
+	       "  -k KEY           Shortcut key (a required option!)\n\n"
 	       "Examples: %s -fn \"Bitstream Vera Sans Mono 12\" -bg white -k F12\n"
 	       "          %s -bg black -fg green -w 800 -h 405 -s right -m alt -k f\n"
 	       "          %s -b thick -w 500 -p left -t best -o 90 -m shift -k tab\n",

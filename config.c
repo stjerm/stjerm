@@ -194,7 +194,7 @@ void conf_init(void)
 
 	if (keyoption == FALSE && _key == 0)
 	{
-		fprintf(stderr, "error: shortcut key is not defined\n");
+		print_help();
 		exit(1);
 	}
 	else if (keyoption == TRUE && _key == 0)
