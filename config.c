@@ -51,6 +51,7 @@ static int _scrollpos;
 static char _shell[100];
 static int _lines;
 static int _showtab;
+static char _termname[100];
 
 static void set_border(char*);
 static void set_mod(char*);
@@ -71,7 +72,8 @@ void conf_get_position(int*, int*);
 int conf_get_scrollbar(void);
 char* conf_get_shell(void);
 int conf_get_lines(void);
-int conf_get_showtab(void);
+int conf_get_show_tab(void);
+char* conf_get_term_name(void);
 
 
 void set_border(char *v)
@@ -183,13 +185,17 @@ void conf_init(void)
 	
 	if ((op = XGetDefault(dpy, "stjerm", "showtab"))) _showtab = 1;
 	else _showtab = 0;
+	
+	if ((op = XGetDefault(dpy, "stjerm", "termname"))) strcpy(_termname, op);
+	else strcpy(_termname, "term");
 
 	
 	gboolean keyoption = FALSE;
 	int i;
 	for (i = 1; i < sargc; i++)
 	{
-		if (!strcmp(sargv[i], "-showtab")) _showtab = 1;
+		if (sargv[i] != 0)
+			if (!strcmp(sargv[i], "--showtab")) _showtab = 1;
 		
 		if (i + 1 >= sargc) continue;
 
@@ -210,6 +216,7 @@ void conf_init(void)
 		}
 		else if (!strcmp(sargv[i], "-sh")) strcpy(_shell, sargv[i+1]);
 		else if (!strcmp(sargv[i], "-bl")) _lines = atoi(sargv[i+1]);
+		else if (!strcmp(sargv[i], "--termname")) strcpy(_termname, sargv[i+1]);
 	}
 
 	if (keyoption == FALSE && _key == 0)
@@ -356,13 +363,21 @@ char* conf_get_shell(void)
 	return _shell;
 }
 
+
 int conf_get_lines(void)
 {
 	return _lines;
 }
 
-int conf_get_showtab(void)
+
+int conf_get_show_tab(void)
 {
 	return _showtab;
+}
+
+
+char* conf_get_term_name(void)
+{
+	return _termname;
 }
 

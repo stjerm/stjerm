@@ -74,7 +74,7 @@ void build_mainwindow(void)
 	
 	mainwindow_create_tab();
 	gtk_box_pack_end(GTK_BOX(mainbox), GTK_WIDGET(tabbox), FALSE, FALSE, 0);
-	if (conf_get_showtab())
+	if (conf_get_show_tab())
 		gtk_widget_show_all(GTK_WIDGET(tabbox));
 	gtk_widget_show_all(GTK_WIDGET(mainbox));
 	gtk_container_add(GTK_CONTAINER(mainwindow), GTK_WIDGET(mainbox));
@@ -95,7 +95,7 @@ void build_mainwindow(void)
 	g_signal_connect(G_OBJECT(mainwindow), "destroy",
 	                 G_CALLBACK(mainwindow_destroy), NULL);
 
-	if (!conf_get_showtab())
+	if (!conf_get_show_tab())
 		gtk_widget_hide(GTK_WIDGET(tabbox));
 	
 	init_key();
@@ -114,16 +114,15 @@ Tab* mainwindow_create_tab(void)
 		gtk_box_pack_start(GTK_BOX(tmp_box), tmp_term, TRUE, TRUE, 0);
 	else if (conf_get_scrollbar() == POS_LEFT)
 	{
-		sbar
-				= GTK_VSCROLLBAR(gtk_vscrollbar_new(vte_terminal_get_adjustment(VTE_TERMINAL(tmp_term))));
+		sbar = GTK_VSCROLLBAR(gtk_vscrollbar_new(vte_terminal_get_adjustment(
+				              VTE_TERMINAL(tmp_term))));
 		gtk_box_pack_start(GTK_BOX(tmp_box), GTK_WIDGET(sbar), FALSE, FALSE, 0);
 		gtk_box_pack_end(GTK_BOX(tmp_box), GTK_WIDGET(tmp_term), TRUE, TRUE, 0);
 	} else // (conf_get_scrollbar() == POS_RIGHT)
 	{
-		sbar
-				= GTK_VSCROLLBAR(gtk_vscrollbar_new(vte_terminal_get_adjustment(VTE_TERMINAL(tmp_term))));
-		gtk_box_pack_start(GTK_BOX(tmp_box), GTK_WIDGET(tmp_term), TRUE, TRUE,
-				0);
+		sbar = GTK_VSCROLLBAR(gtk_vscrollbar_new(vte_terminal_get_adjustment(
+				              VTE_TERMINAL(tmp_term))));
+		gtk_box_pack_start(GTK_BOX(tmp_box), GTK_WIDGET(tmp_term), TRUE, TRUE, 0);
 		gtk_box_pack_end(GTK_BOX(tmp_box), GTK_WIDGET(sbar), FALSE, FALSE, 0);
 	}
 
@@ -131,11 +130,11 @@ Tab* mainwindow_create_tab(void)
 	gtk_box_pack_start(GTK_BOX(mainbox), GTK_WIDGET(tmp_box), TRUE, TRUE, 0);
 
 	char buffer [50];
-	sprintf(buffer, "term %d", activetab + 1);
-	GtkToggleButton
-			* tmp_tab = GTK_TOGGLE_BUTTON(gtk_toggle_button_new_with_label(buffer));
+	sprintf(buffer, "%s %d", conf_get_term_name(), activetab + 1);
+	GtkToggleButton* tmp_tab = GTK_TOGGLE_BUTTON(
+			                   gtk_toggle_button_new_with_label(buffer));
 	gulong handler = g_signal_connect(G_OBJECT(tmp_tab), "toggled",
-			G_CALLBACK(mainwindow_toggle_tab), NULL);
+			                          G_CALLBACK(mainwindow_toggle_tab), NULL);
 
 	gtk_widget_show_all(GTK_WIDGET(tmp_tab));
 	gtk_box_pack_start(GTK_BOX(tabbox), GTK_WIDGET(tmp_tab), FALSE, FALSE, 0);
@@ -155,7 +154,7 @@ Tab* mainwindow_create_tab(void)
 		} else
 		{
 			vte_terminal_set_background_saturation(VTE_TERMINAL(tmp_term),
-			1.0 - conf_get_opacity()/100);
+			                                       1.0 - conf_get_opacity()/100);
 			vte_terminal_set_background_transparent(VTE_TERMINAL(tmp_term), TRUE);
 		}
 	}
@@ -194,7 +193,7 @@ void mainwindow_close_tab(void)
 
 			gtk_widget_show(GTK_WIDGET(g_array_index(tabs, Tab*, activetab)->box));
 			
-			if (tabcount == 1 && conf_get_showtab() == 0)
+			if (tabcount == 1 && conf_get_show_tab() == 0)
 				gtk_widget_hide(GTK_WIDGET(tabbox));
 			
 			g_signal_emit_by_name(g_array_index(tabs, Tab*, activetab)->tab, "toggled");

@@ -88,7 +88,8 @@ extern void conf_get_position(int*, int*);
 extern int conf_get_scrollbar(void);
 extern char* conf_get_shell(void);
 extern int conf_get_lines(void);
-extern int conf_get_showtab(void);
+extern int conf_get_show_tab(void);
+extern char* conf_get_term_name(void);
 
 #endif /* __STJERM_H__ */
 

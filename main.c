@@ -46,7 +46,9 @@ void print_help(void)
 	       "[-m MOD] "
 	       "[-k KEY]\n       "
 		   "[-sh SHELL] "
-		   "[-bl LINES]\n\n"
+		   "[-bl LINES] "
+		   "[--showtabs] "
+		   "[--termname NAME]\n\n"
 	       "Options:\n"
 	       "  -fn FONT         Terminal font\n"
 	       "  -bg COLOR        Background color\n"
@@ -62,8 +64,9 @@ void print_help(void)
 	       "  -k KEY           Shortcut key\n"
 		   "  -sh SHELL        Shell (default: /bin/bash)\n"
 		   "  -bl LINES        Scrollback lines (default: 1000; 0 to disable scrollback)\n"
-		   "  -showtab         Shows the tabbar even if only one tab is opened\n\n"
-	       "Examples: %s -fn \"Bitstream Vera Sans Mono 12\" -bg white -k F12 -sh /bin/bash\n"
+		   "  --showtab        Shows the tabbar even if only one tab is opened\n"
+	       "  --termname NAME  Label of the tab buttons\n\n"
+		   "Examples: %s -fn \"Bitstream Vera Sans Mono 12\" -bg white -k F12 -sh /bin/bash\n"
 	       "          %s -bg black -fg green -w 800 -h 405 -s right -m alt -k f -bl 10000\n"
 	       "          %s -b thick -w 500 -p left -t best -o 90 -m shift -k tab -sh /bin/zsh\n",
 	       STJERM_VERSION,
