@@ -28,6 +28,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <sys/stat.h>
 #include "stjerm.h"
 
 
@@ -47,6 +48,9 @@ static int _pos;
 static int _posx;
 static int _posy;
 static int _scrollpos;
+static char _shell[100];
+static int _lines;
+static int _showtab;
 
 static void set_border(char*);
 static void set_mod(char*);
@@ -65,6 +69,9 @@ int conf_get_width(void);
 int conf_get_height(void);
 void conf_get_position(int*, int*);
 int conf_get_scrollbar(void);
+char* conf_get_shell(void);
+int conf_get_lines(void);
+int conf_get_showtab(void);
 
 
 void set_border(char *v)
@@ -168,11 +175,22 @@ void conf_init(void)
 	if ((op = XGetDefault(dpy, "stjerm", "key"))) set_key(op);
 	else _key = 0;
 
+	if ((op = XGetDefault(dpy, "stjerm", "shell"))) strcpy(_shell, op);
+	else strcpy(_shell, "/bin/bash");
 
+	if ((op = XGetDefault(dpy, "stjerm", "lines"))) _lines = atoi(op);
+	else _lines = 1000;
+	
+	if ((op = XGetDefault(dpy, "stjerm", "showtab"))) _showtab = 1;
+	else _showtab = 0;
+
+	
 	gboolean keyoption = FALSE;
 	int i;
 	for (i = 1; i < sargc; i++)
 	{
+		if (!strcmp(sargv[i], "-showtab")) _showtab = 1;
+		
 		if (i + 1 >= sargc) continue;
 
 		if (!strcmp(sargv[i], "-fn")) strcpy(_font, sargv[i+1]);
@@ -190,6 +208,8 @@ void conf_init(void)
 			if      (!strcmp(sargv[i+1], "left"))  _scrollpos = POS_LEFT;
 			else if (!strcmp(sargv[i+1], "right")) _scrollpos = POS_RIGHT;
 		}
+		else if (!strcmp(sargv[i], "-sh")) strcpy(_shell, sargv[i+1]);
+		else if (!strcmp(sargv[i], "-bl")) _lines = atoi(sargv[i+1]);
 	}
 
 	if (keyoption == FALSE && _key == 0)
@@ -197,7 +217,21 @@ void conf_init(void)
 		print_help();
 		exit(1);
 	}
-	else if (keyoption == TRUE && _key == 0)
+
+	struct stat st;
+	if (stat(_shell, &st) != 0)
+	{
+		fprintf(stderr, "error: the shell '%s' can't be opened\n", _shell);
+		exit(1);
+	}
+
+	if (_lines < 0)
+	{
+		fprintf(stderr, "error: a scrollback line count < 0 is not allowed\n");
+		exit(1);
+	}
+
+	if (keyoption == TRUE && _key == 0)
 	{
 		fprintf(stderr, "error: wrong shortcut key is defined\n");
 		exit(1);
@@ -314,5 +348,21 @@ void conf_get_position(int *x, int *y)
 int conf_get_scrollbar(void)
 {
 	return _scrollpos;
+}
+
+
+char* conf_get_shell(void)
+{
+	return _shell;
+}
+
+int conf_get_lines(void)
+{
+	return _lines;
+}
+
+int conf_get_showtab(void)
+{
+	return _showtab;
 }
 

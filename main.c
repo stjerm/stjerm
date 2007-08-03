@@ -44,7 +44,9 @@ void print_help(void)
 	       "[-p POSITION] "
 		   "[-s POSITION] "
 	       "[-m MOD] "
-	       "-k KEY\n\n"
+	       "[-k KEY]\n       "
+		   "[-sh SHELL] "
+		   "[-bl LINES]\n\n"
 	       "Options:\n"
 	       "  -fn FONT         Terminal font\n"
 	       "  -bg COLOR        Background color\n"
@@ -57,10 +59,13 @@ void print_help(void)
 		   "  -s POSITION      Scrollbar position: left, right, none\n"
 	       "  -m MOD           Mod key used in combination with shortcut key: shift,\n"
 	       "                   control, alt, windows, none\n"
-	       "  -k KEY           Shortcut key (a required option!)\n\n"
-	       "Examples: %s -fn \"Bitstream Vera Sans Mono 12\" -bg white -k F12\n"
-	       "          %s -bg black -fg green -w 800 -h 405 -s right -m alt -k f\n"
-	       "          %s -b thick -w 500 -p left -t best -o 90 -m shift -k tab\n",
+	       "  -k KEY           Shortcut key\n"
+		   "  -sh SHELL        Shell (default: /bin/bash)\n"
+		   "  -bl LINES        Scrollback lines (default: 1000; 0 to disable scrollback)\n"
+		   "  -showtab         Shows the tabbar even if only one tab is opened\n\n"
+	       "Examples: %s -fn \"Bitstream Vera Sans Mono 12\" -bg white -k F12 -sh /bin/bash\n"
+	       "          %s -bg black -fg green -w 800 -h 405 -s right -m alt -k f -bl 10000\n"
+	       "          %s -b thick -w 500 -p left -t best -o 90 -m shift -k tab -sh /bin/zsh\n",
 	       STJERM_VERSION,
 		   sargv[0], sargv[0], sargv[0], sargv[0]);
 }
@@ -70,12 +75,12 @@ int main(int argc, char *argv[])
 {
 	sargc = argc;
 	sargv = argv;
-
-	gtk_init(&argc, &argv);
+	
 	if (!g_thread_supported())
 		g_thread_init(NULL);
 	gdk_threads_init();
-	
+	gtk_init(&argc, &argv);
+
 	conf_init();
 	build_mainwindow();
 	

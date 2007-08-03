@@ -28,8 +28,9 @@
 
 
 extern GtkWidget *mainwindow;
-extern GtkWidget *term;
-GtkWidget *popupmenu = NULL;
+extern int activetab;
+extern GArray* tabs;
+GtkWidget *popupmenu= NULL;
 gboolean popupmenu_shown;
 
 void build_popupmenu(void);
@@ -45,13 +46,14 @@ void build_popupmenu(void)
 	GtkWidget *menuitem;
 	GtkWidget *img;
 	
-	gchar *labels[] = { "Copy", "Paste", "Quit" };
-	gchar *stocks[] = { GTK_STOCK_COPY, GTK_STOCK_PASTE, GTK_STOCK_QUIT };
+	gchar *labels[] = {"New Tab", "Close Tab", "Copy", "Paste", "Quit"};
+	gchar *stocks[] = {GTK_STOCK_ADD, GTK_STOCK_CLOSE, GTK_STOCK_COPY, 
+			            GTK_STOCK_PASTE, GTK_STOCK_QUIT};
 	
 	int i;
-	for (i = 0; i < 3; i++)
+	for (i = 0; i < 5; i++)
 	{
-		if (i == 2)
+		if (i == 2|| i == 4)
 		{
 			menuitem = gtk_separator_menu_item_new();
 			gtk_menu_shell_append(GTK_MENU_SHELL(popupmenu), menuitem);
@@ -75,13 +77,21 @@ void build_popupmenu(void)
 
 static void popupmenu_activate(gchar *label)
 {
-	if (!strcmp(label, "Copy"))
+	if (!strcmp(label, "New Tab"))
 	{
-		vte_terminal_copy_clipboard(VTE_TERMINAL(term));
+		mainwindow_create_tab();
+	}
+	else if (!strcmp(label, "Close Tab"))
+	{
+		mainwindow_close_tab();
+	}
+	else if (!strcmp(label, "Copy"))
+	{
+		vte_terminal_copy_clipboard(VTE_TERMINAL(g_array_index(tabs, Tab*, activetab)->term));
 	}
 	else if (!strcmp(label, "Paste"))
 	{
-		vte_terminal_paste_clipboard(VTE_TERMINAL(term));
+		vte_terminal_paste_clipboard(VTE_TERMINAL(g_array_index(tabs, Tab*, activetab)->term));
 	}
 	else if (!strcmp(label, "Quit"))
 	{

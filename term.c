@@ -29,9 +29,8 @@
 extern GtkWidget *mainwindow;
 extern GtkWidget *popupmenu;
 extern gboolean popupmenu_shown;
-GtkWidget *term;
 
-void build_term(void);
+GtkWidget* build_term(void);
 static void term_connect_signals(GtkWidget*);
 static gboolean term_button_press(GtkWidget*, GdkEventButton*, gpointer);
 static void term_eof_or_child_exited(VteTerminal*, gpointer);
@@ -39,15 +38,15 @@ static void term_app_request(VteTerminal*, gpointer);
 static void term_app_request_resize_move(VteTerminal*, guint, guint, gpointer);
 
 
-void build_term(void)
+GtkWidget* build_term(void)
 {
 	if (!popupmenu) build_popupmenu();
-	
-	term = vte_terminal_new();
-	
-	vte_terminal_fork_command(VTE_TERMINAL(term), "/bin/bash", NULL, NULL,
+
+	GtkWidget* term = vte_terminal_new();
+
+	vte_terminal_fork_command(VTE_TERMINAL(term), conf_get_shell(), NULL, NULL, 
 	                          "", TRUE, TRUE, TRUE);
-	
+
 	GdkColor fore, back;
 	fore = conf_get_fg();
 	back = conf_get_bg();
@@ -56,10 +55,12 @@ void build_term(void)
 	vte_terminal_set_scroll_on_output(VTE_TERMINAL(term), TRUE);
 	vte_terminal_set_scroll_on_keystroke(VTE_TERMINAL(term), TRUE);
 	vte_terminal_set_font_from_string(VTE_TERMINAL(term), conf_get_font());
-	
-	term_connect_signals(term);
-}
+	vte_terminal_set_scrollback_lines(VTE_TERMINAL(term), conf_get_lines());
+	vte_terminal_set_backspace_binding(VTE_TERMINAL(term), VTE_ERASE_ASCII_DELETE);
 
+	term_connect_signals(term);
+	return term;
+}
 
 static void term_connect_signals(GtkWidget *term)
 {
@@ -109,7 +110,7 @@ static gboolean term_button_press(GtkWidget *widget, GdkEventButton *event,
 static void term_eof_or_child_exited(VteTerminal *term, gpointer user_data)
 {
 	vte_terminal_reset(VTE_TERMINAL(term), FALSE, TRUE);
-	vte_terminal_fork_command(VTE_TERMINAL(term), "/bin/bash", NULL, NULL,
+	vte_terminal_fork_command(VTE_TERMINAL(term), conf_get_shell(), NULL, NULL,
 	                          "", TRUE, TRUE, TRUE);
 
 	gtk_widget_hide(GTK_WIDGET(mainwindow));
