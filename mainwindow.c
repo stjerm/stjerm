@@ -53,6 +53,8 @@ static void mainwindow_focus_out_event(GtkWindow*, GdkEventFocus*, gpointer);
 static gboolean mainwindow_expose_event(GtkWidget*, GdkEventExpose*, gpointer);
 static void mainwindow_destroy(GtkWidget*, gpointer);
 static void mainwindow_toggle_tab(GtkToggleButton*, gpointer);
+static void mainwindow_window_title_changed(VteTerminal *vteterminal, 
+		                                    gpointer user_data);
 
 
 void build_mainwindow(void)
@@ -158,6 +160,10 @@ Tab* mainwindow_create_tab(void)
 			                                   1.0 - conf_get_opacity()/100);
 		vte_terminal_set_background_transparent(VTE_TERMINAL(tmp_term), TRUE);
 	}
+	
+	g_signal_connect(G_OBJECT(tmp_term), "window-title-changed",
+			         G_CALLBACK(mainwindow_window_title_changed), NULL);
+	
 	Tab *t = (Tab *) malloc(sizeof(Tab));
 	t->term = tmp_term;
 	t->tab = tmp_tab;
@@ -302,7 +308,7 @@ static void mainwindow_toggle_tab(GtkToggleButton *togglebutton,
 		{
 			i++;
 			t = g_array_index(tabs, Tab*, i);
-		}while (t != 0 && t->tab != togglebutton);
+		} while (t != 0 && t->tab != togglebutton);
 
 		if (i == activetab)
 		{
@@ -315,7 +321,8 @@ static void mainwindow_toggle_tab(GtkToggleButton *togglebutton,
 		{
 			Tab *tmp = 0;
 			int k = -1;
-			do {
+			do
+			{
 				k++;
 				tmp = g_array_index(tabs, Tab*, k);
 				if (tmp != 0)
@@ -349,5 +356,23 @@ static void mainwindow_toggle_tab(GtkToggleButton *togglebutton,
 			gtk_widget_grab_focus(t->term);
 			activetab = i;
 		}
+	}
+}
+
+static void mainwindow_window_title_changed(VteTerminal *vteterminal, 
+		                                    gpointer user_data)
+{
+	if (vteterminal != 0)
+	{
+		Tab *t = 0;
+		int i = -1;
+		do
+		{
+			i++;
+			t = g_array_index(tabs, Tab*, i);
+		} while (t != 0 && VTE_TERMINAL(t->term) != vteterminal);
+		
+		gtk_button_set_label(GTK_BUTTON(t->tab),
+				vte_terminal_get_window_title(vteterminal));
 	}
 }
