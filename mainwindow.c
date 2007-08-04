@@ -47,6 +47,8 @@ void build_mainwindow(void);
 void mainwindow_toggle(void);
 Tab* mainwindow_create_tab(void);
 void mainwindow_close_tab(void);
+int handle_x_error(Display *dpy, XErrorEvent *evt);
+
 static void mainwindow_reset_position(void);
 static void mainwindow_show(GtkWidget*, gpointer);
 static void mainwindow_focus_out_event(GtkWindow*, GdkEventFocus*, gpointer);
@@ -114,6 +116,7 @@ void build_mainwindow(void)
 	if (!conf_get_show_tab())
 		gtk_widget_hide(GTK_WIDGET(tabbox));
 	
+	XSetErrorHandler(handle_x_error);
 	init_key();
 	grab_key();
 	g_thread_create((GThreadFunc)wait_key, NULL, FALSE, NULL);
@@ -375,4 +378,15 @@ static void mainwindow_window_title_changed(VteTerminal *vteterminal,
 		gtk_button_set_label(GTK_BUTTON(t->tab),
 				vte_terminal_get_window_title(vteterminal));
 	}
+}
+
+int handle_x_error(Display *dpy, XErrorEvent *evt)
+{
+	if (evt->error_code == BadAccess || evt->error_code == BadValue ||
+	    evt->error_code == BadWindow)
+	{
+		fprintf(stderr, "error: unable to grab key, is stjerm is already running with the same key?\n");
+		exit(1);
+	}
+	return 0;
 }
