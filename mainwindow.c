@@ -41,6 +41,7 @@ GtkVBox* mainbox;
 Window mw_xwin;
 static Display *dpy = 0;
 Atom opacityatom;
+int screen_is_composited;
 
 void build_mainwindow(void);
 void mainwindow_toggle(void);
@@ -65,12 +66,25 @@ void build_mainwindow(void)
 	gtk_window_set_skip_pager_hint(GTK_WINDOW(mainwindow), TRUE);
 	gtk_window_set_resizable(GTK_WINDOW(mainwindow), FALSE);
 	mainwindow_reset_position();
-
+	
 	activetab = -1;
 	tabs = g_array_new(TRUE, FALSE, sizeof(Tab*));
 	tabcount = 0;
 	mainbox = GTK_VBOX(gtk_vbox_new(FALSE, 0));
 	tabbox = GTK_HBOX(gtk_hbox_new(FALSE, 0));
+	
+	if (conf_get_opacity() < 100)
+	{
+		GdkScreen *screen = gdk_screen_get_default();
+		GdkColormap *colormap = gdk_screen_get_rgba_colormap(screen);
+		screen_is_composited = (colormap != NULL && gdk_screen_is_composited(screen));
+		
+		if (screen_is_composited)
+		{
+			gtk_widget_set_colormap(GTK_WIDGET(mainwindow), colormap);
+			gdk_screen_set_default_colormap(screen, colormap);
+		}
+	}
 	
 	mainwindow_create_tab();
 	gtk_box_pack_end(GTK_BOX(mainbox), GTK_WIDGET(tabbox), FALSE, FALSE, 0);
@@ -106,8 +120,7 @@ void build_mainwindow(void)
 Tab* mainwindow_create_tab(void)
 {
 	GtkWidget* tmp_term = build_term();
-
-	GtkVScrollbar *sbar= NULL;
+	GtkVScrollbar *sbar = NULL;
 	GtkHBox *tmp_box = GTK_HBOX(gtk_hbox_new(FALSE, 0));
 
 	if (conf_get_scrollbar() == -1)
@@ -129,7 +142,7 @@ Tab* mainwindow_create_tab(void)
 	gtk_widget_show_all(GTK_WIDGET(tmp_box));
 	gtk_box_pack_start(GTK_BOX(mainbox), GTK_WIDGET(tmp_box), TRUE, TRUE, 0);
 
-	char buffer [50];
+	char buffer [100];
 	sprintf(buffer, "%s %d", conf_get_term_name(), activetab + 1);
 	GtkToggleButton* tmp_tab = GTK_TOGGLE_BUTTON(
 			                   gtk_toggle_button_new_with_label(buffer));
@@ -141,22 +154,9 @@ Tab* mainwindow_create_tab(void)
 
 	if (conf_get_opacity() < 100)
 	{
-		GdkScreen *screen = gdk_screen_get_default();
-		GdkColormap *colormap = gdk_screen_get_rgba_colormap(screen);
-
-		if (colormap != NULL&& gdk_screen_is_composited(screen))
-		{
-			gtk_widget_set_colormap(GTK_WIDGET(mainwindow), colormap);
-			gdk_screen_set_default_colormap(screen, colormap);
-			vte_terminal_set_background_transparent(VTE_TERMINAL(tmp_term), FALSE);
-			vte_terminal_set_opacity(VTE_TERMINAL(tmp_term),
-			conf_get_opacity()/100 * 0xffff);
-		} else
-		{
-			vte_terminal_set_background_saturation(VTE_TERMINAL(tmp_term),
-			                                       1.0 - conf_get_opacity()/100);
-			vte_terminal_set_background_transparent(VTE_TERMINAL(tmp_term), TRUE);
-		}
+		vte_terminal_set_background_saturation(VTE_TERMINAL(tmp_term),
+			                                   1.0 - conf_get_opacity()/100);
+		vte_terminal_set_background_transparent(VTE_TERMINAL(tmp_term), TRUE);
 	}
 	Tab *t = (Tab *) malloc(sizeof(Tab));
 	t->term = tmp_term;
@@ -269,15 +269,17 @@ static gboolean mainwindow_expose_event(GtkWidget *widget,
 
 	gdk_draw_rectangle(widget->window,
 		               widget->style->black_gc,
-		               FALSE,
-		               0, 0, winw-1, winh-1);
+		               FALSE, 0, 0, winw-1, winh-1);
 
 	if (conf_get_border() == BORDER_THIN) return FALSE;
 
 	gdk_draw_rectangle(widget->window,
 	                   widget->style->bg_gc[GTK_STATE_SELECTED],
-	                   TRUE,
-	                   1, 1, winw-2, winh-2);
+	                   TRUE, 1, 1, winw-2, winh-2);
+	
+	gdk_draw_rectangle(widget->window,
+	                   widget->style->bg_gc[GTK_STATE_NORMAL],
+	                   TRUE, 5, 5, winw-10, winh-10);
 
 	return FALSE;
 }
@@ -336,8 +338,14 @@ static void mainwindow_toggle_tab(GtkToggleButton *togglebutton,
 		{
 			if (activetab >= 0)
 				gtk_widget_hide(GTK_WIDGET(g_array_index(tabs, Tab*, 
-						activetab)->box));
+						        activetab)->box));
 			gtk_widget_show(GTK_WIDGET(t->box));
+			if (conf_get_opacity() < 100 && screen_is_composited)
+			{
+				vte_terminal_set_background_transparent(VTE_TERMINAL(t->term), FALSE);
+				vte_terminal_set_opacity(VTE_TERMINAL(t->term),
+						                 conf_get_opacity()/100 * 0xffff);
+			}
 			gtk_widget_grab_focus(t->term);
 			activetab = i;
 		}
