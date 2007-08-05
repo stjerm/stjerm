@@ -223,6 +223,7 @@ void conf_init(void)
 	if (keyoption == FALSE && _key == 0)
 	{
 		print_help();
+		printf("\nyou have to specify '-k KEY', otherwise stjerm won't start");
 		exit(1);
 	}
 
