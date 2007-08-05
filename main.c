@@ -63,7 +63,7 @@ void print_help(void)
 	       "  -h HEIGHT        Window height\n"
 	       "  -p POSITION      Window position: top, bottom, left, right\n"
 		   "  -s POSITION      Scrollbar position: left, right, none\n"
-		   "  -sh SHELL        Shell (default: /bin/bash)\n"
+		   "  -sh SHELL        Shell (if not set: the user's default shell)\n"
 		   "  -bl LINES        Scrollback lines (default: 1000; 0 to disable scrollback)\n"
 		   "  --showtab        Shows the tabbar even if only one tab is opened\n"
 	       "  --termname NAME  Label of the tab buttons\n\n"
