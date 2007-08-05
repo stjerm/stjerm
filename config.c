@@ -30,6 +30,9 @@
 #include <string.h>
 #include <ctype.h>
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <pwd.h>
 #include "stjerm.h"
 
 
@@ -179,7 +182,7 @@ void conf_init(void)
 	else _key = 0;
 
 	if ((op = XGetDefault(dpy, "stjerm", "shell"))) strcpy(_shell, op);
-	else strcpy(_shell, "/bin/bash");
+	else strcpy(_shell, getpwuid(getuid())->pw_shell);
 
 	if ((op = XGetDefault(dpy, "stjerm", "lines"))) _lines = atoi(op);
 	else _lines = 1000;
