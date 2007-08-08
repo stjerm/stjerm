@@ -52,16 +52,6 @@
 #define POS_BOTTOMLEFT  6
 #define POS_BOTTOMRIGHT 7
 
-
-typedef struct {
-	GtkWidget *term;
-	GtkToggleButton *tab;
-	GtkVScrollbar *bar;
-	GtkHBox *box;
-	gulong handler_id;
-} Tab;
-
-
 extern void print_help(void);
 
 extern void build_mainwindow(void);
@@ -69,7 +59,7 @@ extern GtkWidget* build_term(void);
 extern void build_popupmenu(void);
 
 extern void mainwindow_toggle(void);
-extern Tab* mainwindow_create_tab(void);
+extern void mainwindow_create_tab(void);
 extern void mainwindow_close_tab(void);
 extern void init_key(void);
 extern void grab_key(void);

@@ -26,18 +26,19 @@
 #include <X11/Xatom.h>
 #include <gtk/gtk.h>
 #include <gdk/gdkx.h>
+#include <gdk/gdkkeysyms.h>
 #include <vte/vte.h>
 #include <stdlib.h>
 #include "stjerm.h"
 
 
 extern gboolean popupmenu_shown;
+
 GtkWidget *mainwindow;
 int activetab;
 int tabcount;
 GArray* tabs;
-GtkHBox* tabbox;
-GtkVBox* mainbox;
+GtkNotebook* tabbar;
 
 Window mw_xwin;
 static Display *dpy = 0;
@@ -46,7 +47,7 @@ int screen_is_composited;
 
 void build_mainwindow(void);
 void mainwindow_toggle(void);
-Tab* mainwindow_create_tab(void);
+void mainwindow_create_tab(void);
 void mainwindow_close_tab(void);
 int handle_x_error(Display *dpy, XErrorEvent *evt);
 
@@ -55,10 +56,16 @@ static void mainwindow_show(GtkWidget*, gpointer);
 static void mainwindow_focus_out_event(GtkWindow*, GdkEventFocus*, gpointer);
 static gboolean mainwindow_expose_event(GtkWidget*, GdkEventExpose*, gpointer);
 static void mainwindow_destroy(GtkWidget*, gpointer);
-static void mainwindow_toggle_tab(GtkToggleButton*, gpointer);
 static void mainwindow_window_title_changed(VteTerminal *vteterminal, 
 		                                    gpointer user_data);
-
+static void mainwindow_switch_tab(GtkNotebook     *notebook, 
+		                          GtkNotebookPage *page,
+                                  guint            page_num,
+                                  gpointer         user_data);
+static void mainwindow_next_tab(GtkWidget *widget, gpointer user_data);
+static void mainwindow_prev_tab(GtkWidget *widget, gpointer user_data);
+static void mainwindow_new_tab(GtkWidget *widget, gpointer user_data);
+static void mainwindow_delete_tab(GtkWidget *widget, gpointer user_data);
 
 void build_mainwindow(void)
 {
@@ -71,12 +78,44 @@ void build_mainwindow(void)
 	gtk_window_set_skip_pager_hint(GTK_WINDOW(mainwindow), TRUE);
 	gtk_window_set_resizable(GTK_WINDOW(mainwindow), FALSE);
 	mainwindow_reset_position();
+	GtkAccelGroup* accel_group;
+	GClosure *new_tab, *delete_tab, *next_tab, *prev_tab, *delete_all;
 	
+	accel_group = gtk_accel_group_new();
+	gtk_window_add_accel_group(GTK_WINDOW(mainwindow), accel_group);
+
+	new_tab = g_cclosure_new_swap(G_CALLBACK(mainwindow_new_tab), 
+			                      NULL, NULL);
+    gtk_accel_group_connect(accel_group, 't', GDK_CONTROL_MASK | 
+                            GDK_SHIFT_MASK, GTK_ACCEL_VISIBLE, new_tab);
+    
+	delete_tab = g_cclosure_new_swap(G_CALLBACK(mainwindow_delete_tab), 
+			                         NULL, NULL);
+    gtk_accel_group_connect(accel_group, 'w', GDK_CONTROL_MASK | 
+                            GDK_SHIFT_MASK, GTK_ACCEL_VISIBLE, delete_tab);
+	
+	next_tab = g_cclosure_new_swap(G_CALLBACK(mainwindow_next_tab), 
+			                       NULL, NULL);
+	gtk_accel_group_connect(accel_group, GDK_Page_Up, GDK_CONTROL_MASK | 
+			                GDK_SHIFT_MASK, GTK_ACCEL_VISIBLE, next_tab);
+
+	prev_tab = g_cclosure_new_swap(G_CALLBACK(mainwindow_prev_tab), 
+			                       NULL, NULL);
+	gtk_accel_group_connect(accel_group, GDK_Page_Down, GDK_CONTROL_MASK | 
+                            GDK_SHIFT_MASK, GTK_ACCEL_VISIBLE, prev_tab);
+    
+	delete_all = g_cclosure_new_swap(G_CALLBACK(mainwindow_destroy), 
+			                         NULL, NULL);
+	gtk_accel_group_connect(accel_group, 'q', GDK_CONTROL_MASK | 
+                            GDK_SHIFT_MASK, GTK_ACCEL_VISIBLE, delete_all);
+	    
 	activetab = -1;
-	tabs = g_array_new(TRUE, FALSE, sizeof(Tab*));
+	tabs = g_array_new(TRUE, FALSE, sizeof(VteTerminal*));
 	tabcount = 0;
-	mainbox = GTK_VBOX(gtk_vbox_new(FALSE, 0));
-	tabbox = GTK_HBOX(gtk_hbox_new(FALSE, 0));
+	GtkVBox* mainbox = GTK_VBOX(gtk_vbox_new(FALSE, 0));
+	tabbar = GTK_NOTEBOOK(gtk_notebook_new());
+	g_signal_connect(G_OBJECT(tabbar), "switch-page", 
+			         G_CALLBACK(mainwindow_switch_tab), NULL);
 	
 	if (conf_get_opacity() < 100)
 	{
@@ -91,10 +130,10 @@ void build_mainwindow(void)
 		}
 	}
 	
+	gtk_box_pack_start(GTK_BOX(mainbox), GTK_WIDGET(tabbar), TRUE, TRUE, 0);
+	
 	mainwindow_create_tab();
-	gtk_box_pack_end(GTK_BOX(mainbox), GTK_WIDGET(tabbox), FALSE, FALSE, 0);
-	if (conf_get_show_tab())
-		gtk_widget_show_all(GTK_WIDGET(tabbox));
+	
 	gtk_widget_show_all(GTK_WIDGET(mainbox));
 	gtk_container_add(GTK_CONTAINER(mainwindow), GTK_WIDGET(mainbox));
 
@@ -114,8 +153,12 @@ void build_mainwindow(void)
 	g_signal_connect(G_OBJECT(mainwindow), "destroy",
 	                 G_CALLBACK(mainwindow_destroy), NULL);
 
+	gtk_notebook_set_show_border(tabbar, FALSE);
+	gtk_notebook_set_scrollable(tabbar, TRUE);
 	if (!conf_get_show_tab())
-		gtk_widget_hide(GTK_WIDGET(tabbox));
+		gtk_notebook_set_show_tabs(tabbar, FALSE);
+	gtk_notebook_set_tab_pos(tabbar, GTK_POS_BOTTOM);
+
 	
 	XSetErrorHandler(handle_x_error);
 	init_key();
@@ -123,7 +166,7 @@ void build_mainwindow(void)
 	g_thread_create((GThreadFunc)wait_key, NULL, FALSE, NULL);
 }
 
-Tab* mainwindow_create_tab(void)
+void mainwindow_create_tab(void)
 {
 	GtkWidget* tmp_term = build_term();
 	GtkVScrollbar *sbar = NULL;
@@ -145,70 +188,67 @@ Tab* mainwindow_create_tab(void)
 		gtk_box_pack_end(GTK_BOX(tmp_box), GTK_WIDGET(sbar), FALSE, FALSE, 0);
 	}
 
-	gtk_widget_show_all(GTK_WIDGET(tmp_box));
-	gtk_box_pack_start(GTK_BOX(mainbox), GTK_WIDGET(tmp_box), TRUE, TRUE, 0);
-
 	char buffer [100];
 	sprintf(buffer, "%s %d", conf_get_term_name(), activetab + 1);
-	GtkToggleButton* tmp_tab = GTK_TOGGLE_BUTTON(
-			                   gtk_toggle_button_new_with_label(buffer));
-	gulong handler = g_signal_connect(G_OBJECT(tmp_tab), "toggled",
-			                          G_CALLBACK(mainwindow_toggle_tab), NULL);
-
-	gtk_widget_show_all(GTK_WIDGET(tmp_tab));
-	gtk_box_pack_start(GTK_BOX(tabbox), GTK_WIDGET(tmp_tab), FALSE, FALSE, 0);
-
+	GtkLabel* tmp_label = GTK_LABEL(gtk_label_new(buffer));
+	
 	if (conf_get_opacity() < 100)
 	{
-		vte_terminal_set_background_saturation(VTE_TERMINAL(tmp_term),
-			                                   1.0 - conf_get_opacity()/100);
-		vte_terminal_set_background_transparent(VTE_TERMINAL(tmp_term), TRUE);
+		if (screen_is_composited)
+		{
+			vte_terminal_set_background_transparent(VTE_TERMINAL(tmp_term), FALSE);
+			vte_terminal_set_opacity(VTE_TERMINAL(tmp_term),
+							         conf_get_opacity()/100 * 0xffff);
+		}
+		else
+		{
+		    vte_terminal_set_background_saturation(VTE_TERMINAL(tmp_term),
+			                                       1.0 - conf_get_opacity()/100);
+		    vte_terminal_set_background_transparent(VTE_TERMINAL(tmp_term), TRUE);
+		}
 	}
 	
+	if (conf_get_opacity() < 100 && screen_is_composited)
+	{
+		vte_terminal_set_background_transparent(VTE_TERMINAL(tmp_term), FALSE);
+		vte_terminal_set_opacity(VTE_TERMINAL(tmp_term),
+				                 conf_get_opacity()/100 * 0xffff);
+	}
 	g_signal_connect(G_OBJECT(tmp_term), "window-title-changed",
-			         G_CALLBACK(mainwindow_window_title_changed), NULL);
+			         G_CALLBACK(mainwindow_window_title_changed), tmp_label);
 	
-	Tab *t = (Tab *) malloc(sizeof(Tab));
-	t->term = tmp_term;
-	t->tab = tmp_tab;
-	t->bar = sbar;
-	t->box = tmp_box;
-	t->handler_id = handler;
-	g_array_append_val(tabs, t);
+	g_array_append_val(tabs, tmp_term);
 	tabcount++;
 	
-	if (activetab >= 0)
-		gtk_widget_show(GTK_WIDGET(tabbox));
+	gtk_widget_show_all(GTK_WIDGET(tmp_box));
+	gtk_notebook_append_page(tabbar, GTK_WIDGET(tmp_box), GTK_WIDGET(tmp_label));
 	
-	g_signal_emit_by_name(tmp_tab, "toggled");
-	return t;
+	if (conf_get_show_tab() || tabcount > 1)
+		gtk_notebook_set_show_tabs(tabbar, TRUE);
+	
+	activetab = tabcount - 1;
+	gtk_notebook_set_current_page(tabbar, activetab);
 }
 
 void mainwindow_close_tab(void)
 {
 	if (activetab >= 0)
 	{
-		Tab *t = g_array_index(tabs, Tab*, activetab);
 		g_array_remove_index(tabs, activetab);
 		tabcount--;
-		if (tabcount == 0)
+		if (tabcount <= 0)
 			gtk_widget_destroy(GTK_WIDGET(mainwindow));
 		else
 		{
-			gtk_widget_destroy(GTK_WIDGET(t->box));
-			gtk_widget_destroy(GTK_WIDGET(t->tab));
-
-			if (g_array_index(tabs, Tab*, activetab) == 0)
-				activetab--;
-
-			gtk_widget_show(GTK_WIDGET(g_array_index(tabs, Tab*, activetab)->box));
+			gtk_notebook_remove_page(tabbar, activetab);
+			activetab = gtk_notebook_get_current_page(tabbar);
 			
 			if (tabcount == 1 && conf_get_show_tab() == 0)
-				gtk_widget_hide(GTK_WIDGET(tabbox));
-			
-			g_signal_emit_by_name(g_array_index(tabs, Tab*, activetab)->tab, "toggled");
+				gtk_notebook_set_show_tabs(tabbar, FALSE);
 		}
 	}
+	else
+		gtk_widget_destroy(GTK_WIDGET(mainwindow));
 }
 
 
@@ -301,85 +341,50 @@ static void mainwindow_destroy(GtkWidget *widget, gpointer user_data)
 	gtk_main_quit();
 }
 
-static void mainwindow_toggle_tab(GtkToggleButton *togglebutton,
-		gpointer user_data)
-{
-	if (togglebutton != 0)
-	{
-		Tab *t = 0;
-		int i = -1;
-		do
-		{
-			i++;
-			t = g_array_index(tabs, Tab*, i);
-		} while (t != 0 && t->tab != togglebutton);
-
-		if (i == activetab)
-		{
-			gtk_toggle_button_set_active(togglebutton, FALSE);
-			gtk_widget_grab_focus(g_array_index(tabs, Tab*, activetab)->term);
-			return;
-		}
-
-		if (activetab >= 0)
-		{
-			Tab *tmp = 0;
-			int k = -1;
-			do
-			{
-				k++;
-				tmp = g_array_index(tabs, Tab*, k);
-				if (tmp != 0)
-				{
-					if (k != i)
-					{
-						g_signal_handler_disconnect(G_OBJECT(tmp->tab),
-								(tmp->handler_id));
-						gtk_toggle_button_set_active(tmp->tab, TRUE);
-						tmp->handler_id = g_signal_connect(G_OBJECT(tmp->tab),
-								"toggled", G_CALLBACK(mainwindow_toggle_tab),
-								NULL);
-					} else
-						gtk_toggle_button_set_active(tmp->tab, FALSE);
-				}
-			} while (tmp != 0);
-		}
-
-		if (t != 0)
-		{
-			if (activetab >= 0)
-				gtk_widget_hide(GTK_WIDGET(g_array_index(tabs, Tab*, 
-						        activetab)->box));
-			gtk_widget_show(GTK_WIDGET(t->box));
-			if (conf_get_opacity() < 100 && screen_is_composited)
-			{
-				vte_terminal_set_background_transparent(VTE_TERMINAL(t->term), FALSE);
-				vte_terminal_set_opacity(VTE_TERMINAL(t->term),
-						                 conf_get_opacity()/100 * 0xffff);
-			}
-			gtk_widget_grab_focus(t->term);
-			activetab = i;
-		}
-	}
-}
 
 static void mainwindow_window_title_changed(VteTerminal *vteterminal, 
 		                                    gpointer user_data)
 {
-	if (vteterminal != 0)
-	{
-		Tab *t = 0;
-		int i = -1;
-		do
-		{
-			i++;
-			t = g_array_index(tabs, Tab*, i);
-		} while (t != 0 && VTE_TERMINAL(t->term) != vteterminal);
-		
-		gtk_button_set_label(GTK_BUTTON(t->tab),
-				vte_terminal_get_window_title(vteterminal));
-	}
+	if (vteterminal != NULL && user_data != NULL)
+		gtk_label_set_label(GTK_LABEL(user_data), 
+				            vte_terminal_get_window_title(vteterminal));
 }
+
+
+static void mainwindow_switch_tab(GtkNotebook     *notebook, 
+		                           GtkNotebookPage *page,
+                                   guint            page_num,
+                                   gpointer         user_data)
+{
+	activetab = page_num;
+}
+
+
+static void mainwindow_next_tab(GtkWidget *widget, gpointer user_data)
+{
+	gtk_notebook_next_page(tabbar);
+	activetab = gtk_notebook_get_current_page(tabbar);
+}
+
+
+static void mainwindow_prev_tab(GtkWidget *widget, gpointer user_data)
+{
+	gtk_notebook_prev_page(tabbar);
+	activetab = gtk_notebook_get_current_page(tabbar);
+}
+
+
+static void mainwindow_new_tab(GtkWidget *widget, gpointer user_data)
+{
+	mainwindow_create_tab();
+}
+
+
+static void mainwindow_delete_tab(GtkWidget *widget, gpointer user_data)
+{
+	mainwindow_close_tab();
+}
+
 
 int handle_x_error(Display *dpy, XErrorEvent *evt)
 {
