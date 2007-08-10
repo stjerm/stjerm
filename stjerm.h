@@ -52,6 +52,11 @@
 #define POS_BOTTOMLEFT  6
 #define POS_BOTTOMRIGHT 7
 
+#define TABS_NEVER  0
+#define TABS_ONE    1
+#define TABS_ALWAYS 2
+
+
 extern void print_help(void);
 
 extern void build_mainwindow(void);

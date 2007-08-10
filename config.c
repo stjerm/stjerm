@@ -23,9 +23,6 @@
 
 
 #include <gtk/gtk.h>
-#include <gdk/gdkx.h>
-#include <X11/Xlib.h>
-#include <X11/keysym.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
@@ -62,6 +59,9 @@ static void set_mod(char*);
 static void set_key(char*);
 static void set_pos(char *v);
 
+gboolean load_conf_file(void);
+void read_value(char *line);
+void init_default_values(void);
 void conf_init(void);
 char* conf_get_font(void);
 float conf_get_opacity(void);
@@ -129,78 +129,126 @@ void set_pos(char *v)
 	else if (!strcmp(v, "bottomright")) _pos = POS_BOTTOMRIGHT;
 }
 
+void init_default_values(void)
+{
+	strcpy(_font, "Bitstream Vera Sans Mono 10");
+	gdk_color_parse("black", &_bg);
+	gdk_color_parse("white", &_fg);
+	_scrollpos = -1;
+	_border = BORDER_NONE;
+	_opacity = 100.0f;
+	_width = 800;
+	 _height = 400;
+	_pos = POS_TOP;
+	 _mod = 0;
+	_key = 0;
+	strcpy(_shell, getpwuid(getuid())->pw_shell);
+	_lines = 1000;
+	_showtab = TABS_ONE;
+	strcpy(_termname, "term");
+}
+
+void read_value(char *line)
+{
+	char name[100], value[100];
+	sscanf(line, "%s %s", name, value);
+		
+	if (line != NULL && name != NULL && value != NULL)
+	{
+		if (name[0] == '#')
+			return;
+		if (!strcmp("font", name)) strcpy(_font, value);
+	
+		if (!strcmp("background", name))
+		{
+			if (!gdk_color_parse(value, &_bg)){
+				char tmp[2] = "#";
+				if (!gdk_color_parse(strcat(tmp, value), &_bg))
+				{
+					gdk_color_parse("black", &_bg);
+				}
+			}
+		}
+	
+		if (!strcmp("foreground", name))
+		{
+			if (!gdk_color_parse(value, &_fg)){
+				char tmp[2] = "#";
+				if (!gdk_color_parse(strcat(tmp, value), &_fg))
+				{
+					gdk_color_parse("white", &_fg);
+				}
+			}
+		}
+	
+		if (!strcmp("scrollbar", name))
+		{
+			if      (!strcmp(value, "true"))  _scrollpos = POS_RIGHT;
+			else if (!strcmp(value, "left"))  _scrollpos = POS_LEFT;
+			else if (!strcmp(value, "right")) _scrollpos = POS_RIGHT;
+			else _scrollpos = -1;
+		}
+	
+		if (!strcmp("border", name)) set_border(value);
+	
+		if (!strcmp("opacity", name)) _opacity = atof(value);
+		
+		if (!strcmp("width", name)) _width = atoi(value);
+	
+		if (!strcmp("height", name)) _height = atoi(value);
+	
+		if (!strcmp("position", name)) set_pos(value);
+	
+		if (!strcmp("mod", name)) set_mod(value);
+	
+		if (!strcmp("key", name)) set_key(value);
+	
+		if (!strcmp("shell", name)) strcpy(_shell, value);
+	
+		if (!strcmp("lines", name)) _lines = atoi(value);
+		
+		if (!strcmp("showtab", name)) 
+		{
+			if (!strcmp(value, "always"))
+				_showtab = TABS_ALWAYS;
+			else if (!strcmp(value, "never"))
+				_showtab = TABS_NEVER;
+		}
+		
+		if (!strcmp("tablabel", name)) strcpy(_termname, value);
+	}
+}
+
+gboolean load_conf_file(void)
+{
+	char basename[11] = "/.stjermrc";
+	char *filename = strcat(getpwuid(getuid())->pw_dir, basename);
+	char buffer[204];
+	FILE *conf_file = fopen(filename, "r");
+	if (conf_file == NULL)
+	{
+		return FALSE;
+	}
+	else
+	{
+		while (fgets(buffer, sizeof(buffer), conf_file) != NULL)
+			read_value(buffer);
+		fclose(conf_file);
+		return TRUE;
+	}
+}
+
 
 void conf_init(void)
 {
-	Display *dpy = GDK_DISPLAY_XDISPLAY(gdk_display_get_default());
-	char *op;
-
-	if ((op = XGetDefault(dpy, "stjerm", "font"))) strcpy(_font, op);
-	else strcpy(_font, "Bitstream Vera Sans Mono 10");
-
-	if ((op = XGetDefault(dpy, "stjerm", "background")))
-	{
-		if (!gdk_color_parse(op, &_bg)) gdk_color_parse("black", &_bg);
-	}
-	else gdk_color_parse("black", &_bg);
-
-	if ((op = XGetDefault(dpy, "stjerm", "foreground")))
-	{
-		if (!gdk_color_parse(op, &_fg)) gdk_color_parse("white", &_fg);
-	}
-	else gdk_color_parse("white", &_fg);
-
-	if ((op = XGetDefault(dpy, "stjerm", "scrollBar")) || XGetDefault(dpy, "stjerm", "scrollbar"))
-	{
-		if (!op) op = XGetDefault(dpy, "stjerm", "scrollbar");
-		if      (!strcmp(op, "true"))  _scrollpos = POS_RIGHT;
-		else if (!strcmp(op, "left"))  _scrollpos = POS_LEFT;
-		else if (!strcmp(op, "right")) _scrollpos = POS_RIGHT;
-		else _scrollpos = -1;
-	}
-	else _scrollpos = -1;
-
-	if ((op = XGetDefault(dpy, "stjerm", "border"))) set_border(op);
-	else _border = BORDER_NONE;
-
-	if ((op = XGetDefault(dpy, "stjerm", "opacity"))) _opacity = atof(op);
-	else _opacity = 100.0f;
+	init_default_values();
 	
-	if ((op = XGetDefault(dpy, "stjerm", "width"))) _width = atoi(op);
-	else _width = 800;
-
-	if ((op = XGetDefault(dpy, "stjerm", "height"))) _height = atoi(op);
-	else _height = 400;
-
-	if ((op = XGetDefault(dpy, "stjerm", "position"))) set_pos(op);
-	else _pos = POS_TOP;
-
-	if ((op = XGetDefault(dpy, "stjerm", "mod"))) set_mod(op);
-	else _mod = 0;
-
-	if ((op = XGetDefault(dpy, "stjerm", "key"))) set_key(op);
-	else _key = 0;
-
-	if ((op = XGetDefault(dpy, "stjerm", "shell"))) strcpy(_shell, op);
-	else strcpy(_shell, getpwuid(getuid())->pw_shell);
-
-	if ((op = XGetDefault(dpy, "stjerm", "lines"))) _lines = atoi(op);
-	else _lines = 1000;
-	
-	if ((op = XGetDefault(dpy, "stjerm", "showtab"))) _showtab = 1;
-	else _showtab = 0;
-	
-	if ((op = XGetDefault(dpy, "stjerm", "termname"))) strcpy(_termname, op);
-	else strcpy(_termname, "term");
-
+	gboolean conf_file_loaded = load_conf_file();
 	
 	gboolean keyoption = FALSE;
 	int i;
 	for (i = 1; i < sargc; i++)
 	{
-		if (sargv[i] != 0)
-			if (!strcmp(sargv[i], "--showtab")) _showtab = 1;
-		
 		if (i + 1 >= sargc) continue;
 
 		if (!strcmp(sargv[i], "-fn")) strcpy(_font, sargv[i+1]);
@@ -234,12 +282,24 @@ void conf_init(void)
 		else if (!strcmp(sargv[i], "-sh")) strcpy(_shell, sargv[i+1]);
 		else if (!strcmp(sargv[i], "-bl")) _lines = atoi(sargv[i+1]);
 		else if (!strcmp(sargv[i], "--termname")) strcpy(_termname, sargv[i+1]);
+		else if (!strcmp(sargv[i], "--showtab"))
+		{
+			if (!strcmp(sargv[i+1], "always"))
+				_showtab = TABS_ALWAYS;
+			else if (!strcmp(sargv[i+1], "never"))
+				_showtab = TABS_NEVER;
+		}
 	}
 
 	if (keyoption == FALSE && _key == 0)
 	{
 		print_help();
 		printf("\nyou have to specify '-k KEY', otherwise stjerm won't start\n");
+		if (!conf_file_loaded)
+			printf("\nhint: unable to read .stjermrc config file\ncreate a "
+					"new one first or copy and edit the sample configuration file "
+					"stjermrc.sample\n(the stjermrc.sample file is usually under "
+					"/usr/share/stjerm/stjermrc.sample)\n");
 		exit(1);
 	}
 
@@ -261,7 +321,6 @@ void conf_init(void)
 		fprintf(stderr, "error: wrong shortcut key is defined\n");
 		exit(1);
 	}
-
 
 	int scrw = gdk_screen_get_width(gdk_screen_get_default());
 	int scrh = gdk_screen_get_height(gdk_screen_get_default());

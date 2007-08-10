@@ -43,7 +43,7 @@ GtkNotebook* tabbar;
 Window mw_xwin;
 static Display *dpy = 0;
 Atom opacityatom;
-int screen_is_composited;
+gboolean screen_is_composited;
 
 void build_mainwindow(void);
 void mainwindow_toggle(void);
@@ -155,7 +155,7 @@ void build_mainwindow(void)
 
 	gtk_notebook_set_show_border(tabbar, FALSE);
 	gtk_notebook_set_scrollable(tabbar, TRUE);
-	if (!conf_get_show_tab())
+	if (conf_get_show_tab() == TABS_ONE || conf_get_show_tab() == TABS_NEVER)
 		gtk_notebook_set_show_tabs(tabbar, FALSE);
 	gtk_notebook_set_tab_pos(tabbar, GTK_POS_BOTTOM);
 
@@ -223,7 +223,7 @@ void mainwindow_create_tab(void)
 	gtk_widget_show_all(GTK_WIDGET(tmp_box));
 	gtk_notebook_append_page(tabbar, GTK_WIDGET(tmp_box), GTK_WIDGET(tmp_label));
 	
-	if (conf_get_show_tab() || tabcount > 1)
+	if (conf_get_show_tab() == TABS_ONE && tabcount > 1)
 		gtk_notebook_set_show_tabs(tabbar, TRUE);
 	
 	activetab = tabcount - 1;
@@ -243,7 +243,7 @@ void mainwindow_close_tab(void)
 			gtk_notebook_remove_page(tabbar, activetab);
 			activetab = gtk_notebook_get_current_page(tabbar);
 			
-			if (tabcount == 1 && conf_get_show_tab() == 0)
+			if (tabcount == 1 && conf_get_show_tab() == TABS_ONE)
 				gtk_notebook_set_show_tabs(tabbar, FALSE);
 		}
 	}
