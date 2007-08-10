@@ -88,11 +88,11 @@ static void popupmenu_activate(gchar *label)
 	}
 	else if (!strcmp(label, "Copy"))
 	{
-		vte_terminal_copy_clipboard(VTE_TERMINAL(g_array_index(tabs, Tab*, activetab)->term));
+		vte_terminal_copy_clipboard(g_array_index(tabs, VteTerminal*, activetab));
 	}
 	else if (!strcmp(label, "Paste"))
 	{
-		vte_terminal_paste_clipboard(VTE_TERMINAL(g_array_index(tabs, Tab*, activetab)->term));
+		vte_terminal_paste_clipboard(g_array_index(tabs, VteTerminal*, activetab));
 	}
 	else if (!strcmp(label, "Quit"))
 	{
