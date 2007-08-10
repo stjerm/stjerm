@@ -205,8 +205,21 @@ void conf_init(void)
 
 		if (!strcmp(sargv[i], "-fn")) strcpy(_font, sargv[i+1]);
 		else if (!strcmp(sargv[i], "-o")) _opacity = atof(sargv[i+1]);
-		else if (!strcmp(sargv[i], "-bg")) gdk_color_parse(sargv[i+1], &_bg);
-		else if (!strcmp(sargv[i], "-fg")) gdk_color_parse(sargv[i+1], &_fg);
+		else if (!strcmp(sargv[i], "-bg"))
+		{
+			if (!gdk_color_parse(sargv[i+1], &_bg)){
+				char tmp[2] = "#";
+				gdk_color_parse(strcat(tmp, sargv[i+1]), &_bg);
+			}
+		}
+		else if (!strcmp(sargv[i], "-fg"))
+		{
+			if (!gdk_color_parse(sargv[i+1], &_fg))
+			{
+				char tmp[2] = "#";
+				gdk_color_parse(strcat(tmp, sargv[i+1]), &_fg);
+			}
+		}
 		else if (!strcmp(sargv[i], "-b")) set_border(sargv[i+1]);
 		else if (!strcmp(sargv[i], "-m")) set_mod(sargv[i+1]);
 		else if (!strcmp(sargv[i], "-k")) { keyoption = TRUE; set_key(sargv[i+1]); }
@@ -226,7 +239,7 @@ void conf_init(void)
 	if (keyoption == FALSE && _key == 0)
 	{
 		print_help();
-		printf("\nyou have to specify '-k KEY', otherwise stjerm won't start");
+		printf("\nyou have to specify '-k KEY', otherwise stjerm won't start\n");
 		exit(1);
 	}
 
