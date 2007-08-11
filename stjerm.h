@@ -21,10 +21,8 @@
  * Boston, MA  02110-1301  USA
  */
 
-
 #ifndef __STJERM_H__
 #define __STJERM_H__
-
 
 #include <gtk/gtk.h>
 #include <X11/Xlib.h>
@@ -55,7 +53,6 @@
 #define TABS_NEVER  0
 #define TABS_ONE    1
 #define TABS_ALWAYS 2
-
 
 extern void print_help(void);
 
