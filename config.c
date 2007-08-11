@@ -53,11 +53,13 @@ static char _shell[100];
 static int _lines;
 static int _showtab;
 static char _termname[100];
+static GtkPositionType _tabpos;
 
 static void set_border(char*);
 static void set_mod(char*);
 static void set_key(char*);
 static void set_pos(char *v);
+static GtkPositionType read_pos(char *v);
 
 gboolean load_conf_file(void);
 void read_value(char *line);
@@ -78,7 +80,7 @@ char* conf_get_shell(void);
 int conf_get_lines(void);
 int conf_get_show_tab(void);
 char* conf_get_term_name(void);
-
+GtkPositionType conf_get_tab_pos(void);
 
 void set_border(char *v)
 {
@@ -129,6 +131,18 @@ void set_pos(char *v)
 	else if (!strcmp(v, "bottomright")) _pos = POS_BOTTOMRIGHT;
 }
 
+GtkPositionType read_pos(char *v)
+{
+		if (!strcmp(v, "top")) 
+			return GTK_POS_TOP;
+		else if (!strcmp(v, "left")) 
+			return GTK_POS_LEFT;
+		else if (!strcmp(v, "right"))
+			return GTK_POS_RIGHT;
+		else 
+			return GTK_POS_BOTTOM;
+}
+
 void init_default_values(void)
 {
 	strcpy(_font, "Bitstream Vera Sans Mono 10");
@@ -145,6 +159,7 @@ void init_default_values(void)
 	strcpy(_shell, getpwuid(getuid())->pw_shell);
 	_lines = 1000;
 	_showtab = TABS_ONE;
+	_tabpos = GTK_POS_BOTTOM;
 	strcpy(_termname, "term");
 }
 
@@ -158,8 +173,7 @@ void read_value(char *line)
 		if (name[0] == '#')
 			return;
 		if (!strcmp("font", name)) strcpy(_font, value);
-	
-		if (!strcmp("background", name))
+		else if (!strcmp("background", name))
 		{
 			if (!gdk_color_parse(value, &_bg)){
 				char tmp[2] = "#";
@@ -169,8 +183,7 @@ void read_value(char *line)
 				}
 			}
 		}
-	
-		if (!strcmp("foreground", name))
+		else if (!strcmp("foreground", name))
 		{
 			if (!gdk_color_parse(value, &_fg)){
 				char tmp[2] = "#";
@@ -180,42 +193,32 @@ void read_value(char *line)
 				}
 			}
 		}
-	
-		if (!strcmp("scrollbar", name))
+		else if (!strcmp("scrollbar", name))
 		{
 			if      (!strcmp(value, "true"))  _scrollpos = POS_RIGHT;
 			else if (!strcmp(value, "left"))  _scrollpos = POS_LEFT;
 			else if (!strcmp(value, "right")) _scrollpos = POS_RIGHT;
 			else _scrollpos = -1;
 		}
-	
-		if (!strcmp("border", name)) set_border(value);
-	
-		if (!strcmp("opacity", name)) _opacity = atof(value);
-		
-		if (!strcmp("width", name)) _width = atoi(value);
-	
-		if (!strcmp("height", name)) _height = atoi(value);
-	
-		if (!strcmp("position", name)) set_pos(value);
-	
-		if (!strcmp("mod", name)) set_mod(value);
-	
-		if (!strcmp("key", name)) set_key(value);
-	
-		if (!strcmp("shell", name)) strcpy(_shell, value);
-	
-		if (!strcmp("lines", name)) _lines = atoi(value);
-		
-		if (!strcmp("showtab", name)) 
+		else if (!strcmp("border", name)) set_border(value);
+		else if (!strcmp("opacity", name)) _opacity = atof(value);
+		else if (!strcmp("width", name)) _width = atoi(value);
+		else if (!strcmp("height", name)) _height = atoi(value);
+		else if (!strcmp("position", name)) set_pos(value);
+		else if (!strcmp("mod", name)) set_mod(value);
+		else if (!strcmp("key", name)) set_key(value);
+		else if (!strcmp("shell", name)) strcpy(_shell, value);
+		else if (!strcmp("lines", name)) _lines = atoi(value);
+		else if (!strcmp("showtab", name)) 
 		{
 			if (!strcmp(value, "always"))
 				_showtab = TABS_ALWAYS;
 			else if (!strcmp(value, "never"))
 				_showtab = TABS_NEVER;
 		}
-		
-		if (!strcmp("tablabel", name)) strcpy(_termname, value);
+		else if (!strcmp("tabpos", name))
+			_tabpos = read_pos(value);
+		else if (!strcmp("tablabel", name)) strcpy(_termname, value);
 	}
 }
 
@@ -249,6 +252,14 @@ void conf_init(void)
 	int i;
 	for (i = 1; i < sargc; i++)
 	{
+		if (sargv != NULL)
+		{
+			if (!strcmp(sargv[i], "--help"))
+			{
+				print_help();
+				exit(1);
+			}
+		}
 		if (i + 1 >= sargc) continue;
 
 		if (!strcmp(sargv[i], "-fn")) strcpy(_font, sargv[i+1]);
@@ -458,3 +469,7 @@ char* conf_get_term_name(void)
 	return _termname;
 }
 
+GtkPositionType conf_get_tab_pos(void)
+{
+	return _tabpos;
+}

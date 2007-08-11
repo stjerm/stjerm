@@ -157,8 +157,7 @@ void build_mainwindow(void)
 	gtk_notebook_set_scrollable(tabbar, TRUE);
 	if (conf_get_show_tab() == TABS_ONE || conf_get_show_tab() == TABS_NEVER)
 		gtk_notebook_set_show_tabs(tabbar, FALSE);
-	gtk_notebook_set_tab_pos(tabbar, GTK_POS_BOTTOM);
-
+	gtk_notebook_set_tab_pos(tabbar, conf_get_tab_pos());
 	
 	XSetErrorHandler(handle_x_error);
 	init_key();
