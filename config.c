@@ -179,16 +179,14 @@ void read_value(char *name, char *value) {
 		else if (!strcmp("background", name) || !strcmp("-bg", name)) {
 			if (!gdk_color_parse(value, &_bg)) {
 				char tmp[2] = "#";
-				if (!gdk_color_parse(strcat(tmp, value), &_bg)) {
+				if (!gdk_color_parse(strcat(tmp, value), &_bg))
 					gdk_color_parse("black", &_bg);
-				}
 			}
 		} else if (!strcmp("foreground", name) || !strcmp("-fg", name)) {
 			if (!gdk_color_parse(value, &_fg)) {
 				char tmp[2] = "#";
-				if (!gdk_color_parse(strcat(tmp, value), &_fg)) {
+				if (!gdk_color_parse(strcat(tmp, value), &_fg))
 					gdk_color_parse("white", &_fg);
-				}
 			}
 		} else if (!strcmp("scrollbar", name) || !strcmp("-s", name)) {
 			if (!strcmp(value, "true"))
@@ -234,9 +232,9 @@ gboolean load_conf_file(void) {
 	char *filename = strcat(getpwuid(getuid())->pw_dir, basename);
 	char buffer[204];
 	FILE *conf_file = fopen(filename, "r");
-	if (conf_file == NULL) {
+	if (conf_file == NULL)
 		return FALSE;
-	} else {
+	else {
 		char name[100], value[100];
 		while (fgets(buffer, sizeof(buffer), conf_file) != NULL) {
 			sscanf(buffer, "%s %s", name, value);
