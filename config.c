@@ -178,15 +178,17 @@ void read_value(char *name, char *value) {
 			strcpy(_font, value);
 		else if (!strcmp("background", name) || !strcmp("-bg", name)) {
 			if (!gdk_color_parse(value, &_bg)) {
-				char tmp[2] = "#";
-				if (!gdk_color_parse(strcat(tmp, value), &_bg))
+				char *color = g_strconcat("#", value, NULL);
+				if (!gdk_color_parse(color, &_bg))
 					gdk_color_parse("black", &_bg);
+				free(color);
 			}
 		} else if (!strcmp("foreground", name) || !strcmp("-fg", name)) {
 			if (!gdk_color_parse(value, &_fg)) {
-				char tmp[2] = "#";
-				if (!gdk_color_parse(strcat(tmp, value), &_fg))
+				char *color = g_strconcat("#", value, NULL);
+				if (!gdk_color_parse(color, &_fg))
 					gdk_color_parse("white", &_fg);
+				free(color);
 			}
 		} else if (!strcmp("scrollbar", name) || !strcmp("-s", name)) {
 			if (!strcmp(value, "true"))
@@ -230,15 +232,20 @@ void read_value(char *name, char *value) {
 gboolean load_conf_file(void) {
 	char basename[11] = "/.stjermrc";
 	char *filename = strcat(getpwuid(getuid())->pw_dir, basename);
-	char buffer[204];
+	char buffer[2048];
 	FILE *conf_file = fopen(filename, "r");
 	if (conf_file == NULL)
 		return FALSE;
 	else {
-		char name[100], value[100];
+		char *cleaned;
+		char **list;
 		while (fgets(buffer, sizeof(buffer), conf_file) != NULL) {
-			sscanf(buffer, "%s %s", name, value);
-			read_value(name, value);
+			cleaned = g_strchomp(buffer);
+			cleaned = g_strchug(cleaned);
+			list = g_strsplit_set (cleaned, " ", 2);
+			read_value(list[0], list[1]);
+			g_strfreev(list);
+			
 		}
 		fclose(conf_file);
 		return TRUE;
