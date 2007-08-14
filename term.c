@@ -43,13 +43,17 @@ GtkWidget* build_term(void) {
 	GtkWidget* term = vte_terminal_new();
 
 	vte_terminal_fork_command(VTE_TERMINAL(term), conf_get_shell(), NULL, NULL,
-	"", TRUE, TRUE, TRUE);
+	    "", TRUE, TRUE, TRUE);
 
 	GdkColor fore, back;
 	fore = conf_get_fg();
 	back = conf_get_bg();
-	vte_terminal_set_colors(VTE_TERMINAL(term), &fore, &back, NULL, 0);
-
+	GdkColor *palette = conf_get_color_palette();
+	if (palette == NULL)
+		vte_terminal_set_colors(VTE_TERMINAL(term), &fore, &back, NULL, 0);
+	else
+		vte_terminal_set_colors(VTE_TERMINAL(term), &fore, &back, palette, 16);
+	
 	vte_terminal_set_scroll_on_output(VTE_TERMINAL(term), TRUE);
 	vte_terminal_set_scroll_on_keystroke(VTE_TERMINAL(term), TRUE);
 	vte_terminal_set_font_from_string(VTE_TERMINAL(term), conf_get_font());

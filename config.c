@@ -52,12 +52,15 @@ static int _lines;
 static int _showtab;
 static char _termname[100];
 static GtkPositionType _tabpos;
+static GdkColor _palette[16];
+static int read_colors;
 
 static void set_border(char*);
 static void set_mod(char*);
 static void set_key(char*);
 static void set_pos(char *v);
 static GtkPositionType read_pos(char *v);
+static gboolean parse_hex_color(char *value, GdkColor *color);
 
 gboolean load_conf_file(void);
 void read_value(char *name, char *value);
@@ -79,6 +82,7 @@ int conf_get_lines(void);
 int conf_get_show_tab(void);
 char* conf_get_term_name(void);
 GtkPositionType conf_get_tab_pos(void);
+GdkColor* conf_get_color_palette(void);
 
 void set_border(char *v) {
 	if (!strcmp(v, "thin"))
@@ -151,6 +155,17 @@ GtkPositionType read_pos(char *v) {
 		return GTK_POS_BOTTOM;
 }
 
+gboolean parse_hex_color(char *value, GdkColor *color) {
+	if (!gdk_color_parse(value, color)) {
+		char *value2 = g_strconcat("#", value, NULL);
+		gboolean res = gdk_color_parse(value2, color);
+		free(value2);
+		return res;
+	}
+	else
+		return TRUE;
+}
+
 void init_default_values(void) {
 	strcpy(_font, "Bitstream Vera Sans Mono 10");
 	gdk_color_parse("black", &_bg);
@@ -168,28 +183,23 @@ void init_default_values(void) {
 	_showtab = TABS_ONE;
 	_tabpos = GTK_POS_BOTTOM;
 	strcpy(_termname, "term");
+	read_colors = 0;
 }
 
 void read_value(char *name, char *value) {
 	if (name != NULL&& value != NULL) {
 		if (name[0] == '#')
 			return;
+		g_strstrip(name);
+		g_strstrip(value);
 		if (!strcmp("font", name) || !strcmp("-fn", name))
 			strcpy(_font, value);
 		else if (!strcmp("background", name) || !strcmp("-bg", name)) {
-			if (!gdk_color_parse(value, &_bg)) {
-				char *color = g_strconcat("#", value, NULL);
-				if (!gdk_color_parse(color, &_bg))
-					gdk_color_parse("black", &_bg);
-				free(color);
-			}
+			if (!parse_hex_color(value, &_bg))
+				gdk_color_parse("black", &_bg);
 		} else if (!strcmp("foreground", name) || !strcmp("-fg", name)) {
-			if (!gdk_color_parse(value, &_fg)) {
-				char *color = g_strconcat("#", value, NULL);
-				if (!gdk_color_parse(color, &_fg))
-					gdk_color_parse("white", &_fg);
-				free(color);
-			}
+			if (!parse_hex_color(value, &_fg))
+				gdk_color_parse("white", &_fg);
 		} else if (!strcmp("scrollbar", name) || !strcmp("-s", name)) {
 			if (!strcmp(value, "true"))
 				_scrollpos = POS_RIGHT;
@@ -226,6 +236,14 @@ void read_value(char *name, char *value) {
 			_tabpos = read_pos(value);
 		else if (!strcmp("tablabel", name) || !strcmp("-tablabel", name))
 			strcpy(_termname, value);
+		else if (g_str_has_prefix(name, "color") 
+				 || g_str_has_prefix(name, "-c")) {
+			g_strcanon(name, "0123456789", ' ');
+			g_strchug(name);
+			//int num = atoi(name);
+			parse_hex_color(value, &_palette[atoi(name)]);
+			read_colors++;
+		}
 	}
 }
 
@@ -240,6 +258,7 @@ gboolean load_conf_file(void) {
 		char *cleaned;
 		char **list;
 		while (fgets(buffer, sizeof(buffer), conf_file) != NULL) {
+			g_strstrip(buffer);
 			cleaned = g_strchomp(buffer);
 			cleaned = g_strchug(cleaned);
 			list = g_strsplit_set (cleaned, " ", 2);
@@ -296,6 +315,12 @@ void conf_init(void) {
 
 	if (keyoption == TRUE && _key == 0) {
 		fprintf(stderr, "error: wrong shortcut key is defined\n");
+		exit(1);
+	}
+	
+	if (read_colors > 0 && read_colors < 16) {
+		fprintf(stderr, "error: read only %d colors, not 16\n"
+				"specify a complete color palette\n", read_colors);
 		exit(1);
 	}
 
@@ -392,4 +417,11 @@ char* conf_get_term_name(void) {
 
 GtkPositionType conf_get_tab_pos(void) {
 	return _tabpos;
+}
+
+GdkColor* conf_get_color_palette(void) {
+	if (read_colors <= 0)
+		return NULL;
+	else
+		return _palette;
 }

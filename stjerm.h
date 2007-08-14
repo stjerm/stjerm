@@ -84,6 +84,7 @@ extern int conf_get_lines(void);
 extern int conf_get_show_tab(void);
 extern char* conf_get_term_name(void);
 extern GtkPositionType conf_get_tab_pos(void);
+extern GdkColor* conf_get_color_palette(void);
 
 #endif /* __STJERM_H__ */
 
