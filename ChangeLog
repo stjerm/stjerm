@@ -1,0 +1,5 @@
+16-08-2007 Markus Groß <xsdnyd@gmail.com>
+added autotools build system
+added --toggle command line option
+added full .Xdefaults support
+dropped .stjermrc usage
