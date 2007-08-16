@@ -22,13 +22,16 @@
  */
 
 #include <gtk/gtk.h>
+#include <gdk/gdkx.h>
+#include <X11/Xlib.h>
+#include <X11/Xresource.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 #include <sys/stat.h>
-#include <sys/types.h>
 #include <unistd.h>
 #include <pwd.h>
+#include <signal.h>
 #include "stjerm.h"
 
 extern int sargc;
@@ -61,8 +64,8 @@ static void set_key(char*);
 static void set_pos(char *v);
 static GtkPositionType read_pos(char *v);
 static gboolean parse_hex_color(char *value, GdkColor *color);
+static pid_t getstjermpid(void);
 
-gboolean load_conf_file(void);
 void read_value(char *name, char *value);
 void init_default_values(void);
 void conf_init(void);
@@ -83,6 +86,26 @@ int conf_get_show_tab(void);
 char* conf_get_term_name(void);
 GtkPositionType conf_get_tab_pos(void);
 GdkColor* conf_get_color_palette(void);
+
+
+pid_t getstjermpid(void) {
+	FILE *p = popen("pidof stjerm", "r");
+	if (p == NULL) {
+		fprintf(stderr, "error: unable to get stjerm pid\n");
+		exit(1);
+	}
+	char buffer[100];
+	fgets(buffer, sizeof(buffer), p);
+	pclose(p);
+	char **list;
+	list = g_strsplit_set(buffer, " ", -1);
+	int i = 0;
+	while (list[i] != NULL)
+		i++;
+	pid_t pid = (pid_t) atoi(list[i - 1]);
+	g_strfreev(list);
+	return pid;
+}
 
 void set_border(char *v) {
 	if (!strcmp(v, "thin"))
@@ -240,66 +263,56 @@ void read_value(char *name, char *value) {
 				 || g_str_has_prefix(name, "-c")) {
 			g_strcanon(name, "0123456789", ' ');
 			g_strchug(name);
-			//int num = atoi(name);
 			parse_hex_color(value, &_palette[atoi(name)]);
 			read_colors++;
 		}
 	}
 }
 
-gboolean load_conf_file(void) {
-	char basename[11] = "/.stjermrc";
-	char *filename = strcat(getpwuid(getuid())->pw_dir, basename);
-	char buffer[2048];
-	FILE *conf_file = fopen(filename, "r");
-	if (conf_file == NULL)
-		return FALSE;
-	else {
-		char *cleaned;
-		char **list;
-		while (fgets(buffer, sizeof(buffer), conf_file) != NULL) {
-			g_strstrip(buffer);
-			cleaned = g_strchomp(buffer);
-			cleaned = g_strchug(cleaned);
-			list = g_strsplit_set (cleaned, " ", 2);
-			read_value(list[0], list[1]);
-			g_strfreev(list);
-			
-		}
-		fclose(conf_file);
-		return TRUE;
-	}
-}
-
 void conf_init(void) {
 	init_default_values();
-
-	gboolean conf_file_loaded = load_conf_file();
-
 	gboolean keyoption = FALSE;
+	
+	Display *dpy = gdk_x11_display_get_xdisplay(gdk_display_get_default());
+	XrmInitialize();
+	char basename[12] = "/.Xdefaults";
+	char *filename = strcat(getpwuid(getuid())->pw_dir, basename);
+	XrmSetDatabase(dpy, XrmGetFileDatabase(filename));
+	
+	char *op;
+	char oplist[32][13] = { "font", "background", "foreground", "scrollbar",
+			"border", "opacity", "width", "height", "position", "mod", "key\0",
+			"shell", "lines", "showtab", "tabpos", "tablabel", "color0",
+			"color1", "color2", "color3", "color4", "color5", "color6",
+			"color7", "color8", "color9", "color10", "color11", "color12",
+			"color13", "color14", "color15"};
 	int i;
+	for (i = 0; i < 32; i++) {
+		if ((op = XGetDefault(dpy, "stjerm", oplist[i])))
+			read_value(oplist[i], op);
+	}
+
 	for (i = 1; i < sargc; i++) {
 		if (sargv != NULL) {
 			if (!strcmp(sargv[i], "--help")) {
 				print_help();
 				exit(1);
 			}
+			else if (!strcmp("--toggle", sargv[i])) {
+						kill(getstjermpid(), SIGUSR1);
+						exit(1);
+			}
 		}
 		if (i + 1 >= sargc)
-			continue;
+			break;
 
 		read_value(sargv[i], sargv[i + 1]);
 	}
 
 	if (keyoption == FALSE && _key == 0) {
-		print_help();
-		printf("\nyou have to specify '-k KEY', otherwise stjerm won't start\n");
-		if (!conf_file_loaded)
-			printf("\nhint: unable to read .stjermrc config file\ncreate a "
-				"new one first or copy and edit the sample configuration file "
-				"stjermrc.sample\n(the stjermrc.sample file is usually under "
-				"/usr/share/stjerm/stjermrc.sample)\n");
-		exit(1);
+		printf("hint: you started stjerm without specifying a shortcut key\n"
+			"      to show/hide stjerm run stjerm with the toggle option\n"
+			"      like this: stjerm --toggle");
 	}
 
 	struct stat st;
@@ -324,6 +337,8 @@ void conf_init(void) {
 		exit(1);
 	}
 
+	signal(SIGUSR1, (__sighandler_t) mainwindow_toggle);
+	
 	int scrw = gdk_screen_get_width(gdk_screen_get_default());
 	int scrh = gdk_screen_get_height(gdk_screen_get_default());
 

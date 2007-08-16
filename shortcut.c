@@ -83,7 +83,7 @@ void wait_key(void) {
 
 		if (event.type == KeyPress) {
 			if (XKeycodeToKeysym(dpy, event.xkey.keycode, 0) == opt_key)
-				mainwindow_toggle();
+				mainwindow_toggle(0);
 		}
 	}
 }

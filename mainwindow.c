@@ -44,7 +44,7 @@ Atom opacityatom;
 gboolean screen_is_composited;
 
 void build_mainwindow(void);
-void mainwindow_toggle(void);
+void mainwindow_toggle(int sig);
 void mainwindow_create_tab(void);
 void mainwindow_close_tab(void);
 int handle_x_error(Display *dpy, XErrorEvent *evt);
@@ -81,27 +81,27 @@ void build_mainwindow(void) {
 
 	new_tab = g_cclosure_new_swap(G_CALLBACK(mainwindow_new_tab), 
 	NULL, NULL);
-	gtk_accel_group_connect(accel_group, 't', GDK_CONTROL_MASK |GDK_SHIFT_MASK,
+	gtk_accel_group_connect(accel_group, 't', GDK_CONTROL_MASK | GDK_SHIFT_MASK,
 			GTK_ACCEL_VISIBLE, new_tab);
 
 	delete_tab = g_cclosure_new_swap(G_CALLBACK(mainwindow_delete_tab), 
 	NULL, NULL);
-	gtk_accel_group_connect(accel_group, 'w', GDK_CONTROL_MASK |GDK_SHIFT_MASK,
+	gtk_accel_group_connect(accel_group, 'w', GDK_CONTROL_MASK | GDK_SHIFT_MASK,
 			GTK_ACCEL_VISIBLE, delete_tab);
 
 	next_tab = g_cclosure_new_swap(G_CALLBACK(mainwindow_next_tab), 
 	NULL, NULL);
 	gtk_accel_group_connect(accel_group, GDK_Page_Up, GDK_CONTROL_MASK
-			|GDK_SHIFT_MASK, GTK_ACCEL_VISIBLE, next_tab);
+			| GDK_SHIFT_MASK, GTK_ACCEL_VISIBLE, next_tab);
 
 	prev_tab = g_cclosure_new_swap(G_CALLBACK(mainwindow_prev_tab), 
 	NULL, NULL);
 	gtk_accel_group_connect(accel_group, GDK_Page_Down, GDK_CONTROL_MASK
-			|GDK_SHIFT_MASK, GTK_ACCEL_VISIBLE, prev_tab);
+			| GDK_SHIFT_MASK, GTK_ACCEL_VISIBLE, prev_tab);
 
 	delete_all = g_cclosure_new_swap(G_CALLBACK(mainwindow_destroy), 
 	NULL, NULL);
-	gtk_accel_group_connect(accel_group, 'q', GDK_CONTROL_MASK |GDK_SHIFT_MASK,
+	gtk_accel_group_connect(accel_group, 'q', GDK_CONTROL_MASK | GDK_SHIFT_MASK,
 			GTK_ACCEL_VISIBLE, delete_all);
 
 	activetab = -1;
@@ -234,7 +234,7 @@ void mainwindow_close_tab(void) {
 		gtk_widget_destroy(GTK_WIDGET(mainwindow));
 }
 
-void mainwindow_toggle(void) {
+void mainwindow_toggle(int sig) {
 	if (GTK_WIDGET_VISIBLE(mainwindow)) {
 		gdk_threads_enter();
 		gtk_widget_hide(GTK_WIDGET(mainwindow));

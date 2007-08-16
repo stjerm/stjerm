@@ -60,7 +60,7 @@ extern void build_mainwindow(void);
 extern GtkWidget* build_term(void);
 extern void build_popupmenu(void);
 
-extern void mainwindow_toggle(void);
+extern void mainwindow_toggle(int sig);
 extern void mainwindow_create_tab(void);
 extern void mainwindow_close_tab(void);
 extern void init_key(void);
