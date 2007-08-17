@@ -54,7 +54,17 @@
 #define TABS_ONE    1
 #define TABS_ALWAYS 2
 
+typedef struct {
+	char long_name[12];
+	char short_name[12];
+	char var_type[12];
+	char desc[100];
+} Option;
+
+#define OPTION_COUNT 17
+
 extern void print_help(void);
+extern void print_info(void);
 
 extern void build_mainwindow(void);
 extern GtkWidget* build_term(void);

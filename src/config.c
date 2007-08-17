@@ -87,6 +87,25 @@ char* conf_get_term_name(void);
 GtkPositionType conf_get_tab_pos(void);
 GdkColor* conf_get_color_palette(void);
 
+Option options[OPTION_COUNT] = {
+		{"key", "-k", "KEY", "Shortcut key (eg: f12)"},
+		{"mod", "-m", "MODIFIER", "meta modifier key: shift, control, alt, windows, none"},
+		{"font", "-fn", "FONT", "Terminal font and size (eg: Sans 10)"},
+		{"background", "-bg", "COLOR", "Background color"},
+		{"foreground", "-fg", "COLOR", "Foreground color"},
+		{"border", "-b", "TYPE", "Border type: thin, thick, none"},
+		{"opacity", "-o", "NUMBER", "Opacity (range: 10 - 100)"},
+		{"width", "-w", "NUMBER", "Window width"},
+		{"height", "-h", "NUMBER", "Window height"},
+		{"position", "-p", "POSITION", "Window position: top, bottom, left, right"},
+		{"scrollbar", "-s", "POSITION", "Scrollbar position: left, right, none"},
+		{"shell", "-sh", "STRING", "Terminal Shell (if not set: the user's default shell)"},
+		{"lines", "-l", "NUMBER", "Scrollback lines (default: 1000; 0 to disable scrollback)"},
+		{"showtab", "-st", "VALUE", "Tabbar visibility (one: only visible when > 1 tabs): never, one, always"},
+		{"tabpos", "-tp", "POSITION", "Tabbar position: top, bottom, left, right"},
+		{"tablabel", "-tl", "STRING", "Label of the tab buttons"},
+		{"colorX", "-cX", "COLOR", "Specify color X of the terminals color palette"}
+	  	};
 
 pid_t getstjermpid(void) {
 	FILE *p = popen("pidof stjerm", "r");
@@ -280,22 +299,28 @@ void conf_init(void) {
 	XrmSetDatabase(dpy, XrmGetFileDatabase(filename));
 	
 	char *op;
-	char oplist[32][13] = { "font", "background", "foreground", "scrollbar",
-			"border", "opacity", "width", "height", "position", "mod", "key\0",
-			"shell", "lines", "showtab", "tabpos", "tablabel", "color0",
-			"color1", "color2", "color3", "color4", "color5", "color6",
-			"color7", "color8", "color9", "color10", "color11", "color12",
-			"color13", "color14", "color15"};
 	int i;
-	for (i = 0; i < 32; i++) {
-		if ((op = XGetDefault(dpy, "stjerm", oplist[i])))
-			read_value(oplist[i], op);
+	Option o;
+	for (i = 0; i < OPTION_COUNT; i++) {
+		o = options[i];
+		if ((op = XGetDefault(dpy, "stjerm", o.long_name)))
+			read_value(o.long_name, op);
+	}
+	char color[8];
+	for (i = 0; i < 16; i++) {
+		sprintf(color, "color%d", i);
+		if ((op = XGetDefault(dpy, "stjerm", color)))
+			read_value(color, op);
 	}
 
 	for (i = 1; i < sargc; i++) {
 		if (sargv != NULL) {
 			if (!strcmp(sargv[i], "--help")) {
 				print_help();
+				exit(1);
+			}
+			else if (!strcmp(sargv[i], "--info")) {
+				print_info();
 				exit(1);
 			}
 			else if (!strcmp("--toggle", sargv[i])) {
