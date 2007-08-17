@@ -1,9 +1,9 @@
-17-08-2007 Markus Groß <xsdnyd@gmail.com>
+17-08-2007 Markus Gross <xsdnyd@gmail.com>
 added --info to display .Xdefaults options
 renamed -tablabel to -tl
 renamed -showtab to -st
 
-16-08-2007 Markus Groß <xsdnyd@gmail.com>
+16-08-2007 Markus Gross <xsdnyd@gmail.com>
 added autotools build system
 added --toggle command line option
 added full .Xdefaults support
