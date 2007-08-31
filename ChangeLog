@@ -1,3 +1,10 @@
+31-08-2007 Markus Gross <xsdnyd@gmail.com>
+added tinting of background image with background color
+added "allowbold" option to enable/disable bold fonts
+added "tabfill" option to let tabs fill up all space
+added intelligent boolean value parsing (now "yes", "1" and "true" 
+      evalute to TRUE, and opposites evaluate to FALSE)
+
 17-08-2007 Markus Gross <xsdnyd@gmail.com>
 added --info to display .Xdefaults options
 renamed -tablabel to -tl
@@ -7,4 +14,5 @@ renamed -showtab to -st
 added autotools build system
 added --toggle command line option
 added full .Xdefaults support
+added -cX (colorX) option to set color palette
 dropped .stjermrc usage
