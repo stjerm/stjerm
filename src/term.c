@@ -54,6 +54,7 @@ GtkWidget* build_term(void) {
 	else
 		vte_terminal_set_colors(VTE_TERMINAL(term), &fore, &back, palette, 16);
 	
+	vte_terminal_set_allow_bold(VTE_TERMINAL(term), conf_get_allow_bold());
 	vte_terminal_set_scroll_on_output(VTE_TERMINAL(term), TRUE);
 	vte_terminal_set_scroll_on_keystroke(VTE_TERMINAL(term), TRUE);
 	vte_terminal_set_font_from_string(VTE_TERMINAL(term), conf_get_font());

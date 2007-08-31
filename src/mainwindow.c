@@ -209,7 +209,11 @@ void mainwindow_create_tab(void) {
 
 	gtk_widget_show_all(GTK_WIDGET(tmp_box));
 	gtk_notebook_append_page(tabbar, GTK_WIDGET(tmp_box), GTK_WIDGET(tmp_label));
-
+	
+	if (conf_get_tab_fill())
+		gtk_container_child_set(GTK_CONTAINER(tabbar), GTK_WIDGET(tmp_box), 
+			"tab-expand", TRUE, "tab-fill", TRUE, NULL);
+	
 	if (conf_get_show_tab() == TABS_ONE&& tabcount > 1)
 		gtk_notebook_set_show_tabs(tabbar, TRUE);
 

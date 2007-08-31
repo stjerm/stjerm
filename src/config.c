@@ -57,6 +57,8 @@ static char _termname[100];
 static GtkPositionType _tabpos;
 static GdkColor _palette[16];
 static int read_colors;
+static int _tabfill;
+static int _allowbold;
 
 static void set_border(char*);
 static void set_mod(char*);
@@ -64,6 +66,7 @@ static void set_key(char*);
 static void set_pos(char *v);
 static GtkPositionType read_pos(char *v);
 static gboolean parse_hex_color(char *value, GdkColor *color);
+static gboolean parse_bool_str(char *value, gboolean def);
 static pid_t getstjermpid(void);
 
 void read_value(char *name, char *value);
@@ -86,6 +89,8 @@ int conf_get_show_tab(void);
 char* conf_get_term_name(void);
 GtkPositionType conf_get_tab_pos(void);
 GdkColor* conf_get_color_palette(void);
+gboolean conf_get_tab_fill(void);
+gboolean conf_get_allow_bold(void);
 
 Option options[OPTION_COUNT] = {
 		{"key", "-k", "KEY", "Shortcut key (eg: f12)"},
@@ -93,6 +98,7 @@ Option options[OPTION_COUNT] = {
 		{"font", "-fn", "FONT", "Terminal font and size (eg: Sans 10)"},
 		{"background", "-bg", "COLOR", "Background color"},
 		{"foreground", "-fg", "COLOR", "Foreground color"},
+		{"allowbold", "-ab", "BOOLEAN", "Allow bold fonts or not. Default: true"},
 		{"border", "-b", "TYPE", "Border type: thin, thick, none"},
 		{"opacity", "-o", "NUMBER", "Opacity (range: 10 - 100)"},
 		{"width", "-w", "NUMBER", "Window width"},
@@ -104,6 +110,7 @@ Option options[OPTION_COUNT] = {
 		{"showtab", "-st", "VALUE", "Tabbar visibility (one: only visible when > 1 tabs): never, one, always"},
 		{"tabpos", "-tp", "POSITION", "Tabbar position: top, bottom, left, right"},
 		{"tablabel", "-tl", "STRING", "Label of the tab buttons"},
+		{"tabfill", "-tf", "BOOLEAN", "true: tabs fill whole tabbar space"},
 		{"colorX", "-cX", "COLOR", "Specify color X of the terminals color palette"}
 	  	};
 
@@ -208,6 +215,18 @@ gboolean parse_hex_color(char *value, GdkColor *color) {
 		return TRUE;
 }
 
+gboolean parse_bool_str(char *value, gboolean def) {
+	g_strstrip(value);
+	gboolean res = def;
+	if (!strcasecmp("false", value) || !strcasecmp("0", value) 
+			|| !strcasecmp("no", value))
+		res = FALSE;
+	if (!strcasecmp("true", value) || !strcasecmp("1", value) 
+			|| !strcasecmp("yes", value))
+		res = TRUE;
+	return res;
+}
+
 void init_default_values(void) {
 	strcpy(_font, "Bitstream Vera Sans Mono 10");
 	gdk_color_parse("black", &_bg);
@@ -226,6 +245,8 @@ void init_default_values(void) {
 	_tabpos = GTK_POS_BOTTOM;
 	strcpy(_termname, "term");
 	read_colors = 0;
+	_tabfill = FALSE;
+	_allowbold = TRUE;
 }
 
 void read_value(char *name, char *value) {
@@ -285,6 +306,10 @@ void read_value(char *name, char *value) {
 			parse_hex_color(value, &_palette[atoi(name)]);
 			read_colors++;
 		}
+		else if (!strcmp("tabfill", name) || !strcmp("-tf", name))
+			_tabfill = parse_bool_str(value, _tabfill);
+		else if (!strcmp("allowbold", name) || !strcmp("-ab", name))
+			_allowbold = parse_bool_str(value, _allowbold);
 	}
 }
 
@@ -464,4 +489,12 @@ GdkColor* conf_get_color_palette(void) {
 		return NULL;
 	else
 		return _palette;
+}
+
+gboolean conf_get_tab_fill(void) {
+	return _tabfill;
+}
+
+gboolean conf_get_allow_bold(void) {
+	return _allowbold;
 }
