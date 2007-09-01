@@ -57,8 +57,9 @@ static char _termname[100];
 static GtkPositionType _tabpos;
 static GdkColor _palette[16];
 static int read_colors;
-static int _tabfill;
-static int _allowbold;
+static gboolean _tabfill;
+static gboolean _allowbold;
+static GdkModifierType _keymod;
 
 static void set_border(char*);
 static void set_mod(char*);
@@ -67,7 +68,8 @@ static void set_pos(char *v);
 static GtkPositionType read_pos(char *v);
 static gboolean parse_hex_color(char *value, GdkColor *color);
 static gboolean parse_bool_str(char *value, gboolean def);
-static pid_t getstjermpid(void);
+static GdkModifierType parse_mod(char *value);
+static pid_t get_stjerm_pid(void);
 
 void read_value(char *name, char *value);
 void init_default_values(void);
@@ -91,10 +93,12 @@ GtkPositionType conf_get_tab_pos(void);
 GdkColor* conf_get_color_palette(void);
 gboolean conf_get_tab_fill(void);
 gboolean conf_get_allow_bold(void);
+GdkModifierType conf_get_key_mod(void);
 
 Option options[OPTION_COUNT] = {
 		{"key", "-k", "KEY", "Shortcut key (eg: f12)"},
 		{"mod", "-m", "MODIFIER", "meta modifier key: shift, control, alt, windows, none"},
+		{"keymod", "-km", "MODIFIER", "Modifier for keyboard shortcuts. Can be a combination (with +) of modifiers of shift, control, alt, windows. eg: shift+control"},
 		{"font", "-fn", "FONT", "Terminal font and size (eg: Sans 10)"},
 		{"background", "-bg", "COLOR", "Background color"},
 		{"foreground", "-fg", "COLOR", "Foreground color"},
@@ -112,9 +116,9 @@ Option options[OPTION_COUNT] = {
 		{"tablabel", "-tl", "STRING", "Label of the tab buttons"},
 		{"tabfill", "-tf", "BOOLEAN", "true: tabs fill whole tabbar space"},
 		{"colorX", "-cX", "COLOR", "Specify color X of the terminals color palette"}
-	  	};
+};
 
-pid_t getstjermpid(void) {
+pid_t get_stjerm_pid(void) {
 	FILE *p = popen("pidof stjerm", "r");
 	if (p == NULL) {
 		fprintf(stderr, "error: unable to get stjerm pid\n");
@@ -227,6 +231,20 @@ gboolean parse_bool_str(char *value, gboolean def) {
 	return res;
 }
 
+GdkModifierType parse_mod(char *value) {
+	g_strstrip(value);
+	if (!strcasecmp("control", value) || !strcasecmp("ctrl", value))
+		return GDK_CONTROL_MASK;
+	else if (!strcasecmp("alt", value))
+		return GDK_MOD1_MASK;
+	else if (!strcasecmp("shift", value))
+		return GDK_SHIFT_MASK;
+	else if (!strcasecmp("windows", value))
+		return GDK_SUPER_MASK;
+	else
+		return 0;
+}
+
 void init_default_values(void) {
 	strcpy(_font, "Bitstream Vera Sans Mono 10");
 	gdk_color_parse("black", &_bg);
@@ -247,6 +265,7 @@ void init_default_values(void) {
 	read_colors = 0;
 	_tabfill = FALSE;
 	_allowbold = TRUE;
+	_keymod = GDK_CONTROL_MASK | GDK_SHIFT_MASK;
 }
 
 void read_value(char *name, char *value) {
@@ -310,6 +329,15 @@ void read_value(char *name, char *value) {
 			_tabfill = parse_bool_str(value, _tabfill);
 		else if (!strcmp("allowbold", name) || !strcmp("-ab", name))
 			_allowbold = parse_bool_str(value, _allowbold);
+		else if (!strcmp("keymod", name) || !strcmp("-km", name)) {
+			char **list;
+			list = g_strsplit_set(value, "+", -1);
+			_keymod = 0;
+			int i = 0;
+			while (list[i] != NULL)
+				_keymod = _keymod | parse_mod(list[i++]);
+			g_strfreev(list);
+		}
 	}
 }
 
@@ -349,7 +377,7 @@ void conf_init(void) {
 				exit(1);
 			}
 			else if (!strcmp("--toggle", sargv[i])) {
-						kill(getstjermpid(), SIGUSR1);
+						kill(get_stjerm_pid(), SIGUSR1);
 						exit(1);
 			}
 		}
@@ -497,4 +525,8 @@ gboolean conf_get_tab_fill(void) {
 
 gboolean conf_get_allow_bold(void) {
 	return _allowbold;
+}
+
+GdkModifierType conf_get_key_mod(void){
+	return _keymod;
 }

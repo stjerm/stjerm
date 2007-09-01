@@ -73,6 +73,7 @@ void build_mainwindow(void) {
 	gtk_window_set_skip_pager_hint(GTK_WINDOW(mainwindow), TRUE);
 	gtk_window_set_resizable(GTK_WINDOW(mainwindow), FALSE);
 	mainwindow_reset_position();
+	
 	GtkAccelGroup* accel_group;
 	GClosure *new_tab, *delete_tab, *next_tab, *prev_tab, *delete_all;
 
@@ -80,28 +81,28 @@ void build_mainwindow(void) {
 	gtk_window_add_accel_group(GTK_WINDOW(mainwindow), accel_group);
 
 	new_tab = g_cclosure_new_swap(G_CALLBACK(mainwindow_new_tab), 
-	NULL, NULL);
-	gtk_accel_group_connect(accel_group, 't', GDK_CONTROL_MASK | GDK_SHIFT_MASK,
+			NULL, NULL);
+	gtk_accel_group_connect(accel_group, 't', conf_get_key_mod(),
 			GTK_ACCEL_VISIBLE, new_tab);
 
 	delete_tab = g_cclosure_new_swap(G_CALLBACK(mainwindow_delete_tab), 
-	NULL, NULL);
-	gtk_accel_group_connect(accel_group, 'w', GDK_CONTROL_MASK | GDK_SHIFT_MASK,
+			NULL, NULL);
+	gtk_accel_group_connect(accel_group, 'w', conf_get_key_mod(),
 			GTK_ACCEL_VISIBLE, delete_tab);
 
 	next_tab = g_cclosure_new_swap(G_CALLBACK(mainwindow_next_tab), 
-	NULL, NULL);
-	gtk_accel_group_connect(accel_group, GDK_Page_Up, GDK_CONTROL_MASK
-			| GDK_SHIFT_MASK, GTK_ACCEL_VISIBLE, next_tab);
+			NULL, NULL);
+	gtk_accel_group_connect(accel_group, GDK_Page_Up, conf_get_key_mod(),
+			GTK_ACCEL_VISIBLE, next_tab);
 
 	prev_tab = g_cclosure_new_swap(G_CALLBACK(mainwindow_prev_tab), 
-	NULL, NULL);
-	gtk_accel_group_connect(accel_group, GDK_Page_Down, GDK_CONTROL_MASK
-			| GDK_SHIFT_MASK, GTK_ACCEL_VISIBLE, prev_tab);
+			NULL, NULL);
+	gtk_accel_group_connect(accel_group, GDK_Page_Down, conf_get_key_mod(),
+			GTK_ACCEL_VISIBLE, prev_tab);
 
 	delete_all = g_cclosure_new_swap(G_CALLBACK(mainwindow_destroy), 
-	NULL, NULL);
-	gtk_accel_group_connect(accel_group, 'q', GDK_CONTROL_MASK | GDK_SHIFT_MASK,
+			NULL, NULL);
+	gtk_accel_group_connect(accel_group, 'q', conf_get_key_mod(),
 			GTK_ACCEL_VISIBLE, delete_all);
 
 	activetab = -1;
@@ -318,7 +319,7 @@ static void mainwindow_destroy(GtkWidget *widget, gpointer user_data) {
 
 static void mainwindow_window_title_changed(VteTerminal *vteterminal,
 		gpointer user_data) {
-	if (vteterminal != NULL&& user_data != NULL)
+	if (vteterminal != NULL && user_data != NULL)
 		gtk_label_set_label(GTK_LABEL(user_data),
 				vte_terminal_get_window_title(vteterminal));
 }

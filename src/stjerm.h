@@ -58,10 +58,10 @@ typedef struct {
 	char long_name[12];
 	char short_name[12];
 	char var_type[12];
-	char desc[100];
+	char desc[150];
 } Option;
 
-#define OPTION_COUNT 19
+#define OPTION_COUNT 20
 
 extern void print_help(void);
 extern void print_info(void);
@@ -97,6 +97,7 @@ extern GtkPositionType conf_get_tab_pos(void);
 extern GdkColor* conf_get_color_palette(void);
 extern gboolean conf_get_tab_fill(void);
 extern gboolean conf_get_allow_bold(void);
+extern GdkModifierType conf_get_key_mod(void);
 
 #endif /* __STJERM_H__ */
 
