@@ -332,11 +332,13 @@ void read_value(char *name, char *value) {
 		else if (!strcmp("keymod", name) || !strcmp("-km", name)) {
 			char **list;
 			list = g_strsplit_set(value, "+", -1);
-			_keymod = 0;
+			GdkModifierType tmp = 0;
 			int i = 0;
 			while (list[i] != NULL)
-				_keymod = _keymod | parse_mod(list[i++]);
+				tmp = tmp | parse_mod(list[i++]);
 			g_strfreev(list);
+			if (tmp != 0)
+				_keymod = tmp;
 		}
 	}
 }
