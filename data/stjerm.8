@@ -1,0 +1,118 @@
+.TH STJERM "8" "Last Change: 01-09-2007" "stjerm 0.10" ""
+.SH NAME
+stjerm \- quake\-style terminal emulator
+.SH SYNOPSIS
+.B stjerm [-OPTION] [-OPTION] ... [-OPTION]
+.SH DESCRIPTION
+.B stjerm
+is a quake\-style terminal. It is minimalistic and works
+well with compiz.
+.B stjerm
+can be configured via commandline or the .Xdefaults file.
+
+The following list of options displays the .Xdefaults 
+option first and then the commandline option.
+The commandline options have a higher priority and 
+thus override the .Xdefaults options.
+.SH NOTES
+If you run \fBstjerm\fR with an action it will not parse other commandline options and will exit.
+
+If you specify a hex color on the commandline you have to ommit the \fB#\fR char. 
+Otherwise the option will not get parsed.
+This restriction only affects the commandline options, not the .Xdefaults options.
+.SH ACTIONS
+.TP
+.B "\-\-help"
+Displays menu with commandline options.
+.TP
+.B "\-\-info"
+Displays menu with .Xdefaults options.
+.TP
+.B "\-\-toggle"
+Show/hide the current \fBstjerm\fR instance.
+.SH OPTIONS
+.TP
+.B "key, \-k"
+Shortcut key which shows and hides \fBstjerm\fR (eg: f12). If you don't specify a shortcut key, you can only show/hide \fBstjerm\fR if you run \fBstjerm\fR with \fI\-\-toggle\fR.
+.TP
+.B "mod, \-m"
+Modifier key, which has to be pressed in combination with the shortcut key to show/hide
+.B stjerm
+: shift, control, alt, windows, none. Default: \fInone\fR.
+.TP
+.B "keymod, \-km"
+Modifier for keyboard shortcuts. Can be a combination (with +) of modifiers (eg: control+alt). Default: \fIcontrol+shift\fR.
+.TP
+.B "font, \-f"
+Terminal font and size (eg: Sans 10). Default: \fIBitstream Vera Sans Mono 10\fR.
+.TP
+.B "background, \-bg"
+Background color of the terminal. If the terminal is transparent this is the tint color. Default: \fIBlack\fR.
+.TP
+.B "foreground, \-fg"
+Foreground color of the terminal. This is the font color. Default: \fIWhite\fR.
+.TP
+.B "allowbold, \-ab"
+Allow bold fonts or not. Default: \fItrue\fR
+.TP
+.B "border, \-b"
+Border type: thin, thick, none. Default: \fInone\fR.
+.TP
+.B "opacity, \-o"
+Opacity (range: 10 - 100). If compositing is enabled \fBstjerm\fR will use real transparency. Otherwise you get pseudo\-transparency.
+.TP
+.B "width, \-w"
+Window width. Default: \fI800\fR.
+.TP
+.B "height, \-h"
+Window height. Default: \fI400\fR.
+.TP
+.B "position, \-p"
+Window position: top, bottom, left, right. Default: \fItop\fR.
+.TP
+.B "scrollbar, \-s"
+Scrollbar position: left, right, none. Default: \fInone\fR.
+.TP
+.B "shell, \-sh"
+Terminal shell. Default: the user's default shell.
+.TP
+.B "lines, \-l"
+Scrollback lines. 0 to disable scrollback. Default: \fI1000\fR.
+.TP
+.B "showtab, \-st"
+Tabbar visibility: never, one, always. One means the tabbar is visible if more than one tab is opened. Default: \fIone\fR.
+.TP
+.B "tabpos, \-tp"
+Tabbar position: top, bottom, left, right. Default: \fIbottom\fR.
+.TP
+.B "tablabel, \-tl"
+Label of the tabs. The terminal number gets appended automatically. Default: \fIterm\fR.
+.TP
+.B "tabfill, \-tf"
+Whether tabs fill whole tabbar space. Default: \fItrue\fR.
+.TP
+.B "colorX, \-cX"
+Specify color X of the terminals color palette. You may specify no palette, or a complete one with 16 total colors.
+For this you have to use \-c0, \-c1, ..., \-c15 or the equivalent color0, color1,... color15.
+.SH EXAMPLES
+To run stjerm with F12 as shortcut key, the opacity of 60 and a green foreground color, use:
+
+stjerm -k f12 -o 60 -fg 66ff11
+
+
+To specify the same options in the .Xdefaults file, write this in your .Xdefaults file:
+
+stjerm.key: f12
+
+stjerm.opacity: 60
+
+stjerm.foreground: #66ff11
+.SH "REPORTING BUGS"
+Report bugs to <xsdnyd@gmail.com>.
+.SH COPYRIGHT
+Copyright \(co 2007 Stjepan Glavina
+.br
+Copyright \(co 2007 Markus Gross
+
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.

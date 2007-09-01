@@ -1,3 +1,9 @@
+01-09-2007 Markus Gross <xsdnyd@gmail.com>
+bumped up version to 0.10
+added english manpage
+added "keymod" option to set the modifiers for keyboard shortcuts
+small code cleanups
+
 31-08-2007 Markus Gross <xsdnyd@gmail.com>
 added tinting of background image with background color
 added "allowbold" option to enable/disable bold fonts

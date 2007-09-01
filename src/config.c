@@ -96,25 +96,25 @@ gboolean conf_get_allow_bold(void);
 GdkModifierType conf_get_key_mod(void);
 
 Option options[OPTION_COUNT] = {
-		{"key", "-k", "KEY", "Shortcut key (eg: f12)"},
-		{"mod", "-m", "MODIFIER", "meta modifier key: shift, control, alt, windows, none"},
-		{"keymod", "-km", "MODIFIER", "Modifier for keyboard shortcuts. Can be a combination (with +) of modifiers of shift, control, alt, windows. eg: shift+control"},
-		{"font", "-fn", "FONT", "Terminal font and size (eg: Sans 10)"},
-		{"background", "-bg", "COLOR", "Background color"},
-		{"foreground", "-fg", "COLOR", "Foreground color"},
-		{"allowbold", "-ab", "BOOLEAN", "Allow bold fonts or not. Default: true"},
-		{"border", "-b", "TYPE", "Border type: thin, thick, none"},
-		{"opacity", "-o", "NUMBER", "Opacity (range: 10 - 100)"},
-		{"width", "-w", "NUMBER", "Window width"},
-		{"height", "-h", "NUMBER", "Window height"},
-		{"position", "-p", "POSITION", "Window position: top, bottom, left, right"},
-		{"scrollbar", "-s", "POSITION", "Scrollbar position: left, right, none"},
-		{"shell", "-sh", "STRING", "Terminal Shell (if not set: the user's default shell)"},
-		{"lines", "-l", "NUMBER", "Scrollback lines (default: 1000; 0 to disable scrollback)"},
-		{"showtab", "-st", "VALUE", "Tabbar visibility (one: only visible when > 1 tabs): never, one, always"},
-		{"tabpos", "-tp", "POSITION", "Tabbar position: top, bottom, left, right"},
-		{"tablabel", "-tl", "STRING", "Label of the tab buttons"},
-		{"tabfill", "-tf", "BOOLEAN", "true: tabs fill whole tabbar space"},
+		{"key", "-k", "KEY", "Shortcut key (eg: f12)."},
+		{"mod", "-m", "MODIFIER", "meta modifier key: shift, control, alt, windows, none."},
+		{"keymod", "-km", "MODIFIER", "Modifier for keyboard shortcuts. Can be a combination (with +) of modifiers (eg: shift+control)."},
+		{"font", "-fn", "FONT", "Terminal font and size (eg: Sans 10). Default: Bistream Vera Sans 10."},
+		{"background", "-bg", "COLOR", "Background color. Default: Black."},
+		{"foreground", "-fg", "COLOR", "Foreground color. Default: White."},
+		{"allowbold", "-ab", "BOOLEAN", "Allow bold fonts or not. Default: true."},
+		{"border", "-b", "TYPE", "Border type: thin, thick, none. Default: none."},
+		{"opacity", "-o", "NUMBER", "Opacity (range: 10 - 100). Default: 100."},
+		{"width", "-w", "NUMBER", "Window width. Default: 800."},
+		{"height", "-h", "NUMBER", "Window height. Default: 400."},
+		{"position", "-p", "POSITION", "Window position: top, bottom, left, right. Default: top."},
+		{"scrollbar", "-s", "POSITION", "Scrollbar position: left, right, none. Default: none."},
+		{"shell", "-sh", "STRING", "Terminal Shell. Default: the user's default shell."},
+		{"lines", "-l", "NUMBER", "Scrollback lines. 0 to disable scrollback. Default: 1000."},
+		{"showtab", "-st", "VALUE", "Tabbar visibility (one: only visible when > 1 tabs): never, one, always."},
+		{"tabpos", "-tp", "POSITION", "Tabbar position: top, bottom, left, right. Default: bottom."},
+		{"tablabel", "-tl", "STRING", "Label of the tabs. Default: term."},
+		{"tabfill", "-tf", "BOOLEAN", "Whether tabs fill whole tabbar space. Default: true."},
 		{"colorX", "-cX", "COLOR", "Specify color X of the terminals color palette"}
 };
 
@@ -310,9 +310,9 @@ void read_value(char *name, char *value) {
 		else if (!strcmp("lines", name) || !strcmp("-bl", name))
 			_lines = atoi(value);
 		else if (!strcmp("showtab", name) || !strcmp("-showtab", name)) {
-			if (!strcmp(value, "always"))
+			if (!strcasecmp(value, "always"))
 				_showtab = TABS_ALWAYS;
-			else if (!strcmp(value, "never"))
+			else if (!strcasecmp(value, "never"))
 				_showtab = TABS_NEVER;
 		} else if (!strcmp("tabpos", name) || !strcmp("-tabpos", name))
 			_tabpos = read_pos(value);
