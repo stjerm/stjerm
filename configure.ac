@@ -47,6 +47,6 @@ AC_TYPE_PID_T
 AC_TYPE_SIGNAL
 AC_FUNC_STAT
 
-AC_OUTPUT([Makefile src/Makefile])
+AC_OUTPUT([Makefile doc/Makefile src/Makefile])
 
 echo "ready. type make to build..."
