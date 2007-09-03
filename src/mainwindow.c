@@ -141,7 +141,8 @@ void build_mainwindow(void) {
 		g_signal_connect(G_OBJECT(mainwindow), "expose-event",
 				G_CALLBACK(mainwindow_expose_event), NULL);
 
-	g_signal_connect(G_OBJECT(mainwindow), "focus-out-event",
+	if (conf_get_auto_hide())
+		g_signal_connect(G_OBJECT(mainwindow), "focus-out-event",
 			G_CALLBACK(mainwindow_focus_out_event), NULL);
 	g_signal_connect(G_OBJECT(mainwindow), "show", G_CALLBACK(mainwindow_show),
 			NULL);

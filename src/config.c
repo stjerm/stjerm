@@ -60,6 +60,7 @@ static int read_colors;
 static gboolean _tabfill;
 static gboolean _allowbold;
 static GdkModifierType _keymod;
+static gboolean _autohide;
 
 static void set_border(char*);
 static void set_mod(char*);
@@ -94,11 +95,13 @@ GdkColor* conf_get_color_palette(void);
 gboolean conf_get_tab_fill(void);
 gboolean conf_get_allow_bold(void);
 GdkModifierType conf_get_key_mod(void);
+gboolean conf_get_auto_hide(void);
 
 Option options[OPTION_COUNT] = {
 		{"key", "-k", "KEY", "Shortcut key (eg: f12)."},
 		{"mod", "-m", "MODIFIER", "meta modifier key: shift, control, alt, windows, none."},
 		{"keymod", "-km", "MODIFIER", "Modifier for keyboard shortcuts. Can be a combination (with +) of modifiers (eg: shift+control)."},
+		{"autohide", "-ah", "BOOLEAN", "Whether or not to hide stjerm when it looses focus. Default: true."},
 		{"font", "-fn", "FONT", "Terminal font and size (eg: Sans 10). Default: Bistream Vera Sans 10."},
 		{"background", "-bg", "COLOR", "Background color. Default: Black."},
 		{"foreground", "-fg", "COLOR", "Foreground color. Default: White."},
@@ -266,6 +269,7 @@ void init_default_values(void) {
 	_tabfill = FALSE;
 	_allowbold = TRUE;
 	_keymod = GDK_CONTROL_MASK | GDK_SHIFT_MASK;
+	_autohide = TRUE;
 }
 
 void read_value(char *name, char *value) {
@@ -340,6 +344,8 @@ void read_value(char *name, char *value) {
 			if (tmp != 0)
 				_keymod = tmp;
 		}
+		else if (!strcmp("autohide", name) || !strcmp("-ah", name))
+			_autohide = parse_bool_str(value, _autohide);
 	}
 }
 
@@ -531,4 +537,8 @@ gboolean conf_get_allow_bold(void) {
 
 GdkModifierType conf_get_key_mod(void){
 	return _keymod;
+}
+
+gboolean conf_get_auto_hide(void) {
+	return _autohide;
 }
