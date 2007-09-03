@@ -1,3 +1,6 @@
+03-09-2007 Markus Gross <xsdnyd@gmail.com>
+added "autohide" option, this enables/disables the hiding of stjerm when it looses focus
+
 01-09-2007 Markus Gross <xsdnyd@gmail.com>
 bumped up version to 0.10
 added english manpage

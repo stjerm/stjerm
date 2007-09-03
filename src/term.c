@@ -37,133 +37,133 @@ static void term_app_request(VteTerminal*, gpointer);
 static void term_app_request_resize_move(VteTerminal*, guint, guint, gpointer);
 
 GtkWidget* build_term(void) {
-	if (!popupmenu)
-		build_popupmenu();
+    if (!popupmenu)
+        build_popupmenu();
 
-	GtkWidget* term = vte_terminal_new();
+    GtkWidget* term = vte_terminal_new();
 
-	vte_terminal_fork_command(VTE_TERMINAL(term), conf_get_shell(), NULL, NULL,
-	    "", TRUE, TRUE, TRUE);
+    vte_terminal_fork_command(VTE_TERMINAL(term), conf_get_shell(), NULL, NULL,
+            "", TRUE, TRUE, TRUE);
 
-	GdkColor fore, back;
-	fore = conf_get_fg();
-	back = conf_get_bg();
-	GdkColor *palette = conf_get_color_palette();
-	if (palette == NULL)
-		vte_terminal_set_colors(VTE_TERMINAL(term), &fore, &back, NULL, 0);
-	else
-		vte_terminal_set_colors(VTE_TERMINAL(term), &fore, &back, palette, 16);
-	vte_terminal_set_background_tint_color(VTE_TERMINAL(term), &back);
-	
-	vte_terminal_set_allow_bold(VTE_TERMINAL(term), conf_get_allow_bold());
-	vte_terminal_set_scroll_on_output(VTE_TERMINAL(term), TRUE);
-	vte_terminal_set_scroll_on_keystroke(VTE_TERMINAL(term), TRUE);
-	vte_terminal_set_font_from_string(VTE_TERMINAL(term), conf_get_font());
-	vte_terminal_set_scrollback_lines(VTE_TERMINAL(term), conf_get_lines());
-	vte_terminal_set_backspace_binding(VTE_TERMINAL(term), VTE_ERASE_ASCII_DELETE);
+    GdkColor fore, back;
+    fore = conf_get_fg();
+    back = conf_get_bg();
+    GdkColor *palette = conf_get_color_palette();
+    if (palette == NULL)
+        vte_terminal_set_colors(VTE_TERMINAL(term), &fore, &back, NULL, 0);
+    else
+        vte_terminal_set_colors(VTE_TERMINAL(term), &fore, &back, palette, 16);
+    vte_terminal_set_background_tint_color(VTE_TERMINAL(term), &back);
 
-	term_connect_signals(term);
-	return term;
+    vte_terminal_set_allow_bold(VTE_TERMINAL(term), conf_get_allow_bold());
+    vte_terminal_set_scroll_on_output(VTE_TERMINAL(term), TRUE);
+    vte_terminal_set_scroll_on_keystroke(VTE_TERMINAL(term), TRUE);
+    vte_terminal_set_font_from_string(VTE_TERMINAL(term), conf_get_font());
+    vte_terminal_set_scrollback_lines(VTE_TERMINAL(term), conf_get_lines());
+    vte_terminal_set_backspace_binding(VTE_TERMINAL(term), VTE_ERASE_ASCII_DELETE);
+
+    term_connect_signals(term);
+    return term;
 }
 
 static void term_connect_signals(GtkWidget *term) {
-	g_signal_connect_swapped(G_OBJECT(term), "button-press-event",
-			G_CALLBACK(term_button_press), NULL);
+    g_signal_connect_swapped(G_OBJECT(term), "button-press-event",
+            G_CALLBACK(term_button_press), NULL);
 
-	g_signal_connect (G_OBJECT(term), "eof",
-			G_CALLBACK(term_eof_or_child_exited), NULL);
-	g_signal_connect (G_OBJECT(term), "child-exited",
-			G_CALLBACK(term_eof_or_child_exited), NULL);
+    g_signal_connect (G_OBJECT(term), "eof",
+            G_CALLBACK(term_eof_or_child_exited), NULL);
+    g_signal_connect (G_OBJECT(term), "child-exited",
+            G_CALLBACK(term_eof_or_child_exited), NULL);
 
-	g_signal_connect(G_OBJECT(term), "iconify-window",
-			G_CALLBACK(term_app_request), (gpointer)TERM_ICONIFY_WINDOW);
-	g_signal_connect(G_OBJECT(term), "deiconify-window",
-			G_CALLBACK(term_app_request), (gpointer)TERM_DEICONIFY_WINDOW);
-	g_signal_connect(G_OBJECT(term), "raise-window",
-			G_CALLBACK(term_app_request), (gpointer)TERM_RAISE_WINDOW);
-	g_signal_connect(G_OBJECT(term), "lower-window",
-			G_CALLBACK(term_app_request), (gpointer)TERM_LOWER_WINDOW);
-	g_signal_connect(G_OBJECT(term), "maximize-window",
-			G_CALLBACK(term_app_request), (gpointer)TERM_MAXIMIZE_WINDOW);
-	g_signal_connect(G_OBJECT(term), "restore-window",
-			G_CALLBACK(term_app_request), (gpointer)TERM_RESTORE_WINDOW);
-	g_signal_connect(G_OBJECT(term), "refresh-window",
-			G_CALLBACK(term_app_request), (gpointer)TERM_REFRESH_WINDOW);
-	g_signal_connect(G_OBJECT(term), "resize-window",
-			G_CALLBACK(term_app_request_resize_move),
-			(gpointer)TERM_RESIZE_WINDOW);
-	g_signal_connect(G_OBJECT(term), "move-window",
-			G_CALLBACK(term_app_request_resize_move),
-			(gpointer)TERM_MOVE_WINDOW);
+    g_signal_connect(G_OBJECT(term), "iconify-window",
+            G_CALLBACK(term_app_request), (gpointer)TERM_ICONIFY_WINDOW);
+    g_signal_connect(G_OBJECT(term), "deiconify-window",
+            G_CALLBACK(term_app_request), (gpointer)TERM_DEICONIFY_WINDOW);
+    g_signal_connect(G_OBJECT(term), "raise-window",
+            G_CALLBACK(term_app_request), (gpointer)TERM_RAISE_WINDOW);
+    g_signal_connect(G_OBJECT(term), "lower-window",
+            G_CALLBACK(term_app_request), (gpointer)TERM_LOWER_WINDOW);
+    g_signal_connect(G_OBJECT(term), "maximize-window",
+            G_CALLBACK(term_app_request), (gpointer)TERM_MAXIMIZE_WINDOW);
+    g_signal_connect(G_OBJECT(term), "restore-window",
+            G_CALLBACK(term_app_request), (gpointer)TERM_RESTORE_WINDOW);
+    g_signal_connect(G_OBJECT(term), "refresh-window",
+            G_CALLBACK(term_app_request), (gpointer)TERM_REFRESH_WINDOW);
+    g_signal_connect(G_OBJECT(term), "resize-window",
+            G_CALLBACK(term_app_request_resize_move),
+            (gpointer)TERM_RESIZE_WINDOW);
+    g_signal_connect(G_OBJECT(term), "move-window",
+            G_CALLBACK(term_app_request_resize_move),
+            (gpointer)TERM_MOVE_WINDOW);
 }
 
 static gboolean term_button_press(GtkWidget *widget, GdkEventButton *event,
-		gpointer user_data) {
-	if (event->type == GDK_BUTTON_PRESS && event->button == 3) {
-		popupmenu_shown = TRUE;
-		gtk_menu_popup(GTK_MENU(popupmenu), NULL, NULL, NULL, NULL,
-				event->button, event->time);
-	}
+        gpointer user_data) {
+    if (event->type == GDK_BUTTON_PRESS && event->button == 3) {
+        popupmenu_shown = TRUE;
+        gtk_menu_popup(GTK_MENU(popupmenu), NULL, NULL, NULL, NULL,
+                event->button, event->time);
+    }
 
-	return FALSE;
+    return FALSE;
 }
 
 static void term_eof_or_child_exited(VteTerminal *term, gpointer user_data) {
-	vte_terminal_reset(VTE_TERMINAL(term), FALSE, TRUE);
-	vte_terminal_fork_command(VTE_TERMINAL(term), conf_get_shell(), NULL, NULL,
-	"", TRUE, TRUE, TRUE);
+    vte_terminal_reset(VTE_TERMINAL(term), FALSE, TRUE);
+    vte_terminal_fork_command(VTE_TERMINAL(term), conf_get_shell(), NULL, NULL,
+            "", TRUE, TRUE, TRUE);
 
-	gtk_widget_hide(GTK_WIDGET(mainwindow));
+    gtk_widget_hide(GTK_WIDGET(mainwindow));
 }
 
 static void term_app_request(VteTerminal *term, gpointer user_data) {
-	int event = GPOINTER_TO_INT(user_data);
+    int event = GPOINTER_TO_INT(user_data);
 
-	if (event == TERM_ICONIFY_WINDOW) {
-		gdk_window_iconify(GTK_WIDGET(mainwindow)->window);
-	}
-	if (event == TERM_DEICONIFY_WINDOW) {
-		gdk_window_deiconify(GTK_WIDGET(mainwindow)->window);
-	}
-	if (event == TERM_RAISE_WINDOW) {
-		gdk_window_raise(GTK_WIDGET(mainwindow)->window);
-	}
-	if (event == TERM_LOWER_WINDOW) {
-		gdk_window_lower(GTK_WIDGET(mainwindow)->window);
-	}
-	if (event == TERM_MAXIMIZE_WINDOW) {
-		gdk_window_maximize(GTK_WIDGET(mainwindow)->window);
-	}
-	if (event == TERM_RESTORE_WINDOW) {
-		gdk_window_unmaximize(GTK_WIDGET(mainwindow)->window);
-	}
-	if (event == TERM_REFRESH_WINDOW) {
-		GdkRectangle rect;
-		rect.x = rect.y = 0;
-		rect.width = mainwindow->allocation.width;
-		rect.height = mainwindow->allocation.height;
-		gdk_window_invalidate_rect(GTK_WIDGET(mainwindow)->window, &rect, TRUE);
-	}
+    if (event == TERM_ICONIFY_WINDOW) {
+        gdk_window_iconify(GTK_WIDGET(mainwindow)->window);
+    }
+    if (event == TERM_DEICONIFY_WINDOW) {
+        gdk_window_deiconify(GTK_WIDGET(mainwindow)->window);
+    }
+    if (event == TERM_RAISE_WINDOW) {
+        gdk_window_raise(GTK_WIDGET(mainwindow)->window);
+    }
+    if (event == TERM_LOWER_WINDOW) {
+        gdk_window_lower(GTK_WIDGET(mainwindow)->window);
+    }
+    if (event == TERM_MAXIMIZE_WINDOW) {
+        gdk_window_maximize(GTK_WIDGET(mainwindow)->window);
+    }
+    if (event == TERM_RESTORE_WINDOW) {
+        gdk_window_unmaximize(GTK_WIDGET(mainwindow)->window);
+    }
+    if (event == TERM_REFRESH_WINDOW) {
+        GdkRectangle rect;
+        rect.x = rect.y = 0;
+        rect.width = mainwindow->allocation.width;
+        rect.height = mainwindow->allocation.height;
+        gdk_window_invalidate_rect(GTK_WIDGET(mainwindow)->window, &rect, TRUE);
+    }
 }
 
 static void term_app_request_resize_move(VteTerminal *term, guint x, guint y,
-		gpointer user_data) {
-	int event = GPOINTER_TO_INT(user_data);
+        gpointer user_data) {
+    int event = GPOINTER_TO_INT(user_data);
 
-	if (event == TERM_RESIZE_WINDOW) {
-		gint owidth, oheight, xpad, ypad;
+    if (event == TERM_RESIZE_WINDOW) {
+        gint owidth, oheight, xpad, ypad;
 
-		gtk_window_get_size(GTK_WINDOW(mainwindow), &owidth, &oheight);
-		owidth -= term->char_width * term->column_count;
-		oheight -= term->char_height * term->row_count;
+        gtk_window_get_size(GTK_WINDOW(mainwindow), &owidth, &oheight);
+        owidth -= term->char_width * term->column_count;
+        oheight -= term->char_height * term->row_count;
 
-		vte_terminal_get_padding(term, &xpad, &ypad);
-		owidth -= xpad;
-		oheight -= ypad;
-		gtk_window_resize(GTK_WINDOW(mainwindow), x+owidth, y+oheight);
-	}
-	if (event == TERM_MOVE_WINDOW) {
-		gdk_window_move(GTK_WIDGET(mainwindow)->window, x, y);
-	}
+        vte_terminal_get_padding(term, &xpad, &ypad);
+        owidth -= xpad;
+        oheight -= ypad;
+        gtk_window_resize(GTK_WINDOW(mainwindow), x+owidth, y+oheight);
+    }
+    if (event == TERM_MOVE_WINDOW) {
+        gdk_window_move(GTK_WIDGET(mainwindow)->window, x, y);
+    }
 }
 

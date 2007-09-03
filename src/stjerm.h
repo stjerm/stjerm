@@ -55,10 +55,10 @@
 #define TABS_ALWAYS 2
 
 typedef struct {
-	char long_name[12];
-	char short_name[12];
-	char var_type[12];
-	char desc[150];
+    char long_name[12];
+    char short_name[12];
+    char var_type[12];
+    char desc[150];
 } Option;
 
 #define OPTION_COUNT 21
