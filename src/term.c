@@ -44,7 +44,10 @@ GtkWidget* build_term(void) {
 
     vte_terminal_fork_command(VTE_TERMINAL(term), conf_get_shell(), NULL, NULL,
             "", TRUE, TRUE, TRUE);
-
+    
+    if (conf_get_bg_image() != NULL)
+        vte_terminal_set_background_image_file(VTE_TERMINAL(term), conf_get_bg_image());
+    
     GdkColor fore, back;
     fore = conf_get_fg();
     back = conf_get_bg();
@@ -56,12 +59,13 @@ GtkWidget* build_term(void) {
     vte_terminal_set_background_tint_color(VTE_TERMINAL(term), &back);
 
     vte_terminal_set_allow_bold(VTE_TERMINAL(term), conf_get_allow_bold());
-    vte_terminal_set_scroll_on_output(VTE_TERMINAL(term), TRUE);
+    vte_terminal_set_scroll_on_output(VTE_TERMINAL(term), conf_get_scroll_on_output());
     vte_terminal_set_scroll_on_keystroke(VTE_TERMINAL(term), TRUE);
     vte_terminal_set_font_from_string(VTE_TERMINAL(term), conf_get_font());
     vte_terminal_set_scrollback_lines(VTE_TERMINAL(term), conf_get_lines());
-    vte_terminal_set_backspace_binding(VTE_TERMINAL(term), VTE_ERASE_ASCII_DELETE);
-
+    vte_terminal_set_backspace_binding(VTE_TERMINAL(term), 
+            VTE_ERASE_ASCII_DELETE);
+    
     term_connect_signals(term);
     return term;
 }

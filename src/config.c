@@ -37,7 +37,7 @@
 extern int sargc;
 extern char **sargv;
 extern GtkWidget *mainwindow;
-static char _font[100];
+static char _font[200];
 static float _opacity;
 static GdkColor _bg;
 static GdkColor _fg;
@@ -50,10 +50,10 @@ static int _pos;
 static int _posx;
 static int _posy;
 static int _scrollpos;
-static char _shell[100];
+static char _shell[200];
 static int _lines;
 static int _showtab;
-static char _termname[100];
+static char _termname[200];
 static GtkPositionType _tabpos;
 static GdkColor _palette[16];
 static int read_colors;
@@ -61,6 +61,8 @@ static gboolean _tabfill;
 static gboolean _allowbold;
 static GdkModifierType _keymod;
 static gboolean _autohide;
+static char _bgimage[200];
+static gboolean _scrolloutput;
 
 static void set_border(char*);
 static void set_mod(char*);
@@ -96,6 +98,8 @@ gboolean conf_get_tab_fill(void);
 gboolean conf_get_allow_bold(void);
 GdkModifierType conf_get_key_mod(void);
 gboolean conf_get_auto_hide(void);
+char* conf_get_bg_image(void);
+gboolean conf_get_scroll_on_output(void);
 
 Option options[OPTION_COUNT] = {
         { "key", "-k", "KEY", "Shortcut key (eg: f12)." },
@@ -108,6 +112,7 @@ Option options[OPTION_COUNT] = {
         { "allowbold", "-ab", "BOOLEAN", "Allow bold fonts or not. Default: true." },
         { "border", "-b", "TYPE", "Border type: thin, thick, none. Default: none." },
         { "opacity", "-o", "NUMBER", "Opacity (range: 10 - 100). Default: 100." },
+        { "bgimage", "-bgimg", "FILE", "Background image to use on terminal." },
         { "width", "-w", "NUMBER", "Window width. Default: 800." },
         { "height", "-h", "NUMBER", "Window height. Default: 400." },
         { "position", "-p", "POSITION", "Window position: top, bottom, left, right. Default: top." },
@@ -118,6 +123,7 @@ Option options[OPTION_COUNT] = {
         { "tabpos", "-tp", "POSITION", "Tabbar position: top, bottom, left, right. Default: bottom." },
         { "tablabel", "-tl", "STRING", "Label of the tabs. Default: term." },
         { "tabfill", "-tf", "BOOLEAN", "Whether tabs fill whole tabbar space. Default: true." },
+        { "scroll", "-sc", "BOOLEAN", "Whether to scroll the terminal on output. Default: true." },
         { "colorX", "-cX", "COLOR", "Specify color X of the terminals color palette" }
 };
 
@@ -254,6 +260,7 @@ void init_default_values(void) {
     _scrollpos = -1;
     _border = BORDER_NONE;
     _opacity = 100.0f;
+    strcpy(_bgimage, "");
     _width = 800;
     _height = 400;
     _pos = POS_TOP;
@@ -269,10 +276,11 @@ void init_default_values(void) {
     _allowbold = TRUE;
     _keymod = GDK_CONTROL_MASK | GDK_SHIFT_MASK;
     _autohide = TRUE;
+    _scrolloutput = TRUE;
 }
 
 void read_value(char *name, char *value) {
-    if (name != NULL&& value != NULL) {
+    if (name != NULL && value != NULL) {
         if (name[0] == '#')
             return;
         g_strstrip(name);
@@ -298,6 +306,8 @@ void read_value(char *name, char *value) {
             set_border(value);
         else if (!strcmp("opacity", name) || !strcmp("-o", name))
             _opacity = atof(value);
+        else if (!strcmp("bgimage", name) || !strcmp("-bgimg", name))
+            strcpy(_bgimage, value);
         else if (!strcmp("width", name) || !strcmp("-w", name))
             _width = atoi(value);
         else if (!strcmp("height", name) || !strcmp("-h", name))
@@ -342,6 +352,8 @@ void read_value(char *name, char *value) {
                 _keymod = tmp;
         } else if (!strcmp("autohide", name) || !strcmp("-ah", name))
             _autohide = parse_bool_str(value, _autohide);
+        else if (!strcmp("scroll", name) || !strcmp("-sc", name))
+            _scrolloutput = parse_bool_str(value, _scrolloutput);
     }
 }
 
@@ -535,4 +547,15 @@ GdkModifierType conf_get_key_mod(void) {
 
 gboolean conf_get_auto_hide(void) {
     return _autohide;
+}
+
+char* conf_get_bg_image(void) {
+    if (!strcmp(_bgimage, ""))
+        return NULL;
+    else
+        return _bgimage;
+}
+
+gboolean conf_get_scroll_on_output(void) {
+    return _scrolloutput;
 }

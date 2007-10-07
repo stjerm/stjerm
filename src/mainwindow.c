@@ -192,8 +192,9 @@ void mainwindow_create_tab(void) {
             conf_get_opacity()/100 * 0xffff);
         } else {
             vte_terminal_set_background_saturation(VTE_TERMINAL(tmp_term),
-            1.0 - conf_get_opacity()/100);
-            vte_terminal_set_background_transparent(VTE_TERMINAL(tmp_term), TRUE);
+                1.0 - conf_get_opacity()/100);
+            if (conf_get_bg_image() == NULL)
+                vte_terminal_set_background_transparent(VTE_TERMINAL(tmp_term), TRUE);
         }
     }
 
