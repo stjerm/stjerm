@@ -42,14 +42,18 @@ Window mw_xwin;
 static Display *dpy = 0;
 Atom opacityatom;
 gboolean screen_is_composited;
+gboolean fullscreen;
+gboolean toggled;
 
 void build_mainwindow(void);
 void mainwindow_toggle(int sig);
 void mainwindow_create_tab(void);
 void mainwindow_close_tab(void);
+void mainwindow_toggle_full(void);
 int handle_x_error(Display *dpy, XErrorEvent *evt);
 
 static void mainwindow_reset_position(void);
+static void mainwindow_focus_terminal(void);
 static void mainwindow_show(GtkWidget*, gpointer);
 static void mainwindow_focus_out_event(GtkWindow*, GdkEventFocus*, gpointer);
 static gboolean mainwindow_expose_event(GtkWidget*, GdkEventExpose*, gpointer);
@@ -62,6 +66,7 @@ static void mainwindow_next_tab(GtkWidget *widget, gpointer user_data);
 static void mainwindow_prev_tab(GtkWidget *widget, gpointer user_data);
 static void mainwindow_new_tab(GtkWidget *widget, gpointer user_data);
 static void mainwindow_delete_tab(GtkWidget *widget, gpointer user_data);
+static void mainwindow_toggle_fullscreen(GtkWidget *widget, gpointer user_data);
 
 void build_mainwindow(void) {
     mainwindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
@@ -74,34 +79,43 @@ void build_mainwindow(void) {
     gtk_window_set_resizable(GTK_WINDOW(mainwindow), FALSE);
     mainwindow_reset_position();
 
+    fullscreen = FALSE;
+    toggled = FALSE;
+    
     GtkAccelGroup* accel_group;
-    GClosure *new_tab, *delete_tab, *next_tab, *prev_tab, *delete_all;
+    GClosure *new_tab, *delete_tab, *next_tab, *prev_tab, *delete_all,
+        *maximize;
 
     accel_group = gtk_accel_group_new();
     gtk_window_add_accel_group(GTK_WINDOW(mainwindow), accel_group);
 
+    maximize = g_cclosure_new_swap(G_CALLBACK(mainwindow_toggle_fullscreen),
+            NULL, NULL);
+    gtk_accel_group_connect(accel_group, GDK_F11, 0,
+            GTK_ACCEL_VISIBLE, maximize);
+    
     new_tab = g_cclosure_new_swap(G_CALLBACK(mainwindow_new_tab), 
-    NULL, NULL);
+            NULL, NULL);
     gtk_accel_group_connect(accel_group, 't', conf_get_key_mod(),
             GTK_ACCEL_VISIBLE, new_tab);
 
     delete_tab = g_cclosure_new_swap(G_CALLBACK(mainwindow_delete_tab), 
-    NULL, NULL);
+            NULL, NULL);
     gtk_accel_group_connect(accel_group, 'w', conf_get_key_mod(),
             GTK_ACCEL_VISIBLE, delete_tab);
 
     next_tab = g_cclosure_new_swap(G_CALLBACK(mainwindow_next_tab), 
-    NULL, NULL);
+            NULL, NULL);
     gtk_accel_group_connect(accel_group, GDK_Page_Up, conf_get_key_mod(),
             GTK_ACCEL_VISIBLE, next_tab);
 
     prev_tab = g_cclosure_new_swap(G_CALLBACK(mainwindow_prev_tab), 
-    NULL, NULL);
+            NULL, NULL);
     gtk_accel_group_connect(accel_group, GDK_Page_Down, conf_get_key_mod(),
             GTK_ACCEL_VISIBLE, prev_tab);
 
     delete_all = g_cclosure_new_swap(G_CALLBACK(mainwindow_destroy), 
-    NULL, NULL);
+            NULL, NULL);
     gtk_accel_group_connect(accel_group, 'q', conf_get_key_mod(),
             GTK_ACCEL_VISIBLE, delete_all);
 
@@ -233,7 +247,7 @@ void mainwindow_close_tab(void) {
             gtk_notebook_remove_page(tabbar, activetab);
             activetab = gtk_notebook_get_current_page(tabbar);
 
-            if (tabcount == 1&& conf_get_show_tab() == TABS_ONE)
+            if (tabcount == 1 && conf_get_show_tab() == TABS_ONE)
                 gtk_notebook_set_show_tabs(tabbar, FALSE);
         }
     } else
@@ -241,14 +255,15 @@ void mainwindow_close_tab(void) {
 }
 
 void mainwindow_toggle(int sig) {
-    if (GTK_WIDGET_VISIBLE(mainwindow)) {
+    if (sig)
+        toggled = !toggled;
+    if ((!sig && GTK_WIDGET_VISIBLE(mainwindow)) || (sig && toggled)) {
         gdk_threads_enter();
         gtk_widget_hide(GTK_WIDGET(mainwindow));
         gdk_flush();
         gdk_threads_leave();
         return;
     }
-
     gdk_threads_enter();
     if (gtk_window_is_active(GTK_WINDOW(mainwindow)) == FALSE)
         gtk_window_present(GTK_WINDOW(mainwindow));
@@ -260,6 +275,10 @@ void mainwindow_toggle(int sig) {
     gdk_window_focus(mainwindow->window, gtk_get_current_event_time());
     gdk_flush();
     gdk_threads_leave();
+}
+
+void mainwindow_toggle_full(void) {
+    mainwindow_toggle_fullscreen(NULL, NULL);
 }
 
 static void mainwindow_reset_position(void) {
@@ -320,7 +339,7 @@ static void mainwindow_destroy(GtkWidget *widget, gpointer user_data) {
 
 static void mainwindow_window_title_changed(VteTerminal *vteterminal,
         gpointer user_data) {
-    if (vteterminal != NULL&& user_data != NULL)
+    if (vteterminal != NULL && user_data != NULL)
         gtk_label_set_label(GTK_LABEL(user_data),
                 vte_terminal_get_window_title(vteterminal));
 }
@@ -333,19 +352,35 @@ static void mainwindow_switch_tab(GtkNotebook *notebook, GtkNotebookPage *page,
 static void mainwindow_next_tab(GtkWidget *widget, gpointer user_data) {
     gtk_notebook_next_page(tabbar);
     activetab = gtk_notebook_get_current_page(tabbar);
+    mainwindow_focus_terminal();
 }
 
 static void mainwindow_prev_tab(GtkWidget *widget, gpointer user_data) {
     gtk_notebook_prev_page(tabbar);
     activetab = gtk_notebook_get_current_page(tabbar);
+    mainwindow_focus_terminal();
 }
 
 static void mainwindow_new_tab(GtkWidget *widget, gpointer user_data) {
     mainwindow_create_tab();
+    mainwindow_focus_terminal();
 }
 
 static void mainwindow_delete_tab(GtkWidget *widget, gpointer user_data) {
     mainwindow_close_tab();
+    if (tabcount > 0)
+        mainwindow_focus_terminal();
+}
+
+static void mainwindow_toggle_fullscreen(GtkWidget *widget, gpointer user_data) {
+    if (fullscreen) {
+        gtk_window_unfullscreen(GTK_WINDOW(mainwindow));
+        mainwindow_reset_position();
+    }
+    else
+        gtk_window_fullscreen(GTK_WINDOW(mainwindow));
+    fullscreen = !fullscreen;
+    mainwindow_focus_terminal();
 }
 
 int handle_x_error(Display *dpy, XErrorEvent *evt) {
@@ -355,4 +390,10 @@ int handle_x_error(Display *dpy, XErrorEvent *evt) {
         exit(1);
     }
     return 0;
+}
+
+static void mainwindow_focus_terminal(void) {
+    if (activetab >= 0)
+            gtk_window_set_focus(GTK_WINDOW(mainwindow), 
+                    GTK_WIDGET(g_array_index(tabs, VteTerminal*, activetab)));
 }

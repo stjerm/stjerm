@@ -43,13 +43,13 @@ void build_popupmenu(void) {
     GtkWidget *menuitem;
     GtkWidget *img;
 
-    gchar *labels[] = { "New Tab", "Close Tab", "Copy", "Paste", "Quit" };
+    gchar *labels[] = { "New Tab", "Close Tab", "Copy", "Paste", "Toggle Fullscreen", "Quit" };
     gchar *stocks[] = { GTK_STOCK_ADD, GTK_STOCK_CLOSE, GTK_STOCK_COPY,
-            GTK_STOCK_PASTE, GTK_STOCK_QUIT };
+            GTK_STOCK_PASTE, GTK_STOCK_FULLSCREEN, GTK_STOCK_QUIT };
 
     int i;
-    for (i = 0; i < 5; i++) {
-        if (i == 2|| i == 4) {
+    for (i = 0; i < 6; i++) {
+        if (i == 2 || i == 4 || i == 5) {
             menuitem = gtk_separator_menu_item_new();
             gtk_menu_shell_append(GTK_MENU_SHELL(popupmenu), menuitem);
             gtk_widget_show(GTK_WIDGET(menuitem));
@@ -80,6 +80,8 @@ static void popupmenu_activate(gchar *label) {
     } else if (!strcmp(label, "Paste")) {
         vte_terminal_paste_clipboard(g_array_index(tabs, VteTerminal*,
                 activetab));
+    } else if (!strcmp(label, "Toggle Fullscreen")) {
+        mainwindow_toggle_full();
     } else if (!strcmp(label, "Quit")) {
         gtk_widget_destroy(GTK_WIDGET(mainwindow));
     }

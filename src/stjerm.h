@@ -73,6 +73,7 @@ extern void build_popupmenu(void);
 extern void mainwindow_toggle(int sig);
 extern void mainwindow_create_tab(void);
 extern void mainwindow_close_tab(void);
+extern void mainwindow_toggle_full(void);
 extern void init_key(void);
 extern void grab_key(void);
 extern void wait_key(void);
