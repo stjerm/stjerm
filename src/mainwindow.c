@@ -255,15 +255,15 @@ void mainwindow_close_tab(void) {
 }
 
 void mainwindow_toggle(int sig) {
-    if (sig)
-        toggled = !toggled;
     if ((!sig && GTK_WIDGET_VISIBLE(mainwindow)) || (sig && toggled)) {
         gdk_threads_enter();
         gtk_widget_hide(GTK_WIDGET(mainwindow));
         gdk_flush();
         gdk_threads_leave();
+        toggled = FALSE;
         return;
     }
+    toggled = TRUE;
     gdk_threads_enter();
     if (gtk_window_is_active(GTK_WINDOW(mainwindow)) == FALSE)
         gtk_window_present(GTK_WINDOW(mainwindow));
