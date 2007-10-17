@@ -1,3 +1,16 @@
+09-10-2007 Markus Gross <xsdnyd@gmail.com>
+fixed --toggle (again)
+
+08-10-2007 Markus Gross <xsdnyd@gmail.com>
+added fullscreen keyboard shortcut and popupmenu item
+fixed --toggle option
+fixed weird characters appearing when using shortcuts
+updated manpage
+
+07-10-2007 Markus Gross <xsdnyd@gmail.com>
+added scroll on output option
+added background image option
+
 03-09-2007 Markus Gross <xsdnyd@gmail.com>
 added "autohide" option, this enables/disables the hiding of stjerm when it looses focus
 
