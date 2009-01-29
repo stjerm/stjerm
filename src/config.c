@@ -25,6 +25,7 @@
 #include <gdk/gdkx.h>
 #include <X11/Xlib.h>
 #include <X11/Xresource.h>
+#include <X11/extensions/Xinerama.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
@@ -80,6 +81,7 @@ static pid_t get_stjerm_pid(void);
 void read_value(char *name, char *value);
 void init_default_values(void);
 void conf_init(void);
+void conf_find_position(void);
 char* conf_get_font(void);
 float conf_get_opacity(void);
 GdkColor conf_get_bg(void);
@@ -446,9 +448,67 @@ void conf_init(void) {
     }
 
     signal(SIGUSR1, (__sighandler_t) mainwindow_toggle);
+    
+    conf_find_position();
+}
 
+void conf_find_position(void) {
     int scrw = gdk_screen_get_width(gdk_screen_get_default());
     int scrh = gdk_screen_get_height(gdk_screen_get_default());
+    
+    int offset_x = 0;
+    int offset_y = 0;
+    GdkDisplay *gdk_dpy =  gdk_display_get_default();
+    Display *dpy = gdk_x11_display_get_xdisplay(gdk_dpy);
+    
+    /* Xinerama base event code and base error code */
+    int xr_event_basep, xr_error_basep;
+    
+    if (XineramaQueryExtension(dpy, &xr_event_basep, &xr_error_basep) && XineramaIsActive(dpy)) {
+        /* Calculate offsets to add to get correct values on Xinerama screens */
+        XineramaScreenInfo *xsi;
+        int screens;
+        int cur_x;
+        int cur_y;
+        int i;
+        
+        /* Get data about Xinerama screens */
+        xsi = XineramaQueryScreens(dpy, &screens);
+        
+        /* Get cursor position */
+        gdk_display_get_pointer(gdk_dpy, NULL, &cur_x, &cur_y, NULL);
+        
+        /* "Default" case: if the cursor is in a blackout zone, do as if it were
+           on the first screen */
+        scrw = xsi[0].width;
+        scrh = xsi[0].height;
+        offset_x = xsi[0].x_org;
+        offset_y = xsi[0].y_org;
+        
+        /* Now the other cases, beginning from the 2nd screen */
+        for (i=1; i < screens; i++) {
+            /* Coords of this screen */
+            int min_x = xsi[i].x_org;
+            int max_x = min_x + xsi[i].width;
+            int min_y = xsi[i].y_org;
+            int max_y = min_y + xsi[i].height;
+            
+            /* Is the cursor on this screen? */
+            if ((min_x <= cur_x) && (cur_x <= max_x) &&
+                (min_y <= cur_y) && (cur_y <= max_y)) {
+                /* Set the offsets and dimensions */
+                scrw = xsi[i].width;
+                scrh = xsi[i].height;
+                offset_x = xsi[i].x_org;
+                offset_y = xsi[i].y_org;
+                
+                break;
+            }
+        }
+        
+        /* Cleanup */
+        XFree(xsi);
+    }
 
     if (_pos == POS_TOP) {
         _posx = (scrw - _width) / 2;
@@ -475,6 +535,9 @@ void conf_init(void) {
         _posx = scrw - _width;
         _posy = scrh - _height;
     }
+    
+    _posx += offset_x;
+    _posy += offset_y;
     
     if( _fixedx > -1 )
         _posx = _fixedx;
@@ -520,6 +583,8 @@ int conf_get_height(void) {
 }
 
 void conf_get_position(int *x, int *y) {
+    conf_find_position();
+    
     *x = _posx;
     *y = _posy;
 }

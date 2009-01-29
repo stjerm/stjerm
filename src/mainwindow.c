@@ -268,13 +268,15 @@ void mainwindow_toggle(int sig) {
     }
     toggled = TRUE;
     gdk_threads_enter();
+    /* reset the window position before displaying it to avoid flickering if the
+       windos is moved */
+    mainwindow_reset_position();
     if (gtk_window_is_active(GTK_WINDOW(mainwindow)) == FALSE)
         gtk_window_present(GTK_WINDOW(mainwindow));
     else
         gtk_widget_show(mainwindow);
     gtk_window_stick(GTK_WINDOW(mainwindow));
     gtk_window_set_keep_above(GTK_WINDOW(mainwindow), TRUE);
-    mainwindow_reset_position();
     gdk_window_focus(mainwindow->window, gtk_get_current_event_time());
     gdk_flush();
     gdk_threads_leave();
