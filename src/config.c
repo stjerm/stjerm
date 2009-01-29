@@ -49,6 +49,8 @@ static int _height;
 static int _pos;
 static int _posx;
 static int _posy;
+static int _fixedx;
+static int _fixedy;
 static int _scrollpos;
 static char _shell[200];
 static int _lines;
@@ -124,6 +126,8 @@ Option options[OPTION_COUNT] = {
         { "tablabel", "-tl", "STRING", "Label of the tabs. Default: term." },
         { "tabfill", "-tf", "BOOLEAN", "Whether tabs fill whole tabbar space. Default: true." },
         { "scroll", "-sc", "BOOLEAN", "Whether to scroll the terminal on output. Default: true." },
+        { "fixedx", "-fx", "NUMBER", "Overrides any calculated horizontal position." },
+        { "fixedy", "-fy", "NUMBER", "Overrides any calculated vertical position." },
         { "colorX", "-cX", "COLOR", "Specify color X of the terminals color palette" }
 };
 
@@ -277,6 +281,8 @@ void init_default_values(void) {
     _keymod = GDK_CONTROL_MASK | GDK_SHIFT_MASK;
     _autohide = TRUE;
     _scrolloutput = TRUE;
+    _fixedx = -1;
+    _fixedy = -1;
 }
 
 void read_value(char *name, char *value) {
@@ -314,6 +320,10 @@ void read_value(char *name, char *value) {
             _height = atoi(value);
         else if (!strcmp("position", name) || !strcmp("-p", name))
             set_pos(value);
+        else if (!strcmp("fixedx", name) || !strcmp("-fx", name))
+            _fixedx = atoi(value);
+        else if (!strcmp("fixedy", name) || !strcmp("-fy", name))
+            _fixedy = atoi(value);
         else if (!strcmp("mod", name) || !strcmp("-m", name))
             set_mod(value);
         else if (!strcmp("key", name) || !strcmp("-k", name))
@@ -459,6 +469,12 @@ void conf_init(void) {
         _posx = scrw - _width;
         _posy = scrh - _height;
     }
+    
+    if( _fixedx > -1 )
+        _posx = _fixedx;
+    
+    if( _fixedy > -1 )
+        _posy = _fixedy;
 }
 
 char* conf_get_font(void) {

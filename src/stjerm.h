@@ -61,7 +61,7 @@ typedef struct {
     char desc[150];
 } Option;
 
-#define OPTION_COUNT 23
+#define OPTION_COUNT 25
 
 extern void print_help(void);
 extern void print_info(void);
