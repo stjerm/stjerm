@@ -235,6 +235,9 @@ void mainwindow_create_tab(void) {
 
     activetab = tabcount - 1;
     gtk_notebook_set_current_page(tabbar, activetab);
+
+    if (conf_get_allow_reorder())
+        gtk_notebook_set_tab_reorderable(tabbar, GTK_WIDGET(tmp_box), TRUE); 
 }
 
 void mainwindow_close_tab(void) {

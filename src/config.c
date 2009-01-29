@@ -65,6 +65,7 @@ static GdkModifierType _keymod;
 static gboolean _autohide;
 static char _bgimage[200];
 static gboolean _scrolloutput;
+static gboolean _allowreorder;
 
 static void set_border(char*);
 static void set_mod(char*);
@@ -102,6 +103,7 @@ GdkModifierType conf_get_key_mod(void);
 gboolean conf_get_auto_hide(void);
 char* conf_get_bg_image(void);
 gboolean conf_get_scroll_on_output(void);
+gboolean conf_get_allow_reorder(void);
 
 Option options[OPTION_COUNT] = {
         { "key", "-k", "KEY", "Shortcut key (eg: f12)." },
@@ -128,6 +130,7 @@ Option options[OPTION_COUNT] = {
         { "scroll", "-sc", "BOOLEAN", "Whether to scroll the terminal on output. Default: true." },
         { "fixedx", "-fx", "NUMBER", "Overrides any calculated horizontal position." },
         { "fixedy", "-fy", "NUMBER", "Overrides any calculated vertical position." },
+        { "allowreorder", "-ar", "BOOLEAN", "Allow reordering of terminal tabs." },
         { "colorX", "-cX", "COLOR", "Specify color X of the terminals color palette" }
 };
 
@@ -283,6 +286,7 @@ void init_default_values(void) {
     _scrolloutput = TRUE;
     _fixedx = -1;
     _fixedy = -1;
+    _allowreorder = TRUE;
 }
 
 void read_value(char *name, char *value) {
@@ -364,6 +368,8 @@ void read_value(char *name, char *value) {
             _autohide = parse_bool_str(value, _autohide);
         else if (!strcmp("scroll", name) || !strcmp("-sc", name))
             _scrolloutput = parse_bool_str(value, _scrolloutput);
+        else if (!strcmp("allowreorder", name) || !strcmp("-ar", name))
+            _allowreorder = parse_bool_str(value, _allowreorder);
     }
 }
 
@@ -574,4 +580,8 @@ char* conf_get_bg_image(void) {
 
 gboolean conf_get_scroll_on_output(void) {
     return _scrolloutput;
+}
+
+gboolean conf_get_allow_reorder(void) {
+    return _allowreorder;
 }
