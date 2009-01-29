@@ -101,6 +101,7 @@ extern gboolean conf_get_allow_bold(void);
 extern GdkModifierType conf_get_key_mod(void);
 extern gboolean conf_get_auto_hide(void);
 extern char* conf_get_bg_image(void);
+extern gboolean conf_get_allow_reorder(void);
 extern gboolean conf_get_scroll_on_output();
 
 #endif /* __STJERM_H__ */

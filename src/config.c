@@ -338,14 +338,14 @@ void read_value(char *name, char *value) {
             strcpy(_shell, value);
         else if (!strcmp("lines", name) || !strcmp("-bl", name))
             _lines = atoi(value);
-        else if (!strcmp("showtab", name) || !strcmp("-showtab", name)) {
+        else if (!strcmp("showtab", name) || !strcmp("-st", name)) {
             if (!strcasecmp(value, "always"))
                 _showtab = TABS_ALWAYS;
             else if (!strcasecmp(value, "never"))
                 _showtab = TABS_NEVER;
-        } else if (!strcmp("tabpos", name) || !strcmp("-tabpos", name))
+        } else if (!strcmp("tabpos", name) || !strcmp("-tp", name))
             _tabpos = read_pos(value);
-        else if (!strcmp("tablabel", name) || !strcmp("-tablabel", name))
+        else if (!strcmp("tablabel", name) || !strcmp("-tl", name))
             strcpy(_termname, value);
         else if (g_str_has_prefix(name, "color") || g_str_has_prefix(name, "-c")) {
             g_strcanon(name, "0123456789", ' ');
