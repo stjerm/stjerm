@@ -1,4 +1,4 @@
-.TH STJERM "8" "Last Change: 08-10-2007" "stjerm 0.11" ""
+.TH STJERM "8" "Last Change: 09-06-2008" "stjerm 0.11" ""
 .SH NAME
 stjerm \- quake\-style terminal emulator
 .SH SYNOPSIS
@@ -103,6 +103,15 @@ Whether to scroll the terminal on output. Default: \fItrue\fR.
 .B "colorX, \-cX"
 Specify color X of the terminals color palette. You may specify no palette, or a complete one with 16 total colors.
 For this you have to use \-c0, \-c1, ..., \-c15 or the equivalent color0, color1,... color15.
+.TP
+.B "fixedX, \-fX"
+Overrides the calculated horizontal position of the window. Specifies the location of the left of the window.
+.TP
+.B "fixedY, \-fY"
+Overrides the calculated vertical position of the window. Specifies the location of the top of the window.
+.TP
+.B "allowreorder, \-ar"
+Allows the tabs of the tab bar to be reordered.
 .SH EXAMPLES
 To run stjerm with F12 as shortcut key, the opacity of 60 and a green foreground color, use:
 
@@ -117,11 +126,11 @@ stjerm.opacity: 60
 
 stjerm.foreground: #66ff11
 .SH "REPORTING BUGS"
-Report bugs to <xsdnyd@gmail.com>.
+Report bugs to <stjerm-support@googlegroups.com>.
 .SH COPYRIGHT
-Copyright \(co 2007 Stjepan Glavina
+Copyright \(co 2007 Stjepan Glavina, Markus Gross
 .br
-Copyright \(co 2007 Markus Gross
+Copyright \(co 2008 Kristopher Wilson
 
 This is free software; see the source for copying conditions.  There is NO
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
