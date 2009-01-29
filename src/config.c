@@ -47,6 +47,8 @@ static unsigned int _mod;
 static KeySym _key;
 static int _width;
 static int _height;
+static int _width_percent;
+static int _height_percent;
 static int _pos;
 static int _posx;
 static int _posy;
@@ -121,6 +123,8 @@ Option options[OPTION_COUNT] = {
         { "bgimage", "-bgimg", "FILE", "Background image to use on terminal." },
         { "width", "-w", "NUMBER", "Window width. Default: 800." },
         { "height", "-h", "NUMBER", "Window height. Default: 400." },
+        { "widthpercent", "-wp", "NUMBER", "Window width in percent. Overrides the width if defined." },
+        { "heightpercent", "-hp", "NUMBER", "Window height in percent. Overrides the height if defined."},
         { "position", "-p", "POSITION", "Window position: top, bottom, left, right. Default: top." },
         { "scrollbar", "-s", "POSITION", "Scrollbar position: left, right, none. Default: none." },
         { "shell", "-sh", "STRING", "Terminal Shell. Default: the user's default shell." },
@@ -272,6 +276,8 @@ void init_default_values(void) {
     strcpy(_bgimage, "");
     _width = 800;
     _height = 400;
+    _width_percent = -1;
+    _height_percent = -1;
     _pos = POS_TOP;
     _mod = 0;
     _key = 0;
@@ -324,6 +330,10 @@ void read_value(char *name, char *value) {
             _width = atoi(value);
         else if (!strcmp("height", name) || !strcmp("-h", name))
             _height = atoi(value);
+        else if (!strcmp("widthpercent", name) || !strcmp("-wp", name))
+            _width_percent = atoi(value);
+        else if (!strcmp("heightpercent", name) || !strcmp("-hp", name))
+            _height_percent = atoi(value);
         else if (!strcmp("position", name) || !strcmp("-p", name))
             set_pos(value);
         else if (!strcmp("fixedx", name) || !strcmp("-fx", name))
@@ -509,6 +519,12 @@ void conf_find_position(void) {
         /* Cleanup */
         XFree(xsi);
     }
+
+    /* Recalculate window width and height if needed */
+    if (_width_percent > 0)
+        _width = (_width_percent * scrw)/100;
+    if (_height_percent > 0)
+        _height = (_height_percent * scrh)/100;
 
     if (_pos == POS_TOP) {
         _posx = (scrw - _width) / 2;

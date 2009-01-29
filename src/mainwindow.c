@@ -290,6 +290,7 @@ static void mainwindow_reset_position(void) {
     int x, y;
     conf_get_position(&x, &y);
     gtk_window_move(GTK_WINDOW(mainwindow), x, y);
+    gtk_widget_set_size_request(mainwindow, conf_get_width(), conf_get_height());
 }
 
 static void mainwindow_show(GtkWidget *widget, gpointer userdata) {
