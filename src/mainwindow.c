@@ -62,6 +62,7 @@ static void mainwindow_window_title_changed(VteTerminal *vteterminal,
         gpointer user_data);
 static void mainwindow_switch_tab(GtkNotebook *notebook, GtkNotebookPage *page,
         guint page_num, gpointer user_data);
+static void mainwindow_goto_tab(gint i);
 static void mainwindow_next_tab(GtkWidget *widget, gpointer user_data);
 static void mainwindow_prev_tab(GtkWidget *widget, gpointer user_data);
 static void mainwindow_new_tab(GtkWidget *widget, gpointer user_data);
@@ -86,6 +87,9 @@ void build_mainwindow(void) {
     GClosure *new_tab, *delete_tab, *next_tab, *prev_tab, *delete_all,
         *maximize;
 
+    GClosure *goto_tab_closure[10];
+    int i;
+    
     accel_group = gtk_accel_group_new();
     gtk_window_add_accel_group(GTK_WINDOW(mainwindow), accel_group);
 
@@ -118,6 +122,14 @@ void build_mainwindow(void) {
             NULL, NULL);
     gtk_accel_group_connect(accel_group, 'q', conf_get_key_mod(),
             GTK_ACCEL_VISIBLE, delete_all);
+
+    /* tab hotkeys, inspired by Tilda -- thanks to castorinop for the patch */
+    for (i=0; i<10; i++) {
+        goto_tab_closure[i] = g_cclosure_new_swap(G_CALLBACK(mainwindow_goto_tab),
+                (gpointer) i, NULL);
+        gtk_accel_group_connect(accel_group, '0' + ((i+1)%10), GDK_MOD1_MASK,
+                GTK_ACCEL_VISIBLE, goto_tab_closure[i]);
+    }
 
     activetab = -1;
     tabs = g_array_new(TRUE, FALSE, sizeof(VteTerminal*));
@@ -168,6 +180,7 @@ void build_mainwindow(void) {
     if (conf_get_show_tab() == TABS_ONE|| conf_get_show_tab() == TABS_NEVER)
         gtk_notebook_set_show_tabs(tabbar, FALSE);
     gtk_notebook_set_tab_pos(tabbar, conf_get_tab_pos());
+    gtk_notebook_set_homogeneous_tabs(tabbar, TRUE);
 
     XSetErrorHandler(handle_x_error);
     init_key();
@@ -365,6 +378,12 @@ static void mainwindow_window_title_changed(VteTerminal *vteterminal,
 static void mainwindow_switch_tab(GtkNotebook *notebook, GtkNotebookPage *page,
         guint page_num, gpointer user_data) {
     activetab = page_num;
+}
+
+static void mainwindow_goto_tab(gint i) {
+    gtk_notebook_set_current_page (tabbar, i);
+    activetab = gtk_notebook_get_current_page(tabbar);
+    mainwindow_focus_terminal();
 }
 
 static void mainwindow_next_tab(GtkWidget *widget, gpointer user_data) {
