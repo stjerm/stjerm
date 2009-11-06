@@ -73,7 +73,7 @@ static void popupmenu_activate(gchar *label) {
     if (!strcmp(label, "New Tab")) {
         mainwindow_create_tab();
     } else if (!strcmp(label, "Close Tab")) {
-        mainwindow_close_tab();
+        mainwindow_close_tab(NULL);
     } else if (!strcmp(label, "Copy")) {
         vte_terminal_copy_clipboard
                 (g_array_index(tabs, VteTerminal*, activetab));

@@ -48,7 +48,7 @@ gboolean toggled;
 void build_mainwindow(void);
 void mainwindow_toggle(int sig);
 void mainwindow_create_tab(void);
-void mainwindow_close_tab(void);
+void mainwindow_close_tab(GtkWidget *term);
 void mainwindow_toggle_full(void);
 int handle_x_error(Display *dpy, XErrorEvent *evt);
 
@@ -240,14 +240,26 @@ void mainwindow_create_tab(void) {
         gtk_notebook_set_tab_reorderable(tabbar, GTK_WIDGET(tmp_box), TRUE); 
 }
 
-void mainwindow_close_tab(void) {
-    if (activetab >= 0) {
-        g_array_remove_index(tabs, activetab);
+void mainwindow_close_tab(GtkWidget *term) {
+    // Look for the right tab...
+    int thetab = activetab;
+    if (term != NULL) {
+        int i;
+        for (i = 0; i < tabs->len; i++) {
+            if (g_array_index(tabs, GtkWidget *, i) == term) {
+                thetab = i;
+                break;
+            }
+        }
+    }
+
+    if (thetab >= 0) {
+        g_array_remove_index(tabs, thetab);
         tabcount--;
         if (tabcount <= 0)
             gtk_widget_destroy(GTK_WIDGET(mainwindow));
         else {
-            gtk_notebook_remove_page(tabbar, activetab);
+            gtk_notebook_remove_page(tabbar, thetab);
             activetab = gtk_notebook_get_current_page(tabbar);
 
             if (tabcount == 1 && conf_get_show_tab() == TABS_ONE)
@@ -373,7 +385,7 @@ static void mainwindow_new_tab(GtkWidget *widget, gpointer user_data) {
 }
 
 static void mainwindow_delete_tab(GtkWidget *widget, gpointer user_data) {
-    mainwindow_close_tab();
+    mainwindow_close_tab(NULL);
     if (tabcount > 0)
         mainwindow_focus_terminal();
 }
