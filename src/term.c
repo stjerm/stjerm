@@ -64,7 +64,10 @@ GtkWidget* build_term(void) {
     vte_terminal_set_font_from_string(VTE_TERMINAL(term), conf_get_font());
     vte_terminal_set_scrollback_lines(VTE_TERMINAL(term), conf_get_lines());
     vte_terminal_set_backspace_binding(VTE_TERMINAL(term), 
-            VTE_ERASE_ASCII_DELETE);
+        VTE_ERASE_ASCII_DELETE);
+    vte_terminal_set_word_chars(VTE_TERMINAL(term),
+        "-A-Za-z0-9_$.+!*(),;:@&=?/~#%");
+
     
     term_connect_signals(term);
     return term;
