@@ -68,6 +68,8 @@ static void mainwindow_prev_tab(GtkWidget *widget, gpointer user_data);
 static void mainwindow_new_tab(GtkWidget *widget, gpointer user_data);
 static void mainwindow_delete_tab(GtkWidget *widget, gpointer user_data);
 static void mainwindow_toggle_fullscreen(GtkWidget *widget, gpointer user_data);
+static void mainwindow_copy(GtkWidget *widget, gpointer user_data);
+static void mainwindow_paste(GtkWidget *widget, gpointer user_data);
 
 void build_mainwindow(void) {
     mainwindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
@@ -82,14 +84,14 @@ void build_mainwindow(void) {
 
     fullscreen = FALSE;
     toggled = FALSE;
-    
+
     GtkAccelGroup* accel_group;
     GClosure *new_tab, *delete_tab, *next_tab, *prev_tab, *delete_all,
-        *maximize;
+             *maximize, *copy, *paste;
 
     GClosure *goto_tab_closure[10];
-    int i;
-    
+    long i;
+
     accel_group = gtk_accel_group_new();
     gtk_window_add_accel_group(GTK_WINDOW(mainwindow), accel_group);
 
@@ -97,7 +99,7 @@ void build_mainwindow(void) {
             NULL, NULL);
     gtk_accel_group_connect(accel_group, GDK_F11, 0,
             GTK_ACCEL_VISIBLE, maximize);
-    
+
     new_tab = g_cclosure_new_swap(G_CALLBACK(mainwindow_new_tab), 
             NULL, NULL);
     gtk_accel_group_connect(accel_group, 't', conf_get_key_mod(),
@@ -130,6 +132,16 @@ void build_mainwindow(void) {
         gtk_accel_group_connect(accel_group, '0' + ((i+1)%10), GDK_MOD1_MASK,
                 GTK_ACCEL_VISIBLE, goto_tab_closure[i]);
     }
+
+    copy = g_cclosure_new_swap(G_CALLBACK(mainwindow_copy), 
+            NULL, NULL);
+    gtk_accel_group_connect(accel_group, 'c', conf_get_key_mod(),
+            GTK_ACCEL_VISIBLE, copy);
+
+    paste = g_cclosure_new_swap(G_CALLBACK(mainwindow_paste), 
+            NULL, NULL);
+    gtk_accel_group_connect(accel_group, 'v', conf_get_key_mod(),
+            GTK_ACCEL_VISIBLE, paste);
 
     activetab = -1;
     tabs = g_array_new(TRUE, FALSE, sizeof(VteTerminal*));
@@ -197,13 +209,13 @@ void mainwindow_create_tab(void) {
         gtk_box_pack_start(GTK_BOX(tmp_box), tmp_term, TRUE, TRUE, 0);
     else if (conf_get_scrollbar() == POS_LEFT) {
         sbar = GTK_VSCROLLBAR(gtk_vscrollbar_new(vte_terminal_get_adjustment(
-        VTE_TERMINAL(tmp_term))));
+                        VTE_TERMINAL(tmp_term))));
         gtk_box_pack_start(GTK_BOX(tmp_box), GTK_WIDGET(sbar), FALSE, FALSE, 0);
         gtk_box_pack_end(GTK_BOX(tmp_box), GTK_WIDGET(tmp_term), TRUE, TRUE, 0);
     } else // (conf_get_scrollbar() == POS_RIGHT)
     {
         sbar = GTK_VSCROLLBAR(gtk_vscrollbar_new(vte_terminal_get_adjustment(
-        VTE_TERMINAL(tmp_term))));
+                        VTE_TERMINAL(tmp_term))));
         gtk_box_pack_start(GTK_BOX(tmp_box), GTK_WIDGET(tmp_term), TRUE, TRUE, 0);
         gtk_box_pack_end(GTK_BOX(tmp_box), GTK_WIDGET(sbar), FALSE, FALSE, 0);
     }
@@ -216,10 +228,10 @@ void mainwindow_create_tab(void) {
         if (screen_is_composited) {
             vte_terminal_set_background_transparent(VTE_TERMINAL(tmp_term), FALSE);
             vte_terminal_set_opacity(VTE_TERMINAL(tmp_term),
-            conf_get_opacity()/100 * 0xffff);
+                    conf_get_opacity()/100 * 0xffff);
         } else {
             vte_terminal_set_background_saturation(VTE_TERMINAL(tmp_term),
-                1.0 - conf_get_opacity()/100);
+                    1.0 - conf_get_opacity()/100);
             if (conf_get_bg_image() == NULL)
                 vte_terminal_set_background_transparent(VTE_TERMINAL(tmp_term), TRUE);
         }
@@ -228,7 +240,7 @@ void mainwindow_create_tab(void) {
     if (conf_get_opacity() < 100 && screen_is_composited) {
         vte_terminal_set_background_transparent(VTE_TERMINAL(tmp_term), FALSE);
         vte_terminal_set_opacity(VTE_TERMINAL(tmp_term),
-        conf_get_opacity()/100 * 0xffff);
+                conf_get_opacity()/100 * 0xffff);
     }
     g_signal_connect(G_OBJECT(tmp_term), "window-title-changed",
             G_CALLBACK(mainwindow_window_title_changed), tmp_label);
@@ -318,13 +330,13 @@ static void mainwindow_reset_position(void) {
     gtk_widget_set_size_request(mainwindow, conf_get_width(), conf_get_height());
 }
 
-static void mainwindow_show(GtkWidget *widget, gpointer userdata) {
-    if (dpy != NULL)
-        return;
+    static void mainwindow_show(GtkWidget *widget, gpointer userdata) {
+        if (dpy != NULL)
+            return;
 
-    mw_xwin = GDK_WINDOW_XWINDOW(GTK_WIDGET(mainwindow)->window);
-    dpy = GDK_DISPLAY_XDISPLAY(gdk_display_get_default());
-}
+        mw_xwin = GDK_WINDOW_XWINDOW(GTK_WIDGET(mainwindow)->window);
+        dpy = GDK_DISPLAY_XDISPLAY(gdk_display_get_default());
+    }
 
 static void mainwindow_focus_out_event(GtkWindow* window, GdkEventFocus* event,
         gpointer userdata) {
@@ -387,13 +399,19 @@ static void mainwindow_goto_tab(gint i) {
 }
 
 static void mainwindow_next_tab(GtkWidget *widget, gpointer user_data) {
-    gtk_notebook_next_page(tabbar);
+    if(gtk_notebook_get_current_page(tabbar) == (tabcount - 1))
+        gtk_notebook_set_current_page(tabbar, 0);
+    else
+        gtk_notebook_next_page(tabbar);
     activetab = gtk_notebook_get_current_page(tabbar);
     mainwindow_focus_terminal();
 }
 
 static void mainwindow_prev_tab(GtkWidget *widget, gpointer user_data) {
-    gtk_notebook_prev_page(tabbar);
+    if(gtk_notebook_get_current_page(tabbar) == (0))
+        gtk_notebook_set_current_page(tabbar, (tabcount - 1));
+    else    
+        gtk_notebook_prev_page(tabbar);
     activetab = gtk_notebook_get_current_page(tabbar);
     mainwindow_focus_terminal();
 }
@@ -429,8 +447,19 @@ int handle_x_error(Display *dpy, XErrorEvent *evt) {
     return 0;
 }
 
-static void mainwindow_focus_terminal(void) {
-    if (activetab >= 0)
+    static void mainwindow_focus_terminal(void) {
+        if (activetab >= 0)
             gtk_window_set_focus(GTK_WINDOW(mainwindow), 
                     GTK_WIDGET(g_array_index(tabs, VteTerminal*, activetab)));
+    }
+
+static void mainwindow_copy(GtkWidget *widget, gpointer user_data) {
+    vte_terminal_copy_clipboard
+        (g_array_index(tabs, VteTerminal*, activetab));
+}
+
+static void mainwindow_paste(GtkWidget *widget, gpointer user_data) 
+{
+    vte_terminal_paste_clipboard
+        (g_array_index(tabs, VteTerminal*, activetab));
 }
