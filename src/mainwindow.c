@@ -147,7 +147,10 @@ void build_mainwindow(void) {
     tabs = g_array_new(TRUE, FALSE, sizeof(VteTerminal*));
     tabcount = 0;
     GtkVBox* mainbox = GTK_VBOX(gtk_vbox_new(FALSE, 0));
+    
     tabbar = GTK_NOTEBOOK(gtk_notebook_new());
+    gtk_notebook_set_tab_reorderable(tabbar, NULL, TRUE);
+    
     g_signal_connect(G_OBJECT(tabbar), "switch-page",
             G_CALLBACK(mainwindow_switch_tab), NULL);
 
