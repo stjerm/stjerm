@@ -52,6 +52,9 @@ void mainwindow_close_tab(GtkWidget *term);
 void mainwindow_toggle_full(void);
 int handle_x_error(Display *dpy, XErrorEvent *evt);
 
+static GRegex **uri_regex;
+static guint uri_regex_count;
+
 static void mainwindow_reset_position(void);
 static void mainwindow_focus_terminal(void);
 static void mainwindow_show(GtkWidget*, gpointer);
@@ -59,9 +62,9 @@ static void mainwindow_focus_out_event(GtkWindow*, GdkEventFocus*, gpointer);
 static gboolean mainwindow_expose_event(GtkWidget*, GdkEventExpose*, gpointer);
 static void mainwindow_destroy(GtkWidget*, gpointer);
 static void mainwindow_window_title_changed(VteTerminal *vteterminal,
-        gpointer user_data);
+    gpointer user_data);
 static void mainwindow_switch_tab(GtkNotebook *notebook, GtkNotebookPage *page,
-        guint page_num, gpointer user_data);
+    guint page_num, gpointer user_data);
 static void mainwindow_goto_tab(gint i);
 static void mainwindow_next_tab(GtkWidget *widget, gpointer user_data);
 static void mainwindow_prev_tab(GtkWidget *widget, gpointer user_data);
@@ -71,7 +74,27 @@ static void mainwindow_toggle_fullscreen(GtkWidget *widget, gpointer user_data);
 static void mainwindow_copy(GtkWidget *widget, gpointer user_data);
 static void mainwindow_paste(GtkWidget *widget, gpointer user_data);
 
-void build_mainwindow(void) {
+void build_mainwindow(void)
+{
+    guint ic;
+  
+    uri_regex_count = G_N_ELEMENTS (uri_patterns);
+    uri_regex = g_new0 (GRegex*, uri_regex_count);
+
+    for(ic = 0; ic < uri_regex_count; ++ic)
+    {
+        GError *error = NULL;
+        
+        uri_regex[ic] = g_regex_new(uri_patterns[ic].pattern,
+            uri_patterns[ic].flags | G_REGEX_OPTIMIZE, 0, &error);
+        
+        if(error)
+        {
+            g_message ("%s", error->message);
+            g_error_free (error);
+        }
+    }
+
     mainwindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
     gtk_widget_set_app_paintable(mainwindow, TRUE);
@@ -265,7 +288,15 @@ void mainwindow_create_tab(void) {
     gtk_notebook_set_current_page(tabbar, activetab);
 
     if (conf_get_allow_reorder())
-        gtk_notebook_set_tab_reorderable(tabbar, GTK_WIDGET(tmp_box), TRUE); 
+        gtk_notebook_set_tab_reorderable(tabbar, GTK_WIDGET(tmp_box), TRUE);
+        
+    guint i;
+    
+    for(i = 0; i < uri_regex_count; ++i)
+    {
+        int tag = vte_terminal_match_add_gregex(VTE_TERMINAL(tmp_term), uri_regex[i], 0);
+        vte_terminal_match_set_cursor_type(VTE_TERMINAL(tmp_term), tag, GDK_HAND2);
+    }
 }
 
 void mainwindow_close_tab(GtkWidget *term) {

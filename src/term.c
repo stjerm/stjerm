@@ -26,6 +26,7 @@
 #include "stjerm.h"
 
 extern GtkWidget *mainwindow;
+extern GtkNotebook* tabbar;
 extern GtkWidget *popupmenu;
 extern gboolean popupmenu_shown;
 
@@ -104,16 +105,49 @@ static void term_connect_signals(GtkWidget *term) {
             (gpointer)TERM_MOVE_WINDOW);
 }
 
-static gboolean term_button_press(GtkWidget *widget, GdkEventButton *event,
-        gpointer user_data) {
-    if (event->type == GDK_BUTTON_PRESS && event->button == 3) {
+static CursorMatch term_cursor_match_pattern(GdkEventButton* event)
+{
+    int tag = -1;
+    
+    gint page = gtk_notebook_get_current_page(GTK_NOTEBOOK(tabbar));
+    
+    GtkWidget *vte = gtk_container_get_focus_child(GTK_CONTAINER(gtk_notebook_get_nth_page(GTK_NOTEBOOK(tabbar), page)));
+
+    glong column = ((glong) (event->x) / vte_terminal_get_char_width(VTE_TERMINAL(vte)));
+    glong row = ((glong) (event->y) / vte_terminal_get_char_height(VTE_TERMINAL(vte)));
+    
+    char* current_match = vte_terminal_match_check(VTE_TERMINAL(vte), column, row, &tag);
+
+    CursorMatch match;
+
+    match.tag = tag;
+    match.text = current_match;
+    
+    return match;
+}
+
+static gboolean term_button_press(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
+{
+    if(event->type == GDK_BUTTON_PRESS && event->button == 3)
+    {
         popupmenu_shown = TRUE;
-        gtk_menu_popup(GTK_MENU(popupmenu), NULL, NULL, NULL, NULL,
-                event->button, event->time);
+        gtk_menu_popup(GTK_MENU(popupmenu), NULL, NULL, NULL, NULL, event->button, event->time);
+    }
+    else if (event->button == 1)
+    {
+        GError *error = NULL; 
+        CursorMatch match = term_cursor_match_pattern(event);
+        
+        if(match.tag >= 0)
+        {
+            gtk_show_uri(NULL, match.text, event->time, &error);
+        }
     }
 
     return FALSE;
 }
+
+
 
 static void term_eof_or_child_exited(VteTerminal *term, gpointer user_data) {
     if (vte_terminal_get_child_exit_status(term) != 0) {

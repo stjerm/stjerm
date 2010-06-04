@@ -54,6 +54,24 @@
 #define TABS_ONE    1
 #define TABS_ALWAYS 2
 
+#define OPTION_COUNT 28
+
+
+// The following defines borrowed from gnome-terminal:
+
+#define USERCHARS "-[:alnum:]"
+#define USERCHARS_CLASS "[" USERCHARS "]"
+#define PASSCHARS_CLASS "[-[:alnum:]\\Q,?;.:/!%$^*&~\"#'\\E]"
+#define HOSTCHARS_CLASS "[-[:alnum:]]"
+#define HOST HOSTCHARS_CLASS "+(\\." HOSTCHARS_CLASS "+)*"
+#define PORT "(?:\\:[[:digit:]]{1,5})?"
+#define PATHCHARS_CLASS "[-[:alnum:]\\Q_$.+!*,;@&=?/~#%\\E]"
+#define PATHTERM_CLASS "[^\\Q]'.}>) \t\r\n,\"\\E]"
+#define SCHEME "(?:news:|telnet:|nntp:|file:\\/|https?:|ftps?:|sftp:|webcal:)"
+#define USERPASS USERCHARS_CLASS "+(?:" PASSCHARS_CLASS "+)?"
+#define URLPATH   "(?:(/"PATHCHARS_CLASS"+(?:[(]"PATHCHARS_CLASS"*[)])*"PATHCHARS_CLASS"*)*"PATHTERM_CLASS")?"
+
+
 typedef struct {
     char long_name[18];
     char short_name[12];
@@ -61,7 +79,33 @@ typedef struct {
     char desc[150];
 } Option;
 
-#define OPTION_COUNT 28
+typedef enum {
+    URL_TYPE_HTTP,
+    URL_TYPE_EMAIL,
+    URL_TYPE_NEWS
+} UrlTypes;
+
+typedef struct {
+  const char *pattern;
+  UrlTypes url_type;
+  GRegexCompileFlags flags;
+} RegExPattern;
+
+typedef struct {
+    int tag;
+    char *text;
+} CursorMatch;
+
+
+// The following patterns borrowed from gnome-terminal:
+
+static const RegExPattern uri_patterns[] = {
+  { "news:[[:alnum:]\\Q^_{|}~!\"#$%&'()*+,./;:=?`\\E]+", URL_TYPE_NEWS, G_REGEX_CASELESS  },
+  { SCHEME "//(?:" USERPASS "\\@)?" HOST PORT URLPATH, URL_TYPE_HTTP, G_REGEX_CASELESS },
+  { "(?:www|ftp)" HOSTCHARS_CLASS "*\\." HOST PORT URLPATH , URL_TYPE_HTTP, G_REGEX_CASELESS  },
+  { "(?:mailto:)?" USERCHARS_CLASS "[" USERCHARS ".]*\\@" HOSTCHARS_CLASS "+\\." HOST, URL_TYPE_EMAIL, G_REGEX_CASELESS  },
+};
+
 
 extern void print_help(void);
 extern void print_info(void);
