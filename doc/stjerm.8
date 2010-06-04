@@ -1,4 +1,4 @@
-.TH STJERM "8" "Last Change: 09-06-2008" "stjerm 0.11" ""
+.TH STJERM "8" "Last Change: 05 Jun 2010" "stjerm 0.15" ""
 .SH NAME
 stjerm \- quake\-style terminal emulator
 .SH SYNOPSIS
@@ -46,7 +46,7 @@ Modifier for keyboard shortcuts. Can be a combination (with +) of modifiers (eg:
 .B "autohide, \-ah"
 Whether or not to hide stjerm when it looses focus. Default: \fItrue\fR.
 .TP
-.B "font, \-f"
+.B "font, \-fn"
 Terminal font and size (eg: Sans 10). Default: \fIBitstream Vera Sans Mono 10\fR.
 .TP
 .B "background, \-bg"
@@ -72,6 +72,12 @@ Window width. Default: \fI800\fR.
 .TP
 .B "height, \-h"
 Window height. Default: \fI400\fR.
+.TP
+.B "width, \-wp"
+Window width in percent. Overrides the width if defined.
+.TP
+.B "height, \-hp"
+Window height in percent. Overrides the height if defined.
 .TP
 .B "position, \-p"
 Window position: top, bottom, left, right. Default: \fItop\fR.
