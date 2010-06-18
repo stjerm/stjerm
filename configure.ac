@@ -31,7 +31,7 @@ AC_SUBST(gthread_LIBS)
 AC_SUBST(gthread_CFLAGS)
 
 # gthread
-PKG_CHECK_MODULES([vte], vte >= 0.16)
+PKG_CHECK_MODULES([vte], vte >= 0.20)
 AC_SUBST(vte_LIBS)
 AC_SUBST(vte_CFLAGS)
 
