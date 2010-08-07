@@ -147,7 +147,10 @@ pid_t get_stjerm_pid(void) {
         exit(1);
     }
     char buffer[100];
-    fgets(buffer, sizeof(buffer), p);
+    if(fgets(buffer, sizeof(buffer), p) == NULL) {
+        fprintf(stderr, "error: unable to read stjerm pid\n");
+        exit(1);
+    }
     pclose(p);
     char **list;
     list = g_strsplit_set(buffer, " ", -1);
