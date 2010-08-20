@@ -2,8 +2,7 @@
  * popupmenu.c
  * This file is part of Stjerm
  *
- * Copyright (C) 2007 - Stjepan Glavina
- * Copyright (C) 2007 - Markus Groß
+ * Copyright (C) 2007-2010 - Kristopher Wilson, Stjepan Glavina and Markus Groß
  * 
  * Stjerm is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

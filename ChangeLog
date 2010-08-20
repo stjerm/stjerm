@@ -1,3 +1,13 @@
+17-08-2010 Kristopher Wilson <kristopherwilson@gmail.com>
+released version 0.12
+added ability to drag and drop tabs for sorting
+added ability to specify width and height as a percentage (thomas.jost)
+added character selection string for better highlighting
+fixed behavior issue when typing exit (thomas.jost)
+added tab hotkey feature (thomas.jost)
+added keyboard copy and paste functionality (andfagiani)
+added clickable link functionality
+
 09-10-2007 Markus Gross <xsdnyd@gmail.com>
 fixed --toggle (again)
 
