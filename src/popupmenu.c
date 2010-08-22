@@ -87,17 +87,15 @@ static void popupmenu_activate(gchar *label)
     }
     else if(!strcmp(label, "Copy"))
     {
-        vte_terminal_copy_clipboard
-            (g_array_index(tabs, VteTerminal*, activetab));
+        vte_terminal_copy_clipboard(g_array_index(tabs, VteTerminal*, activetab));
     }
     else if(!strcmp(label, "Paste"))
     {
-        vte_terminal_paste_clipboard(g_array_index(tabs, VteTerminal*,
-            activetab));
+        vte_terminal_paste_clipboard(g_array_index(tabs, VteTerminal*, activetab));
     }
     else if(!strcmp(label, "Toggle Fullscreen"))
     {
-        mainwindow_toggle_full();
+        mainwindow_toggle_fullscreen();
     }
     else if(!strcmp(label, "Quit"))
     {

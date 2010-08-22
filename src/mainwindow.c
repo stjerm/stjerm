@@ -48,7 +48,7 @@ void build_mainwindow(void);
 void mainwindow_toggle(int sig);
 void mainwindow_create_tab(void);
 void mainwindow_close_tab(GtkWidget *term);
-void mainwindow_toggle_full(void);
+void mainwindow_toggle_fullscreen(void);
 int handle_x_error(Display *dpy, XErrorEvent *evt);
 
 static GRegex **uri_regex;
@@ -69,7 +69,6 @@ static void mainwindow_next_tab(GtkWidget *widget, gpointer user_data);
 static void mainwindow_prev_tab(GtkWidget *widget, gpointer user_data);
 static void mainwindow_new_tab(GtkWidget *widget, gpointer user_data);
 static void mainwindow_delete_tab(GtkWidget *widget, gpointer user_data);
-static void mainwindow_toggle_fullscreen(GtkWidget *widget, gpointer user_data);
 static void mainwindow_copy(GtkWidget *widget, gpointer user_data);
 static void mainwindow_paste(GtkWidget *widget, gpointer user_data);
 
@@ -101,7 +100,7 @@ void build_mainwindow(void)
     gtk_window_set_decorated(GTK_WINDOW(mainwindow), FALSE);
     gtk_window_set_skip_taskbar_hint(GTK_WINDOW(mainwindow), TRUE);
     gtk_window_set_skip_pager_hint(GTK_WINDOW(mainwindow), TRUE);
-    gtk_window_set_resizable(GTK_WINDOW(mainwindow), FALSE);
+    gtk_window_set_resizable(GTK_WINDOW(mainwindow), TRUE);
     mainwindow_reset_position();
 
     fullscreen = FALSE;
@@ -379,9 +378,18 @@ void mainwindow_toggle(int sig)
     gdk_threads_leave();
 }
 
-void mainwindow_toggle_full(void)
+void mainwindow_toggle_fullscreen(void)
 {
-    mainwindow_toggle_fullscreen(NULL, NULL);
+    if(fullscreen)
+    {
+        gtk_window_unfullscreen(GTK_WINDOW(mainwindow));
+        mainwindow_reset_position();
+    }
+    else
+        gtk_window_fullscreen(GTK_WINDOW(mainwindow));
+    
+    fullscreen = !fullscreen;
+    mainwindow_focus_terminal();
 }
 
 static void mainwindow_reset_position(void)
@@ -500,20 +508,6 @@ static void mainwindow_delete_tab(GtkWidget *widget, gpointer user_data)
 
     if(tabcount > 0)
         mainwindow_focus_terminal();
-}
-
-static void mainwindow_toggle_fullscreen(GtkWidget *widget, gpointer user_data)
-{
-    if(fullscreen)
-    {
-        gtk_window_unfullscreen(GTK_WINDOW(mainwindow));
-        mainwindow_reset_position();
-    }
-    else
-        gtk_window_fullscreen(GTK_WINDOW(mainwindow));
-    
-    fullscreen = !fullscreen;
-    mainwindow_focus_terminal();
 }
 
 int handle_x_error(Display *dpy, XErrorEvent *evt)
