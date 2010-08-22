@@ -85,9 +85,9 @@ typedef enum {
 } UrlTypes;
 
 typedef struct {
-  const char *pattern;
-  UrlTypes url_type;
-  GRegexCompileFlags flags;
+    const char *pattern;
+    UrlTypes url_type;
+    GRegexCompileFlags flags;
 } RegExPattern;
 
 typedef struct {
@@ -99,10 +99,10 @@ typedef struct {
 // The following patterns borrowed from gnome-terminal:
 
 static const RegExPattern uri_patterns[] = {
-  { "news:[[:alnum:]\\Q^_{|}~!\"#$%&'()*+,./;:=?`\\E]+", URL_TYPE_NEWS, G_REGEX_CASELESS  },
-  { SCHEME "//(?:" USERPASS "\\@)?" HOST PORT URLPATH, URL_TYPE_HTTP, G_REGEX_CASELESS },
-  { "(?:www|ftp)" HOSTCHARS_CLASS "*\\." HOST PORT URLPATH , URL_TYPE_HTTP, G_REGEX_CASELESS  },
-  { "(?:mailto:)?" USERCHARS_CLASS "[" USERCHARS ".]*\\@" HOSTCHARS_CLASS "+\\." HOST, URL_TYPE_EMAIL, G_REGEX_CASELESS  },
+    {"news:[[:alnum:]\\Q^_{|}~!\"#$%&'()*+,./;:=?`\\E]+", URL_TYPE_NEWS, G_REGEX_CASELESS },
+    {SCHEME "//(?:" USERPASS "\\@)?" HOST PORT URLPATH, URL_TYPE_HTTP, G_REGEX_CASELESS},
+    {"(?:www|ftp)" HOSTCHARS_CLASS "*\\." HOST PORT URLPATH , URL_TYPE_HTTP, G_REGEX_CASELESS},
+    {"(?:mailto:)?" USERCHARS_CLASS "[" USERCHARS ".]*\\@" HOSTCHARS_CLASS "+\\." HOST, URL_TYPE_EMAIL, G_REGEX_CASELESS},
 };
 
 
