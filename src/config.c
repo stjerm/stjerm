@@ -79,6 +79,7 @@ static gboolean parse_bool_str(char *value, gboolean def);
 static GdkModifierType parse_mod(char *value);
 static pid_t get_stjerm_pid(void);
 
+void conf_parse_size(char*, int*, int*);
 void read_value(char *name, char *value);
 void init_default_values(void);
 void conf_init(void);
@@ -120,10 +121,8 @@ Option options[OPTION_COUNT] = {
     {"border", "-b", "TYPE", "Border type: thin, thick, none. Default: none."},
     {"opacity", "-o", "NUMBER", "Opacity (range: 10 - 100). Default: 100."},
     {"bgimage", "-bgimg", "FILE", "Background image to use on terminal."},
-    {"width", "-w", "NUMBER", "Window width. Default: 800."},
-    {"height", "-h", "NUMBER", "Window height. Default: 400."},
-    {"widthpercent", "-wp", "NUMBER", "Window width in percent. Overrides the width if defined."},
-    {"heightpercent", "-hp", "NUMBER", "Window height in percent. Overrides the height if defined."},
+    {"width", "-w", "NUMBER", "Window width, either as an integer or a percentage (eg, 50%). Default: 800."},
+    {"height", "-h", "NUMBER", "Window height, either as an integer or a percentage (eg, 50%).. Default: 400."},
     {"position", "-p", "POSITION", "Window position: top, bottom, left, right. Default: top."},
     {"scrollbar", "-s", "POSITION", "Scrollbar position: left, right, none. Default: none."},
     {"shell", "-sh", "STRING", "Terminal Shell. Default: the user's default shell."},
@@ -365,15 +364,9 @@ void read_value(char *name, char *value)
         else if(!strcmp("bgimage", name) || !strcmp("-bgimg", name))
             strcpy(_bgimage, value);
         else if(!strcmp("width", name) || !strcmp("-w", name))
-        {
-            _width = atoi(value);
-        }
+            conf_parse_size(value, &_width, &_width_percent);
         else if(!strcmp("height", name) || !strcmp("-h", name))
-            _height = atoi(value);
-        else if(!strcmp("widthpercent", name) || !strcmp("-wp", name))
-            _width_percent = atoi(value);
-        else if(!strcmp("heightpercent", name) || !strcmp("-hp", name))
-            _height_percent = atoi(value);
+            conf_parse_size(value, &_height, &_height_percent);
         else if(!strcmp("position", name) || !strcmp("-p", name))
             set_pos(value);
         else if(!strcmp("fixedx", name) || !strcmp("-fx", name))
@@ -433,6 +426,19 @@ void read_value(char *name, char *value)
         else if(!strcmp("allowreorder", name) || !strcmp("-ar", name))
             _allowreorder = parse_bool_str(value, _allowreorder);
     }
+}
+
+void conf_parse_size(char *value, int *fixed, int *percentage)
+{
+    if(strchr(value, '%') != NULL)
+    {
+        char tmp[(strlen(value) - 1) * sizeof(char)];
+        strncpy(tmp, value, (strlen(value) - 1) * sizeof(char));
+        tmp[strlen(value) - 1] = '\0';
+        *percentage = atoi(tmp);
+    }
+    else
+        *fixed = atoi(value);
 }
 
 void conf_init(void)
