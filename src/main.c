@@ -30,6 +30,7 @@ extern Option options[OPTION_COUNT];
 
 void print_help(void);
 void print_info(void);
+void print_version(void);
 
 void print_help(void)
 {
@@ -41,6 +42,7 @@ void print_help(void)
         "Actions are:\n"
         "  --help\tDisplay this menu\n"
         "  --info\tDisplay .Xdefault options\n"
+        "  --version\tDisplay the current application version\n"
         "  --toggle\tShow/Hide the current stjerm instance\n"
         "(When using an action command, the options are ignored)\n\n"
         "Options are:\n", STJERM_VERSION, sargv[0]);
@@ -72,6 +74,7 @@ void print_info(void)
         "Actions are:\n"
         "  --help\tDisplay command line options menu\n"
         "  --info\tDisplay .Xdefault options\n"
+        "  --version\tDisplay current application version\n"
         "  --toggle\tShow/Hide the current stjerm instance\n"
         "(When using an action command, the .Xdefaults options are ignored)\n\n"
         "The .Xdefault options are read from ~/.Xdefaults.\n"
@@ -88,6 +91,11 @@ void print_info(void)
     
     printf("\t\t\t\tYou may specify no palette, or a complete one with 16 total colors.\n"
            "\t\t\t\tFor this you have to use color0, color1, ..., color15.\n");
+}
+
+void print_version(void)
+{
+    printf("stjerm %s\n", STJERM_VERSION);
 }
 
 int main(int argc, char *argv[])

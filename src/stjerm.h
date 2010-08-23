@@ -108,6 +108,7 @@ static const RegExPattern uri_patterns[] = {
 
 extern void print_help(void);
 extern void print_info(void);
+extern void print_version(void);
 
 extern void build_mainwindow(void);
 extern GtkWidget* build_term(void);

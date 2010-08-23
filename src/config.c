@@ -365,7 +365,9 @@ void read_value(char *name, char *value)
         else if(!strcmp("bgimage", name) || !strcmp("-bgimg", name))
             strcpy(_bgimage, value);
         else if(!strcmp("width", name) || !strcmp("-w", name))
+        {
             _width = atoi(value);
+        }
         else if(!strcmp("height", name) || !strcmp("-h", name))
             _height = atoi(value);
         else if(!strcmp("widthpercent", name) || !strcmp("-wp", name))
@@ -484,6 +486,11 @@ void conf_init(void)
             else if(!strcmp(sargv[i], "--info"))
             {
                 print_info();
+                exit(1);
+            }
+            else if(!strcmp(sargv[i], "--version"))
+            {
+                print_version();
                 exit(1);
             }
             else if(!strcmp("--toggle", sargv[i]))
