@@ -1,3 +1,12 @@
+24-08-2010 Kristopher Wilson <kristopherwilson@gmail.com>
+released version 0.13
+
+23-08-2010 Kristopher Wilson <kristopherwilson@gmail.com>
+fixed fullscreen functionality bugs
+added --version action
+merged widthpercent and heightpercent into width and height options, respectively
+updated man page and --info and --help actions
+
 17-08-2010 Kristopher Wilson <kristopherwilson@gmail.com>
 released version 0.12
 added ability to drag and drop tabs for sorting

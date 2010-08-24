@@ -1,4 +1,4 @@
-.TH STJERM "8" "Last Change: 17 Aug 2010" "stjerm 0.12" ""
+.TH STJERM "8" "Last Change: 17 Aug 2010" "stjerm 0.13" ""
 .SH NAME
 stjerm \- quake\-style terminal emulator
 .SH SYNOPSIS
@@ -27,6 +27,9 @@ Displays menu with commandline options.
 .TP
 .B "\-\-info"
 Displays menu with .Xdefaults options.
+.TP
+.B "\-\-version"
+Display the current application version.
 .TP
 .B "\-\-toggle"
 Show/hide the current \fBstjerm\fR instance.
@@ -68,16 +71,10 @@ Opacity (range: 10 - 100). If compositing is enabled \fBstjerm\fR will use real 
 Background image file. Specify the filename. Default: \fIdisabled\fR.
 .TP
 .B "width, \-w"
-Window width. Default: \fI800\fR.
+Window width, either as an integer or a percentage (eg, 50%). Default: \fI800\fR.
 .TP
 .B "height, \-h"
-Window height. Default: \fI400\fR.
-.TP
-.B "widthpercent, \-wp"
-Window width in percent. Overrides the width if defined.
-.TP
-.B "heightpercent, \-hp"
-Window height in percent. Overrides the height if defined.
+Window height, either as an integer or a percentage (eg, 50%). Default: \fI400\fR.
 .TP
 .B "position, \-p"
 Window position: top, bottom, left, right. Default: \fItop\fR.

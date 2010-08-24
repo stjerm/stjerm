@@ -53,7 +53,7 @@
 #define TABS_ONE    1
 #define TABS_ALWAYS 2
 
-#define OPTION_COUNT 28
+#define OPTION_COUNT 26
 
 
 // The following defines borrowed from gnome-terminal:
@@ -85,9 +85,9 @@ typedef enum {
 } UrlTypes;
 
 typedef struct {
-  const char *pattern;
-  UrlTypes url_type;
-  GRegexCompileFlags flags;
+    const char *pattern;
+    UrlTypes url_type;
+    GRegexCompileFlags flags;
 } RegExPattern;
 
 typedef struct {
@@ -99,15 +99,16 @@ typedef struct {
 // The following patterns borrowed from gnome-terminal:
 
 static const RegExPattern uri_patterns[] = {
-  { "news:[[:alnum:]\\Q^_{|}~!\"#$%&'()*+,./;:=?`\\E]+", URL_TYPE_NEWS, G_REGEX_CASELESS  },
-  { SCHEME "//(?:" USERPASS "\\@)?" HOST PORT URLPATH, URL_TYPE_HTTP, G_REGEX_CASELESS },
-  { "(?:www|ftp)" HOSTCHARS_CLASS "*\\." HOST PORT URLPATH , URL_TYPE_HTTP, G_REGEX_CASELESS  },
-  { "(?:mailto:)?" USERCHARS_CLASS "[" USERCHARS ".]*\\@" HOSTCHARS_CLASS "+\\." HOST, URL_TYPE_EMAIL, G_REGEX_CASELESS  },
+    {"news:[[:alnum:]\\Q^_{|}~!\"#$%&'()*+,./;:=?`\\E]+", URL_TYPE_NEWS, G_REGEX_CASELESS },
+    {SCHEME "//(?:" USERPASS "\\@)?" HOST PORT URLPATH, URL_TYPE_HTTP, G_REGEX_CASELESS},
+    {"(?:www|ftp)" HOSTCHARS_CLASS "*\\." HOST PORT URLPATH , URL_TYPE_HTTP, G_REGEX_CASELESS},
+    {"(?:mailto:)?" USERCHARS_CLASS "[" USERCHARS ".]*\\@" HOSTCHARS_CLASS "+\\." HOST, URL_TYPE_EMAIL, G_REGEX_CASELESS},
 };
 
 
 extern void print_help(void);
 extern void print_info(void);
+extern void print_version(void);
 
 extern void build_mainwindow(void);
 extern GtkWidget* build_term(void);
@@ -116,7 +117,7 @@ extern void build_popupmenu(void);
 extern void mainwindow_toggle(int sig);
 extern void mainwindow_create_tab(void);
 extern void mainwindow_close_tab(GtkWidget *);
-extern void mainwindow_toggle_full(void);
+extern void mainwindow_toggle_fullscreen(void);
 extern void init_key(void);
 extern void grab_key(void);
 extern void wait_key(void);
