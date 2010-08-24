@@ -3,7 +3,7 @@
 # (see: sarine.nl/gmpc)
 AC_INIT(src)
 AC_PREREQ(2.59)
-AM_INIT_AUTOMAKE([stjerm], [0.12], kristopherwilson@gmail.com)
+AM_INIT_AUTOMAKE([stjerm], [0.13], kristopherwilson@gmail.com)
 #AC_INIT(FULL-PACKAGE-NAME, VERSION, BUG-REPORT-ADDRESS)
 AC_CONFIG_SRCDIR([src/mainwindow.c])
 AC_CONFIG_HEADER([config.h])
