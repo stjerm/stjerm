@@ -29,6 +29,8 @@
 #include <stdlib.h>
 #include "stjerm.h"
 
+extern GtkWidget *popupmenu;
+extern GtkImageMenuItem *close_tab;
 extern gboolean popupmenu_shown;
 
 GtkWidget *mainwindow;
@@ -43,6 +45,8 @@ Atom opacityatom;
 gboolean screen_is_composited;
 gboolean fullscreen;
 gboolean toggled;
+
+
 
 void build_mainwindow(void);
 void mainwindow_toggle(int sig);
@@ -71,6 +75,8 @@ static void mainwindow_new_tab(GtkWidget *widget, gpointer user_data);
 static void mainwindow_delete_tab(GtkWidget *widget, gpointer user_data);
 static void mainwindow_copy(GtkWidget *widget, gpointer user_data);
 static void mainwindow_paste(GtkWidget *widget, gpointer user_data);
+
+static void mainwindow_notebook_clicked(GtkWidget *widget, GdkEventButton *event, gpointer func_data);
 
 void build_mainwindow(void)
 {
@@ -214,6 +220,9 @@ void build_mainwindow(void)
     g_signal_connect(G_OBJECT(mainwindow), "destroy",
         G_CALLBACK(mainwindow_destroy), NULL);
 
+    g_signal_connect(G_OBJECT(tabbar), "button_press_event", 
+        G_CALLBACK(mainwindow_notebook_clicked), NULL);
+
     gtk_notebook_set_show_border(tabbar, FALSE);
     gtk_notebook_set_scrollable(tabbar, TRUE);
     if (conf_get_show_tab() == TABS_ONE|| conf_get_show_tab() == TABS_NEVER)
@@ -225,6 +234,11 @@ void build_mainwindow(void)
     init_key();
     grab_key();
     g_thread_create((GThreadFunc)wait_key, NULL, FALSE, NULL);
+}
+
+void mainwindow_notebook_clicked(GtkWidget *widget, GdkEventButton *event, gpointer func_data)
+{
+
 }
 
 void mainwindow_create_tab(void)
@@ -307,6 +321,10 @@ void mainwindow_create_tab(void)
         int tag = vte_terminal_match_add_gregex(VTE_TERMINAL(tmp_term), uri_regex[i], 0);
         vte_terminal_match_set_cursor_type(VTE_TERMINAL(tmp_term), tag, GDK_HAND2);
     }
+    
+    if(tabcount > 1)
+        gtk_widget_set_sensitive(GTK_WIDGET(close_tab), TRUE);
+        
 }
 
 void mainwindow_close_tab(GtkWidget *term)
@@ -332,19 +350,17 @@ void mainwindow_close_tab(GtkWidget *term)
         g_array_remove_index(tabs, thetab);
         tabcount--;
         
-        if(tabcount <= 0)
-            gtk_widget_destroy(GTK_WIDGET(mainwindow));
-        else
-        {
-            gtk_notebook_remove_page(tabbar, thetab);
-            activetab = gtk_notebook_get_current_page(tabbar);
+        gtk_notebook_remove_page(tabbar, thetab);
+        activetab = gtk_notebook_get_current_page(tabbar);
 
-            if(tabcount == 1 && conf_get_show_tab() == TABS_ONE)
-                gtk_notebook_set_show_tabs(tabbar, FALSE);
-        }
+        if(tabcount == 1 && conf_get_show_tab() == TABS_ONE)
+            gtk_notebook_set_show_tabs(tabbar, FALSE);
     } 
     else
         gtk_widget_destroy(GTK_WIDGET(mainwindow));
+    
+    if(tabcount == 1)
+        gtk_widget_set_sensitive(GTK_WIDGET(close_tab), FALSE);
 }
 
 void mainwindow_toggle(int sig)
