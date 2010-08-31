@@ -1,3 +1,6 @@
+31-08-2010 Kristopher Wilson <kristopherwilson@gmail.com>
+released version 0.14
+
 30-08-2010 Kristopher Wilson <kristopherwilson@gmail.com>
 close tab menu item is no longer available when only one tab is open, no longer exits application
 right clicking on the notebook bar will display the popup menu
