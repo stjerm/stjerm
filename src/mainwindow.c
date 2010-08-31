@@ -76,6 +76,7 @@ static void mainwindow_delete_tab(GtkWidget *widget, gpointer user_data);
 static void mainwindow_copy(GtkWidget *widget, gpointer user_data);
 static void mainwindow_paste(GtkWidget *widget, gpointer user_data);
 
+static gint mainwindow_tab_at_xy(GtkNotebook *notebook, gint abs_x, gint abs_y);
 static void mainwindow_notebook_clicked(GtkWidget *widget, GdkEventButton *event, gpointer func_data);
 
 void build_mainwindow(void)
@@ -220,7 +221,7 @@ void build_mainwindow(void)
     g_signal_connect(G_OBJECT(mainwindow), "destroy",
         G_CALLBACK(mainwindow_destroy), NULL);
 
-    g_signal_connect(G_OBJECT(tabbar), "button_press_event", 
+    g_signal_connect_after(G_OBJECT(tabbar), "button_press_event", 
         G_CALLBACK(mainwindow_notebook_clicked), NULL);
 
     gtk_notebook_set_show_border(tabbar, FALSE);
@@ -238,8 +239,60 @@ void build_mainwindow(void)
 
 void mainwindow_notebook_clicked(GtkWidget *widget, GdkEventButton *event, gpointer func_data)
 {
-
+    gint tabclicked = mainwindow_tab_at_xy(GTK_NOTEBOOK(widget), event->x, event->y);
+    
+    if(tabclicked > -1)
+        gtk_notebook_set_current_page(GTK_NOTEBOOK(widget), tabclicked);
+    else if(event->type == GDK_2BUTTON_PRESS)
+        mainwindow_create_tab();
+    
+    if(event->button == 3)
+    {
+        popupmenu_shown = TRUE;
+        gtk_menu_popup(GTK_MENU(popupmenu), NULL, NULL, NULL, NULL, event->button, event->time);
+    }
 }
+
+/* This code adapted from gnome-terminal */
+static gint mainwindow_tab_at_xy(GtkNotebook *notebook, gint x, gint y)
+{
+    GtkPositionType tab_pos;
+    int page_num = 0;
+    GtkWidget *page;
+    
+    tab_pos = gtk_notebook_get_tab_pos(notebook);
+    
+    if(notebook->first_tab == NULL)
+        return -1;
+
+    while((page = gtk_notebook_get_nth_page(notebook, page_num)))
+    {
+        GtkWidget *screen;
+        gint max_x, max_y;
+
+        screen = gtk_notebook_get_tab_label(notebook, page);
+        g_return_val_if_fail(screen != NULL, -1);
+
+        if(!GTK_WIDGET_MAPPED(GTK_WIDGET(screen)))
+        {
+            page_num++;
+            continue;
+        }
+
+        max_x = screen->allocation.x + screen->allocation.width;
+        max_y = screen->allocation.y + screen->allocation.height;
+
+        if(((tab_pos == GTK_POS_TOP) || (tab_pos == GTK_POS_BOTTOM)) && (x <= max_x))
+            return page_num;
+        else if(((tab_pos == GTK_POS_LEFT) || (tab_pos == GTK_POS_RIGHT)) && (y <= max_y))
+            return page_num;
+        
+        page_num++;
+    }
+
+    return -1;
+}
+
 
 void mainwindow_create_tab(void)
 {
