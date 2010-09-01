@@ -33,7 +33,7 @@ extern GArray* tabs;
 GtkWidget *popupmenu= NULL;
 gboolean popupmenu_shown;
 
-GtkImageMenuItem *close_tab;
+GtkWidget *close_tab;
 
 void build_popupmenu(void);
 static void popupmenu_activate(gchar*);

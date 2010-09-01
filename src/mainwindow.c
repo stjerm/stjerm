@@ -30,7 +30,7 @@
 #include "stjerm.h"
 
 extern GtkWidget *popupmenu;
-extern GtkImageMenuItem *close_tab;
+extern GtkWidget *close_tab;
 extern gboolean popupmenu_shown;
 
 GtkWidget *mainwindow;
@@ -376,7 +376,7 @@ void mainwindow_create_tab(void)
     }
     
     if(tabcount > 1)
-        gtk_widget_set_sensitive(GTK_WIDGET(close_tab), TRUE);
+        gtk_widget_set_sensitive(close_tab, TRUE);
         
 }
 
