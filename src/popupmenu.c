@@ -25,11 +25,15 @@
 #include <string.h>
 #include "stjerm.h"
 
+
+
 extern GtkWidget *mainwindow;
 extern int activetab;
 extern GArray* tabs;
 GtkWidget *popupmenu= NULL;
 gboolean popupmenu_shown;
+
+GtkWidget *close_tab;
 
 void build_popupmenu(void);
 static void popupmenu_activate(gchar*);
@@ -60,6 +64,12 @@ void build_popupmenu(void)
 
         menuitem = gtk_image_menu_item_new_with_label(labels[i]);
         img = gtk_image_new_from_stock(stocks[i], GTK_ICON_SIZE_MENU);
+        
+        if(i == 1)
+        {
+            close_tab = menuitem;
+            gtk_widget_set_sensitive(menuitem, FALSE);
+        }
         
         gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menuitem),
             GTK_WIDGET(img));
