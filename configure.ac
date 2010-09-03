@@ -5,11 +5,11 @@ AC_INIT(src)
 AC_PREREQ(2.59)
 AM_INIT_AUTOMAKE([stjerm], [0.14], kristopherwilson@gmail.com)
 #AC_INIT(FULL-PACKAGE-NAME, VERSION, BUG-REPORT-ADDRESS)
-AC_CONFIG_SRCDIR([src/mainwindow.c])
+AC_CONFIG_SRCDIR([src/main.cc])
 AC_CONFIG_HEADER([config.h])
 
 # Checks for programs.
-AC_PROG_CC
+AC_PROG_CXX
 
 # Checks for libraries.
 AC_SUBST(GLIB_REQUIRED)
@@ -20,15 +20,14 @@ PKG_CHECK_MODULES([glib], glib-2.0 >= 2.10)
 AC_SUBST(glib_LIBS)
 AC_SUBST(glib_CFLAGS)
 
-#gtk
-PKG_CHECK_MODULES([gtk], gtk+-2.0 >= 2.10)
-AC_SUBST(gtk_LIBS)
-AC_SUBST(gtk_CFLAGS)
-
 # gthread
 PKG_CHECK_MODULES([gthread], gthread-2.0)
 AC_SUBST(gthread_LIBS)
 AC_SUBST(gthread_CFLAGS)
+
+PKG_CHECK_MODULES([gtkmm], [gtkmm-2.4 >= 2.12.2])
+AC_SUBST(gtkmm_LIBS)
+AC_SUBST(gtkmm_CFLAGS)
 
 # gthread
 PKG_CHECK_MODULES([vte], vte >= 0.20)
