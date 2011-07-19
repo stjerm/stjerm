@@ -53,7 +53,7 @@
 #define TABS_ONE    1
 #define TABS_ALWAYS 2
 
-#define OPTION_COUNT 26
+#define OPTION_COUNT 27
 
 
 // The following defines borrowed from gnome-terminal:
@@ -135,6 +135,7 @@ extern int conf_get_height(void);
 extern void conf_get_position(int*, int*);
 extern int conf_get_scrollbar(void);
 extern char* conf_get_shell(void);
+extern char* conf_get_emulation(void);
 extern int conf_get_lines(void);
 extern int conf_get_show_tab(void);
 extern char* conf_get_term_name(void);

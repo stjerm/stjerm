@@ -79,6 +79,8 @@ static void mainwindow_paste(GtkWidget *widget, gpointer user_data);
 static gint mainwindow_tab_at_xy(GtkNotebook *notebook, gint abs_x, gint abs_y);
 static void mainwindow_notebook_clicked(GtkWidget *widget, GdkEventButton *event, gpointer func_data);
 
+static void mainwindow_tab_moved(GtkWidget *notebook, GtkWidget *page, guint page_num, gpointer user_data);
+
 void build_mainwindow(void)
 {
     guint ic;
@@ -178,10 +180,12 @@ void build_mainwindow(void)
     GtkVBox* mainbox = GTK_VBOX(gtk_vbox_new(FALSE, 0));
     
     tabbar = GTK_NOTEBOOK(gtk_notebook_new());
-    gtk_notebook_set_tab_reorderable(tabbar, NULL, TRUE);
     
     g_signal_connect(G_OBJECT(tabbar), "switch-page",
         G_CALLBACK(mainwindow_switch_tab), NULL);
+
+    g_signal_connect(G_OBJECT(tabbar), "page-reordered", 
+        G_CALLBACK(mainwindow_tab_moved), NULL);
 
     if(conf_get_opacity() < 100)
     {
@@ -229,7 +233,7 @@ void build_mainwindow(void)
     if (conf_get_show_tab() == TABS_ONE|| conf_get_show_tab() == TABS_NEVER)
         gtk_notebook_set_show_tabs(tabbar, FALSE);
     gtk_notebook_set_tab_pos(tabbar, conf_get_tab_pos());
-    gtk_notebook_set_homogeneous_tabs(tabbar, TRUE);
+    gtk_notebook_set_homogeneous_tabs(tabbar, FALSE);
 
     XSetErrorHandler(handle_x_error);
     init_key();
@@ -398,7 +402,7 @@ void mainwindow_close_tab(GtkWidget *term)
         }
     }
 
-    if(thetab >= 0)
+    if(tabcount > 1)
     {
         g_array_remove_index(tabs, thetab);
         tabcount--;
@@ -589,6 +593,35 @@ int handle_x_error(Display *dpy, XErrorEvent *evt)
     }
     
     return 0;
+}
+
+static void mainwindow_tab_moved(GtkWidget *notebook, GtkWidget *page, guint page_num, gpointer user_data)
+{
+    GList *children = gtk_container_get_children(GTK_CONTAINER(page));
+    GtkWidget *term = GTK_WIDGET(children->data);
+       
+    GArray *newtabs = g_array_new(TRUE, FALSE, sizeof(VteTerminal*));
+    
+    int i;
+    
+    for(i = 0; i < tabcount; i++)
+    {
+        GtkWidget *element = g_array_index(tabs, GtkWidget *, i);
+        
+        if(i == page_num)
+        {
+            g_array_append_val(newtabs, term);
+            g_array_append_val(newtabs, element);
+        }
+        else if(element == term)
+            continue;
+        else
+            g_array_append_val(newtabs, element);
+    }
+    
+    g_array_free(tabs, TRUE);
+    tabs = newtabs;
+    activetab = page_num;
 }
 
 static void mainwindow_focus_terminal(void)

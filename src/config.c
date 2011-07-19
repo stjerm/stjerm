@@ -55,6 +55,7 @@ static int _fixedx;
 static int _fixedy;
 static int _scrollpos;
 static char _shell[200];
+static char _emulation[200];
 static int _lines;
 static int _showtab;
 static char _termname[200];
@@ -96,6 +97,7 @@ int conf_get_height(void);
 void conf_get_position(int*, int*);
 int conf_get_scrollbar(void);
 char* conf_get_shell(void);
+char* conf_get_emulation(void);
 int conf_get_lines(void);
 int conf_get_show_tab(void);
 char* conf_get_term_name(void);
@@ -126,6 +128,7 @@ Option options[OPTION_COUNT] = {
     {"position", "-p", "POSITION", "Window position: top, bottom, left, right. Default: top."},
     {"scrollbar", "-s", "POSITION", "Scrollbar position: left, right, none. Default: none."},
     {"shell", "-sh", "STRING", "Terminal Shell. Default: the user's default shell."},
+    {"emulation", "-e", "STRING", "Terminal Emulation. Default: xterm"},
     {"lines", "-l", "NUMBER", "Scrollback lines. 0 to disable scrollback. Default: 1000."},
     {"showtab", "-st", "VALUE", "Tabbar visibility (one: only visible when > 1 tabs): never, one, always."},
     {"tabpos", "-tp", "POSITION", "Tabbar position: top, bottom, left, right. Default: bottom."},
@@ -309,6 +312,7 @@ void init_default_values(void)
     _mod = 0;
     _key = 0;
     strcpy(_shell, getpwuid(getuid())->pw_shell);
+    strcpy(_emulation, "xterm");
     _lines = 1000;
     _showtab = TABS_ONE;
     _tabpos = GTK_POS_BOTTOM;
@@ -379,6 +383,8 @@ void read_value(char *name, char *value)
             set_key(value);
         else if(!strcmp("shell", name) || !strcmp("-sh", name))
             strcpy(_shell, value);
+        else if(!strcmp("emulation", name) || !strcmp("-e", name))
+            strcpy(_emulation, value);
         else if(!strcmp("lines", name) || !strcmp("-bl", name))
             _lines = atoi(value);
         else if(!strcmp("showtab", name) || !strcmp("-st", name))
@@ -732,6 +738,11 @@ int conf_get_scrollbar(void)
 char* conf_get_shell(void)
 {
     return _shell;
+}
+
+char* conf_get_emulation(void)
+{
+    return _emulation;
 }
 
 int conf_get_lines(void)
