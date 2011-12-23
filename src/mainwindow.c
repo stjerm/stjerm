@@ -402,19 +402,17 @@ void mainwindow_close_tab(GtkWidget *term)
         }
     }
 
-    if(tabcount > 1)
-    {
-        g_array_remove_index(tabs, thetab);
-        tabcount--;
-        
-        gtk_notebook_remove_page(tabbar, thetab);
-        activetab = gtk_notebook_get_current_page(tabbar);
+    g_array_remove_index(tabs, thetab);
+    tabcount--;
+    
+    gtk_notebook_remove_page(tabbar, thetab);
+    activetab = gtk_notebook_get_current_page(tabbar);
 
-        if(tabcount == 1 && conf_get_show_tab() == TABS_ONE)
-            gtk_notebook_set_show_tabs(tabbar, FALSE);
-    } 
-    else
-        gtk_widget_destroy(GTK_WIDGET(mainwindow));
+    if(tabcount == 1 && conf_get_show_tab() == TABS_ONE)
+        gtk_notebook_set_show_tabs(tabbar, FALSE);
+    
+    if (tabcount == 0)
+        mainwindow_create_tab();
     
     if(tabcount == 1)
         gtk_widget_set_sensitive(GTK_WIDGET(close_tab), FALSE);
