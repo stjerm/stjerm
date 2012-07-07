@@ -47,7 +47,7 @@ void build_popupmenu(void)
     GtkWidget *menuitem;
     GtkWidget *img;
 
-    gchar *labels[] = {"New Tab", "Close Tab", "Copy", "Paste", "Toggle Fullscreen", "Quit"};
+    gchar *labels[] = {"New Tab", "Close Tab", "Copy", "Paste", "Preferences", "Toggle Fullscreen", "Quit"};
     gchar *stocks[] = {GTK_STOCK_ADD, GTK_STOCK_CLOSE, GTK_STOCK_COPY,
         GTK_STOCK_PASTE, GTK_STOCK_FULLSCREEN, GTK_STOCK_QUIT};
 
@@ -110,6 +110,8 @@ static void popupmenu_activate(gchar *label)
     else if(!strcmp(label, "Quit"))
     {
         gtk_widget_destroy(GTK_WIDGET(mainwindow));
+    } else if (!strcmp(label, "Preferences")) {
+        buildprefswindow();
     }
 
     popupmenu_shown = FALSE;
