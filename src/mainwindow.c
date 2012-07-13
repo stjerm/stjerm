@@ -641,3 +641,13 @@ static void mainwindow_paste(GtkWidget *widget, gpointer user_data)
         (g_array_index(tabs, VteTerminal*, activetab));
 }
 
+
+
+
+
+
+
+static void mainwindow_set_terminal_opacity(int value)
+{
+    
+}
