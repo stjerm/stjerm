@@ -2,7 +2,7 @@
  * popupmenu.c
  * This file is part of Stjerm
  *
- * Copyright (C) 2007-2010 - Kristopher Wilson, Stjepan Glavina and Markus Groß
+ * Copyright (C) 2007-2012 - Kristopher Wilson, Stjepan Glavina and Markus GroÃŸ
  * 
  * Stjerm is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@
 #include "stjerm.h"
 
 
+
 extern GtkWidget *mainwindow;
 extern int activetab;
 extern GArray* tabs;
@@ -46,15 +47,15 @@ void build_popupmenu(void)
     GtkWidget *menuitem;
     GtkWidget *img;
 
-    gchar *labels[] = {"New Tab", "Close Tab", "Copy", "Paste", "Toggle Fullscreen", "Preferences", "Quit"};
+    gchar *labels[] = {"New Tab", "Close Tab", "Copy", "Paste", "Toggle Fullscreen", "Quit"};
     gchar *stocks[] = {GTK_STOCK_ADD, GTK_STOCK_CLOSE, GTK_STOCK_COPY,
         GTK_STOCK_PASTE, GTK_STOCK_FULLSCREEN, GTK_STOCK_QUIT};
 
     int i;
     
-    for(i = 0; i < 7; i++)
+    for(i = 0; i < 6; i++)
     {
-        if(i == 2 || i == 4 || i == 6)
+        if(i == 2 || i == 4 || i == 5)
         {
             menuitem = gtk_separator_menu_item_new();
             gtk_menu_shell_append(GTK_MENU_SHELL(popupmenu), menuitem);
@@ -109,8 +110,6 @@ static void popupmenu_activate(gchar *label)
     else if(!strcmp(label, "Quit"))
     {
         gtk_widget_destroy(GTK_WIDGET(mainwindow));
-    } else if (!strcmp(label, "Preferences")) {
-        buildprefswindow();
     }
 
     popupmenu_shown = FALSE;
@@ -120,4 +119,3 @@ static void popupmenu_deactivate(GtkMenuShell *menushell, gpointer userdata)
 {
     popupmenu_shown = FALSE;
 }
-
