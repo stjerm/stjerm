@@ -75,6 +75,14 @@ GtkWidget* build_term(void)
     vte_terminal_set_word_chars(VTE_TERMINAL(term),
         "-A-Za-z0-9_$.+!*(),;:@&=?/~#%");
 
+    GdkColor cursor = conf_get_cursor_color();
+
+    vte_terminal_set_cursor_blink_mode(VTE_TERMINAL(term), conf_get_cursor_blink() ?
+        VTE_CURSOR_BLINK_ON : VTE_CURSOR_BLINK_OFF);
+    vte_terminal_set_cursor_shape(VTE_TERMINAL(term), conf_get_cursor_shape());
+    vte_terminal_set_color_cursor(VTE_TERMINAL(term), &cursor);
+    
+
     term_connect_signals(term);
 
     return term;

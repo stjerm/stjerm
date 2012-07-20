@@ -1,4 +1,4 @@
-.TH STJERM "8" "Last Change: 19 Jul 2011" "stjerm 0.15" ""
+.TH STJERM "8" "Last Change: 7 Jul 2012" "stjerm 0.16" ""
 .SH NAME
 stjerm \- quake\-style terminal emulator
 .SH SYNOPSIS
@@ -115,10 +115,19 @@ Overrides the calculated vertical position of the window. Specifies the location
 .TP
 .B "allowreorder, \-ar"
 Allows the tabs of the tab bar to be reordered.
+.TP
+.B "cursorBlink, \-ub"
+Should the cursor blink? Default: true.
+.TP
+.B "cursorColor, \-uc"
+The color of the cursor. Default: white
+.TP
+.B "cursorShape, \-us"
+Cursor shape, one of [block,ibeam,underline]. Default: block
 .SH EXAMPLES
 To run stjerm with F12 as shortcut key, the opacity of 60 and a green foreground color, use:
 
-stjerm -k f12 -o 60 -fg 66ff11
+stjerm \-k f12 \-o 60 \-fg 66ff11
 
 
 To specify the same options in the .Xdefaults file, write this in your .Xdefaults file:

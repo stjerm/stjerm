@@ -1,8 +1,9 @@
-STJERM_VERSION = 0.15
+STJERM_VERSION = 0.16
 
 bin_PROGRAMS = stjerm
 
-stjerm_SOURCES = main.c mainwindow.c config.c term.c popupmenu.c shortcut.c
+stjerm_SOURCES = main.c mainwindow.c config.c term.c \
+	popupmenu.c shortcut.c
 
 INCLUDES= -Wall\
           -DSTJERM_VERSION=\"$(STJERM_VERSION)\"

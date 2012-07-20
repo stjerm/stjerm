@@ -73,8 +73,8 @@ static void mainwindow_next_tab(GtkWidget *widget, gpointer user_data);
 static void mainwindow_prev_tab(GtkWidget *widget, gpointer user_data);
 static void mainwindow_new_tab(GtkWidget *widget, gpointer user_data);
 static void mainwindow_delete_tab(GtkWidget *widget, gpointer user_data);
-static void mainwindow_copy(GtkWidget *widget, gpointer user_data);
-static void mainwindow_paste(GtkWidget *widget, gpointer user_data);
+static gint mainwindow_copy(GtkWidget *widget, gpointer user_data);
+static gint mainwindow_paste(GtkWidget *widget, gpointer user_data);
 
 static gint mainwindow_tab_at_xy(GtkNotebook *notebook, gint abs_x, gint abs_y);
 static void mainwindow_notebook_clicked(GtkWidget *widget, GdkEventButton *event, gpointer func_data);
@@ -402,19 +402,17 @@ void mainwindow_close_tab(GtkWidget *term)
         }
     }
 
-    if(tabcount > 1)
-    {
-        g_array_remove_index(tabs, thetab);
-        tabcount--;
-        
-        gtk_notebook_remove_page(tabbar, thetab);
-        activetab = gtk_notebook_get_current_page(tabbar);
+    g_array_remove_index(tabs, thetab);
+    tabcount--;
+    
+    gtk_notebook_remove_page(tabbar, thetab);
+    activetab = gtk_notebook_get_current_page(tabbar);
 
-        if(tabcount == 1 && conf_get_show_tab() == TABS_ONE)
-            gtk_notebook_set_show_tabs(tabbar, FALSE);
-    } 
-    else
-        gtk_widget_destroy(GTK_WIDGET(mainwindow));
+    if(tabcount == 1 && conf_get_show_tab() == TABS_ONE)
+        gtk_notebook_set_show_tabs(tabbar, FALSE);
+    
+    if (tabcount == 0)
+        mainwindow_create_tab();
     
     if(tabcount == 1)
         gtk_widget_set_sensitive(GTK_WIDGET(close_tab), FALSE);
@@ -631,15 +629,29 @@ static void mainwindow_focus_terminal(void)
             GTK_WIDGET(g_array_index(tabs, VteTerminal*, activetab)));
 }
 
-static void mainwindow_copy(GtkWidget *widget, gpointer user_data)
+static gint mainwindow_copy(GtkWidget *widget, gpointer user_data)
 {
     vte_terminal_copy_clipboard
         (g_array_index(tabs, VteTerminal*, activetab));
+
+    return TRUE;
 }
 
-static void mainwindow_paste(GtkWidget *widget, gpointer user_data) 
+static gint mainwindow_paste(GtkWidget *widget, gpointer user_data) 
 {
     vte_terminal_paste_clipboard
         (g_array_index(tabs, VteTerminal*, activetab));
+
+    return TRUE;
 }
 
+
+
+
+
+
+
+static void mainwindow_set_terminal_opacity(int value)
+{
+    
+}

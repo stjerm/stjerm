@@ -69,6 +69,9 @@ static gboolean _autohide;
 static char _bgimage[200];
 static gboolean _scrolloutput;
 static gboolean _allowreorder;
+static gboolean _cursor_blink;
+static VteTerminalCursorShape _cursor_shape;
+static GdkColor _cursor_color;
 
 static void set_border(char*);
 static void set_mod(char*);
@@ -110,6 +113,9 @@ gboolean conf_get_auto_hide(void);
 char* conf_get_bg_image(void);
 gboolean conf_get_scroll_on_output(void);
 gboolean conf_get_allow_reorder(void);
+gboolean conf_get_cursor_blink(void);
+GdkColor conf_get_cursor_color(void);
+VteTerminalCursorShape conf_get_cursor_shape(void);
 
 Option options[OPTION_COUNT] = {
     {"key", "-k", "KEY", "Shortcut key (eg: f12)."},
@@ -138,7 +144,10 @@ Option options[OPTION_COUNT] = {
     {"fixedx", "-fx", "NUMBER", "Overrides any calculated horizontal position."},
     {"fixedy", "-fy", "NUMBER", "Overrides any calculated vertical position."},
     {"allowreorder", "-ar", "BOOLEAN", "Allow reordering of terminal tabs."},
-    {"colorX", "-cX", "COLOR", "Specify color X of the terminals color palette"}
+    {"colorX", "-cX", "COLOR", "Specify color X of the terminals color palette"},
+    {"cursorBlink", "-ub", "BOOLEAN", "Should the cursor blink? Default: true"},
+    {"cursorColor", "-uc", "COLOR", "The color of the cursor. Default: white"},
+    {"cursorShape", "-us", "STRING", "Cursor shape, one of [block,ibeam,underline]. Default: block"}
 };
 
 pid_t get_stjerm_pid(void)
@@ -202,7 +211,7 @@ void set_mod(char *v)
     else if(!strcmp(v, "win"))
         _mod = Mod4Mask;
     else
-        _mod = 0;
+        _mod = ControlMask;
 }
 
 void set_key(char *v)
@@ -326,6 +335,9 @@ void init_default_values(void)
     _fixedx = -1;
     _fixedy = -1;
     _allowreorder = TRUE;
+    _cursor_blink = TRUE;
+    gdk_color_parse("white", &_cursor_color);
+    _cursor_shape = VTE_CURSOR_SHAPE_BLOCK;
 }
 
 void read_value(char *name, char *value)
@@ -431,6 +443,21 @@ void read_value(char *name, char *value)
             _scrolloutput = parse_bool_str(value, _scrolloutput);
         else if(!strcmp("allowreorder", name) || !strcmp("-ar", name))
             _allowreorder = parse_bool_str(value, _allowreorder);
+        else if(!strcmp("cursorBlink", name) || !strcmp("-ub", name))
+            _cursor_blink = parse_bool_str(value, _cursor_blink);
+        else if(!strcmp("cursorColor", name) || !strcmp("-uc", name)) {
+            if(!parse_hex_color(value, &_cursor_color))
+                gdk_color_parse("white", &_cursor_color);
+        }
+        else if (!strcmp("cursorShape", name) || !strcmp("-us", name)) {
+            if (!strcmp("block", name)) {
+                _cursor_shape = VTE_CURSOR_SHAPE_BLOCK;
+            } else if (!strcmp("ibeam", name)) {
+                _cursor_shape = VTE_CURSOR_SHAPE_IBEAM;
+            } else if (!strcmp("underline", name)) {
+                _cursor_shape = VTE_CURSOR_SHAPE_UNDERLINE;
+            }
+        }
     }
 }
 
@@ -811,3 +838,17 @@ gboolean conf_get_allow_reorder(void)
     return _allowreorder;
 }
 
+gboolean conf_get_cursor_blink(void)
+{
+    return _cursor_blink;
+}
+
+VteTerminalCursorShape conf_get_cursor_shape(void)
+{
+    return _cursor_shape;
+}
+
+GdkColor conf_get_cursor_color(void)
+{
+    return _cursor_color;
+}

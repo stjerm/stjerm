@@ -2,7 +2,7 @@
  * popupmenu.c
  * This file is part of Stjerm
  *
- * Copyright (C) 2007-2010 - Kristopher Wilson, Stjepan Glavina and Markus Groß
+ * Copyright (C) 2007-2012 - Kristopher Wilson, Stjepan Glavina and Markus GroÃŸ
  * 
  * Stjerm is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -119,4 +119,3 @@ static void popupmenu_deactivate(GtkMenuShell *menushell, gpointer userdata)
 {
     popupmenu_shown = FALSE;
 }
-

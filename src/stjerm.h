@@ -24,6 +24,7 @@
 #define __STJERM_H__
 
 #include <gtk/gtk.h>
+#include <vte/vte.h>
 #include <X11/Xlib.h>
 
 #define TERM_ICONIFY_WINDOW    0
@@ -53,7 +54,7 @@
 #define TABS_ONE    1
 #define TABS_ALWAYS 2
 
-#define OPTION_COUNT 27
+#define OPTION_COUNT 30
 
 
 // The following defines borrowed from gnome-terminal:
@@ -122,6 +123,8 @@ extern void init_key(void);
 extern void grab_key(void);
 extern void wait_key(void);
 
+extern void buildprefswindow(void);
+
 extern void conf_init(void);
 extern char* conf_get_font(void);
 extern float conf_get_opacity(void);
@@ -148,6 +151,10 @@ extern gboolean conf_get_auto_hide(void);
 extern char* conf_get_bg_image(void);
 extern gboolean conf_get_allow_reorder(void);
 extern gboolean conf_get_scroll_on_output();
+extern gboolean conf_get_cursor_blink(void);
+extern GdkColor conf_get_cursor_color(void);
+extern VteTerminalCursorShape conf_get_cursor_shape(void);
+
 
 #endif /* __STJERM_H__ */
 
