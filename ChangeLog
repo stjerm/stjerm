@@ -1,3 +1,14 @@
+15 Jul 2012 Kristopher Wilson <kristopherwilson@gmail.com>
+correcting INSTALL to be more accurate
+fixing issue with keyboard shortcut copy + paste
+
+08 Jul 2012 Kristopher Wilson <kristopherwilson@gmail.com>
+fixing unescaped dashes in manpage (barygin)
+added cursorBlink, cursorColor and cursorShape options
+
+22 Dec 2011 Kristopher Wilson <kristopherwilson@gmail.com>
+new tab launches when closing the last tab
+
 19 Jul 2010 Kristopher Wilson <kristopherwilson@gmail.com>
 released version 0.15
 
