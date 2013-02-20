@@ -13,6 +13,7 @@ If you're compiling from source on Ubuntu, you'll need:
 ## Installation
 
     ./autogen.sh
+    ./configure
     make
     sudo make install
 
