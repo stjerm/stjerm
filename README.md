@@ -8,7 +8,7 @@ pkgconfig, gtk2, vte
 
 If you're compiling from source on Ubuntu, you'll need:
 
-sudo apt-get install build-essential automake libglib2.0-dev libvte-dev
+    sudo apt-get install build-essential automake libglib2.0-dev libvte-dev
 
 ## Installation
 
