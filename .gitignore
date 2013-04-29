@@ -1,0 +1,13 @@
+*.o
+*Makefile*
+!src/Makefile.am
+*config*
+!configure.ac
+src/stjerm
+src/.deps
+aclocal.m4
+autom4te.cache/
+depcomp
+install-sh
+missing
+stamp-h1
