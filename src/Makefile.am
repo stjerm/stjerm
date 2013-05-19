@@ -1,4 +1,4 @@
-STJERM_VERSION = 0.16
+STJERM_VERSION = 0.16.3
 
 bin_PROGRAMS = stjerm
 
