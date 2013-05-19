@@ -35,6 +35,14 @@ PKG_CHECK_MODULES([vte], vte >= 0.20)
 AC_SUBST(vte_LIBS)
 AC_SUBST(vte_CFLAGS)
 
+# Checks for Xinerama extension
+PKG_CHECK_MODULES([XINERAMA], [xinerama], [ac_have_xinerama="yes"], [
+AC_CHECK_LIB(Xinerama, XineramaQueryExtension, 
+    XINERAMA_LIBS="-lXinerama"
+    ac_have_xinerama="yes",,
+    $X_LIBS $X_PRE_LIBS -lXext $X_EXTRA_LIBS)
+])
+
 # Checks for header files.
 AC_PATH_X
 AC_HEADER_STDC
