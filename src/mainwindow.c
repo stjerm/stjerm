@@ -645,13 +645,3 @@ static gint mainwindow_paste(GtkWidget *widget, gpointer user_data)
     return TRUE;
 }
 
-
-
-
-
-
-
-static void mainwindow_set_terminal_opacity(int value)
-{
-    
-}
