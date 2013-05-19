@@ -3,7 +3,7 @@
 # (see: sarine.nl/gmpc)
 AC_INIT(src)
 AC_PREREQ(2.59)
-AM_INIT_AUTOMAKE([stjerm], [0.16], kristopherwilson@gmail.com)
+AM_INIT_AUTOMAKE([stjerm], [0.16.3], kristopherwilson@gmail.com)
 #AC_INIT(FULL-PACKAGE-NAME, VERSION, BUG-REPORT-ADDRESS)
 AC_CONFIG_SRCDIR([src/mainwindow.c])
 AC_CONFIG_HEADER([config.h])
@@ -16,12 +16,12 @@ AC_SUBST(GLIB_REQUIRED)
 AC_SUBST(GTK_REQUIRED)
 
 # glib
-PKG_CHECK_MODULES([glib], glib-2.0 >= 2.10)
+PKG_CHECK_MODULES([glib], glib-2.0 >= 2.32)
 AC_SUBST(glib_LIBS)
 AC_SUBST(glib_CFLAGS)
 
 #gtk
-PKG_CHECK_MODULES([gtk], gtk+-2.0 >= 2.10)
+PKG_CHECK_MODULES([gtk], gtk+-2.0 >= 2.24)
 AC_SUBST(gtk_LIBS)
 AC_SUBST(gtk_CFLAGS)
 
@@ -31,9 +31,17 @@ AC_SUBST(gthread_LIBS)
 AC_SUBST(gthread_CFLAGS)
 
 # gthread
-PKG_CHECK_MODULES([vte], vte >= 0.20)
+PKG_CHECK_MODULES([vte], vte >= 0.28)
 AC_SUBST(vte_LIBS)
 AC_SUBST(vte_CFLAGS)
+
+# Checks for Xinerama extension
+PKG_CHECK_MODULES([XINERAMA], [xinerama], [ac_have_xinerama="yes"], [
+AC_CHECK_LIB(Xinerama, XineramaQueryExtension, 
+    XINERAMA_LIBS="-lXinerama"
+    ac_have_xinerama="yes",,
+    $X_LIBS $X_PRE_LIBS -lXext $X_EXTRA_LIBS)
+])
 
 # Checks for header files.
 AC_PATH_X

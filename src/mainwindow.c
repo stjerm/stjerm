@@ -238,7 +238,7 @@ void build_mainwindow(void)
     XSetErrorHandler(handle_x_error);
     init_key();
     grab_key();
-    g_thread_create((GThreadFunc)wait_key, NULL, FALSE, NULL);
+    g_thread_new("stjerm", (GThreadFunc)wait_key, NULL);
 }
 
 void mainwindow_notebook_clicked(GtkWidget *widget, GdkEventButton *event, gpointer func_data)
@@ -645,13 +645,3 @@ static gint mainwindow_paste(GtkWidget *widget, gpointer user_data)
     return TRUE;
 }
 
-
-
-
-
-
-
-static void mainwindow_set_terminal_opacity(int value)
-{
-    
-}
