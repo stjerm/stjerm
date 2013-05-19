@@ -21,7 +21,7 @@ AC_SUBST(glib_LIBS)
 AC_SUBST(glib_CFLAGS)
 
 #gtk
-PKG_CHECK_MODULES([gtk], gtk+-2.0 >= 2.10)
+PKG_CHECK_MODULES([gtk], gtk+-2.0 >= 2.24)
 AC_SUBST(gtk_LIBS)
 AC_SUBST(gtk_CFLAGS)
 
@@ -31,7 +31,7 @@ AC_SUBST(gthread_LIBS)
 AC_SUBST(gthread_CFLAGS)
 
 # gthread
-PKG_CHECK_MODULES([vte], vte >= 0.20)
+PKG_CHECK_MODULES([vte], vte >= 0.28)
 AC_SUBST(vte_LIBS)
 AC_SUBST(vte_CFLAGS)
 
