@@ -103,9 +103,6 @@ int main(int argc, char *argv[])
     sargc = argc;
     sargv = argv;
 
-    if (!g_thread_supported())
-        g_thread_init(NULL);
-
     gdk_threads_init();
     gtk_init(&argc, &argv);
 

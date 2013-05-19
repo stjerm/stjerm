@@ -1,4 +1,4 @@
-STJERM_VERSION = 0.16
+STJERM_VERSION = 0.16.3
 
 bin_PROGRAMS = stjerm
 
@@ -11,7 +11,8 @@ INCLUDES= -Wall\
 LIBS = @glib_LIBS@ @LIBS@\
        @gtk_LIBS@\
        @gthread_LIBS@\
-       @vte_LIBS@
+       @vte_LIBS@\
+       $(XINERAMA_LIBS)
 	     
 AM_CFLAGS = @CFLAGS@\
 	    @glib_CFLAGS@\
