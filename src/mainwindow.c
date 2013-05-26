@@ -490,6 +490,8 @@ static void mainwindow_focus_out_event(GtkWindow* window, GdkEventFocus* event, 
     if (w == mw_xwin)
         return;
 
+    toggled = FALSE;
+
     // focus wasn't lost just by pressing the shortcut key
 
     if(popupmenu_shown == TRUE)
