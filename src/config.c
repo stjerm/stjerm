@@ -155,7 +155,7 @@ pid_t get_stjerm_pid(void)
     char buffer[100];
     char **list;
     int i = 0;
-    FILE *p = popen("pidof stjerm", "r");
+    FILE *p = popen("pgrep stjerm", "r");
     
     if(p == NULL)
     {
