@@ -154,6 +154,7 @@ extern gboolean conf_get_scroll_on_output();
 extern gboolean conf_get_cursor_blink(void);
 extern GdkColor conf_get_cursor_color(void);
 extern VteTerminalCursorShape conf_get_cursor_shape(void);
+extern gboolean conf_get_toggled(void);
 
 
 #endif /* __STJERM_H__ */
