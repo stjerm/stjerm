@@ -25,6 +25,7 @@
 #include <gtk/gtk.h>
 #include <gdk/gdkx.h>
 #include <gdk/gdkkeysyms.h>
+#include <string.h>
 #include <vte/vte.h>
 #include <stdlib.h>
 #include "stjerm.h"
@@ -239,6 +240,12 @@ void build_mainwindow(void)
     init_key();
     grab_key();
     g_thread_new("stjerm", (GThreadFunc)wait_key, NULL);
+    
+    // If stjerm has been started for the first time with --toggle, then
+    // show the window straight away. Make haste!
+    if(conf_get_toggled()) {
+        mainwindow_toggle(1);
+    }
 }
 
 void mainwindow_notebook_clicked(GtkWidget *widget, GdkEventButton *event, gpointer func_data)
