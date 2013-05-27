@@ -25,7 +25,6 @@
 #include <gtk/gtk.h>
 #include <gdk/gdkx.h>
 #include <gdk/gdkkeysyms.h>
-#include <string.h>
 #include <vte/vte.h>
 #include <stdlib.h>
 #include "stjerm.h"
@@ -46,7 +45,6 @@ Atom opacityatom;
 gboolean screen_is_composited;
 gboolean fullscreen;
 gboolean toggled;
-
 
 
 void build_mainwindow(void);
