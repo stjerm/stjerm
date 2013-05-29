@@ -79,7 +79,7 @@ static gint mainwindow_tab_at_xy(GtkNotebook *notebook, gint abs_x, gint abs_y);
 static void mainwindow_notebook_clicked(GtkWidget *widget, GdkEventButton *event, gpointer func_data);
 
 static void mainwindow_tab_moved(GtkWidget *notebook, GtkWidget *page, guint page_num, gpointer user_data);
-static void void mainwindow_reindex_tabs();
+static void mainwindow_reindex_tabs();
 
 void build_mainwindow(void)
 {
