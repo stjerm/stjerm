@@ -1,3 +1,8 @@
+## 19 May 2013 Version 0.16.4 Released
+ * fixed compilation failure
+ * require newer versions of glib, gtk+ and vte
+ * fixed some compilation warnings
+
 ## 20 Jul 2012 Version 0.16 Released
 
  * correcting INSTALL to be more accurate
