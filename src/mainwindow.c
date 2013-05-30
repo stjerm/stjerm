@@ -629,16 +629,28 @@ static gint mainwindow_paste(GtkWidget *widget, gpointer user_data)
     return TRUE;
 }
 
+/**
+ * This function is responsible for re-indexing the pointer map of tabs 
+ * after a tab has been re-ordered in the notebook. Other functions, such as
+ * deleting tabs and copy and pasting rely on the tabs being stored in proper
+ * order.
+ */
 void mainwindow_reindex_tabs()
 {
     int i;
 
+    // Loop each page in the notebook
     for (i = 0; i < gtk_notebook_get_n_pages(tabbar); i++) {
+        // Grab the page from the notebook:
         GtkWidget *page = gtk_notebook_get_nth_page(tabbar, i);
         GtkWidget *term = NULL;
 
         GList *children = gtk_container_get_children(GTK_CONTAINER(page));
 
+        // Depending on which side the scroll bar is on, grab the terminal from
+        // the box container so that we can store a reference to it in our
+        // collection of terminals:
+        
         if (conf_get_scrollbar() == POS_LEFT) {
             term = g_list_nth_data(children, 1);
         } else {
