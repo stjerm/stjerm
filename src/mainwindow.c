@@ -79,6 +79,7 @@ static gint mainwindow_tab_at_xy(GtkNotebook *notebook, gint abs_x, gint abs_y);
 static void mainwindow_notebook_clicked(GtkWidget *widget, GdkEventButton *event, gpointer func_data);
 
 static void mainwindow_tab_moved(GtkWidget *notebook, GtkWidget *page, guint page_num, gpointer user_data);
+static void mainwindow_reindex_tabs();
 
 void build_mainwindow(void)
 {
@@ -602,31 +603,7 @@ int handle_x_error(Display *dpy, XErrorEvent *evt)
 
 static void mainwindow_tab_moved(GtkWidget *notebook, GtkWidget *page, guint page_num, gpointer user_data)
 {
-    GList *children = gtk_container_get_children(GTK_CONTAINER(page));
-    GtkWidget *term = GTK_WIDGET(children->data);
-       
-    GArray *newtabs = g_array_new(TRUE, FALSE, sizeof(VteTerminal*));
-    
-    int i;
-    
-    for(i = 0; i < tabcount; i++)
-    {
-        GtkWidget *element = g_array_index(tabs, GtkWidget *, i);
-        
-        if(i == page_num)
-        {
-            g_array_append_val(newtabs, term);
-            g_array_append_val(newtabs, element);
-        }
-        else if(element == term)
-            continue;
-        else
-            g_array_append_val(newtabs, element);
-    }
-    
-    g_array_free(tabs, TRUE);
-    tabs = newtabs;
-    activetab = page_num;
+    mainwindow_reindex_tabs();
 }
 
 static void mainwindow_focus_terminal(void)
@@ -650,5 +627,37 @@ static gint mainwindow_paste(GtkWidget *widget, gpointer user_data)
         (g_array_index(tabs, VteTerminal*, activetab));
 
     return TRUE;
+}
+
+/**
+ * This function is responsible for re-indexing the pointer map of tabs 
+ * after a tab has been re-ordered in the notebook. Other functions, such as
+ * deleting tabs and copy and pasting rely on the tabs being stored in proper
+ * order.
+ */
+void mainwindow_reindex_tabs()
+{
+    int i;
+
+    // Loop each page in the notebook
+    for (i = 0; i < gtk_notebook_get_n_pages(tabbar); i++) {
+        // Grab the page from the notebook:
+        GtkWidget *page = gtk_notebook_get_nth_page(tabbar, i);
+        GtkWidget *term = NULL;
+
+        GList *children = gtk_container_get_children(GTK_CONTAINER(page));
+
+        // Depending on which side the scroll bar is on, grab the terminal from
+        // the box container so that we can store a reference to it in our
+        // collection of terminals:
+        
+        if (conf_get_scrollbar() == POS_LEFT) {
+            term = g_list_nth_data(children, 1);
+        } else {
+            term = g_list_nth_data(children, 0);
+        }
+
+        g_array_insert_val(tabs, i, term);
+    }
 }
 
