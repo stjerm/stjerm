@@ -25,11 +25,10 @@
 #include <string.h>
 #include "stjerm.h"
 
-
-
 extern GtkWidget *mainwindow;
 extern int activetab;
-extern GArray* tabs;
+extern GtkWidget *mainwindow_get_terminal_at(int);
+
 GtkWidget *popupmenu= NULL;
 gboolean popupmenu_shown;
 
@@ -97,11 +96,11 @@ static void popupmenu_activate(gchar *label)
     }
     else if(!strcmp(label, "Copy"))
     {
-        vte_terminal_copy_clipboard(g_array_index(tabs, VteTerminal*, activetab));
+        vte_terminal_copy_clipboard(VTE_TERMINAL(mainwindow_get_terminal_at(activetab)));
     }
     else if(!strcmp(label, "Paste"))
     {
-        vte_terminal_paste_clipboard(g_array_index(tabs, VteTerminal*, activetab));
+        vte_terminal_paste_clipboard(VTE_TERMINAL(mainwindow_get_terminal_at(activetab)));
     }
     else if(!strcmp(label, "Toggle Fullscreen"))
     {
