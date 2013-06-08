@@ -266,7 +266,6 @@ static gint mainwindow_tab_at_xy(GtkNotebook *notebook, gint x, gint y)
     
     tab_pos = gtk_notebook_get_tab_pos(notebook);
     
-#include <vte/vte.h>
     if(notebook->first_tab == NULL)
         return -1;
 
