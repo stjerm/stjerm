@@ -1,10 +1,11 @@
 # Process this file with autoconf to produce a configure script.
 # some parts are taken from configure.ac from gmpc-svn
 # (see: sarine.nl/gmpc)
-AC_INIT(src)
-AC_PREREQ(2.59)
-AM_INIT_AUTOMAKE([stjerm], [0.16.3], kristopherwilson@gmail.com)
-#AC_INIT(FULL-PACKAGE-NAME, VERSION, BUG-REPORT-ADDRESS)
+
+AC_INIT([stjerm C], [0.16.3], [kristopherwilson@gmail.com],
+    [main_c], [http://github.com/stjerm/])
+AC_PREREQ([2.59])
+AM_INIT_AUTOMAKE([1.10 no-define foreign])
 AC_CONFIG_SRCDIR([src/mainwindow.c])
 AC_CONFIG_HEADER([config.h])
 
