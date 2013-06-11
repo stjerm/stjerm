@@ -423,7 +423,7 @@ void read_value(char *name, char *value)
             strcpy(_shell, value);
         else if(!strcmp("emulation", name) || !strcmp("-e", name))
             strcpy(_emulation, value);
-        else if(!strcmp("lines", name) || !strcmp("-bl", name))
+        else if(!strcmp("lines", name) || !strcmp("-l", name))
             _lines = atoi(value);
         else if(!strcmp("showtab", name) || !strcmp("-st", name))
         {
