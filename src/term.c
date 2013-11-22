@@ -175,6 +175,7 @@ static void term_eof_or_child_exited(VteTerminal *term, gpointer user_data)
         /* else close the tab */
         mainwindow_close_tab(GTK_WIDGET(term));
     }
+    gtk_widget_hide(GTK_WIDGET(mainwindow));
 }
 
 static void term_app_request(VteTerminal *term, gpointer user_data)
