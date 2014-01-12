@@ -2,7 +2,7 @@
 # some parts are taken from configure.ac from gmpc-svn
 # (see: sarine.nl/gmpc)
 
-AC_INIT([stjerm C], [0.16.3], [kristopherwilson@gmail.com],
+AC_INIT([stjerm C], [0.18], [kristopherwilson@gmail.com],
     [main_c], [http://github.com/stjerm/])
 AC_PREREQ([2.59])
 AM_INIT_AUTOMAKE([1.10 no-define foreign])
