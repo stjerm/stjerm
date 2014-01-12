@@ -73,6 +73,8 @@ static gboolean _cursor_blink;
 static VteTerminalCursorShape _cursor_shape;
 static GdkColor _cursor_color;
 
+static gboolean _toggled;
+
 static void set_border(char*);
 static void set_mod(char*);
 static void set_key(char*);
@@ -82,6 +84,7 @@ static gboolean parse_hex_color(char *value, GdkColor *color);
 static gboolean parse_bool_str(char *value, gboolean def);
 static GdkModifierType parse_mod(char *value);
 static pid_t get_stjerm_pid(void);
+static int get_num_stjerm_instances(void);
 
 void conf_parse_size(char*, int*, int*);
 void read_value(char *name, char *value);
@@ -116,6 +119,7 @@ gboolean conf_get_allow_reorder(void);
 gboolean conf_get_cursor_blink(void);
 GdkColor conf_get_cursor_color(void);
 VteTerminalCursorShape conf_get_cursor_shape(void);
+gboolean conf_get_toggled(void);
 
 Option options[OPTION_COUNT] = {
     {"key", "-k", "KEY", "Shortcut key (eg: f12)."},
@@ -150,12 +154,33 @@ Option options[OPTION_COUNT] = {
     {"cursorShape", "-us", "STRING", "Cursor shape, one of [block,ibeam,underline]. Default: block"}
 };
 
+int get_num_stjerm_instances(void)
+{
+    char buffer[100];
+
+    FILE *p = popen("pgrep -c stjerm", "r");
+    
+    if (p == NULL) {
+        fprintf(stderr, "error: unable to get stjerm pid\n");
+        exit(1);
+    }
+    
+    if (fgets(buffer, sizeof(buffer), p) == NULL) {
+        fprintf(stderr, "error: unable to read stjerm pid\n");
+        exit(1);
+    }
+    
+    pclose(p);
+
+    return (pid_t) atoi(buffer);
+}
+
 pid_t get_stjerm_pid(void)
 {
     char buffer[100];
     char **list;
     int i = 0;
-    FILE *p = popen("pidof stjerm", "r");
+    FILE *p = popen("pgrep stjerm", "r");
     
     if(p == NULL)
     {
@@ -338,6 +363,7 @@ void init_default_values(void)
     _cursor_blink = TRUE;
     gdk_color_parse("white", &_cursor_color);
     _cursor_shape = VTE_CURSOR_SHAPE_BLOCK;
+    _toggled = FALSE;
 }
 
 void read_value(char *name, char *value)
@@ -397,7 +423,7 @@ void read_value(char *name, char *value)
             strcpy(_shell, value);
         else if(!strcmp("emulation", name) || !strcmp("-e", name))
             strcpy(_emulation, value);
-        else if(!strcmp("lines", name) || !strcmp("-bl", name))
+        else if(!strcmp("lines", name) || !strcmp("-l", name))
             _lines = atoi(value);
         else if(!strcmp("showtab", name) || !strcmp("-st", name))
         {
@@ -532,10 +558,19 @@ void conf_init(void)
                 print_version();
                 exit(1);
             }
-            else if(!strcmp("--toggle", sargv[i]))
+            else if(!strcmp(sargv[i], "--toggle"))
             {
-                kill(get_stjerm_pid(), SIGUSR1);
-                exit(1);
+                // Store that stjerm has been toggled to be displayed. This is
+                // only used if the IF statement below fails to fire.
+                _toggled = TRUE;
+                
+                // If there is more than once instance of stjerm running, 
+                // we've done all we need to do, just kill this process. 
+                // Otherwise leavce it running
+                if (get_num_stjerm_instances() > 1) {
+                    kill(get_stjerm_pid(), SIGUSR1);
+                    exit(1);
+                }
             }
         }
         
@@ -852,3 +887,9 @@ GdkColor conf_get_cursor_color(void)
 {
     return _cursor_color;
 }
+
+gboolean conf_get_toggled(void) 
+{
+    return _toggled;
+}
+

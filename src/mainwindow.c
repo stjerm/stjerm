@@ -36,7 +36,6 @@ extern gboolean popupmenu_shown;
 GtkWidget *mainwindow;
 int activetab;
 int tabcount;
-GArray* tabs;
 GtkNotebook* tabbar;
 
 Window mw_xwin;
@@ -47,13 +46,14 @@ gboolean fullscreen;
 gboolean toggled;
 
 
-
 void build_mainwindow(void);
 void mainwindow_toggle(int sig);
 void mainwindow_create_tab(void);
 void mainwindow_close_tab(GtkWidget *term);
 void mainwindow_toggle_fullscreen(void);
 int handle_x_error(Display *dpy, XErrorEvent *evt);
+
+GtkWidget* mainwindow_get_terminal_at(int);
 
 static GRegex **uri_regex;
 static guint uri_regex_count;
@@ -78,8 +78,6 @@ static gint mainwindow_paste(GtkWidget *widget, gpointer user_data);
 
 static gint mainwindow_tab_at_xy(GtkNotebook *notebook, gint abs_x, gint abs_y);
 static void mainwindow_notebook_clicked(GtkWidget *widget, GdkEventButton *event, gpointer func_data);
-
-static void mainwindow_tab_moved(GtkWidget *notebook, GtkWidget *page, guint page_num, gpointer user_data);
 
 void build_mainwindow(void)
 {
@@ -175,7 +173,6 @@ void build_mainwindow(void)
         GTK_ACCEL_VISIBLE, paste);
 
     activetab = -1;
-    tabs = g_array_new(TRUE, FALSE, sizeof(VteTerminal*));
     tabcount = 0;
     GtkVBox* mainbox = GTK_VBOX(gtk_vbox_new(FALSE, 0));
     
@@ -183,9 +180,6 @@ void build_mainwindow(void)
     
     g_signal_connect(G_OBJECT(tabbar), "switch-page",
         G_CALLBACK(mainwindow_switch_tab), NULL);
-
-    g_signal_connect(G_OBJECT(tabbar), "page-reordered", 
-        G_CALLBACK(mainwindow_tab_moved), NULL);
 
     if(conf_get_opacity() < 100)
     {
@@ -239,6 +233,12 @@ void build_mainwindow(void)
     init_key();
     grab_key();
     g_thread_new("stjerm", (GThreadFunc)wait_key, NULL);
+    
+    // If stjerm has been started for the first time with --toggle, then
+    // show the window straight away. Make haste!
+    if(conf_get_toggled()) {
+        mainwindow_toggle(1);
+    }
 }
 
 void mainwindow_notebook_clicked(GtkWidget *widget, GdkEventButton *event, gpointer func_data)
@@ -297,7 +297,6 @@ static gint mainwindow_tab_at_xy(GtkNotebook *notebook, gint x, gint y)
     return -1;
 }
 
-
 void mainwindow_create_tab(void)
 {
     GtkWidget* tmp_term = build_term();
@@ -352,7 +351,6 @@ void mainwindow_create_tab(void)
     g_signal_connect(G_OBJECT(tmp_term), "window-title-changed",
         G_CALLBACK(mainwindow_window_title_changed), tmp_label);
 
-    g_array_append_val(tabs, tmp_term);
     tabcount++;
 
     gtk_widget_show_all(GTK_WIDGET(tmp_box));
@@ -392,17 +390,19 @@ void mainwindow_close_tab(GtkWidget *term)
     if(term != NULL)
     {
         int i;
-        for(i = 0; i < tabs->len; i++)
-        {
-            if(g_array_index(tabs, GtkWidget *, i) == term)
-            {
+        
+        // Loop each page in the notebook
+        for (i = 0; i < gtk_notebook_get_n_pages(tabbar); i++) {
+            // Grab the terminal from the notebook:
+            GtkWidget *testTerm = mainwindow_get_terminal_at(i);
+
+            if (term == testTerm) {
                 thetab = i;
                 break;
             }
         }
     }
 
-    g_array_remove_index(tabs, thetab);
     tabcount--;
     
     gtk_notebook_remove_page(tabbar, thetab);
@@ -490,6 +490,8 @@ static void mainwindow_focus_out_event(GtkWindow* window, GdkEventFocus* event, 
     if (w == mw_xwin)
         return;
 
+    toggled = FALSE;
+
     // focus wasn't lost just by pressing the shortcut key
 
     if(popupmenu_shown == TRUE)
@@ -522,7 +524,6 @@ static gboolean mainwindow_expose_event(GtkWidget *widget, GdkEventExpose *event
 
 static void mainwindow_destroy(GtkWidget *widget, gpointer user_data)
 {
-    g_array_free(tabs, TRUE);
     gtk_main_quit();
 }
 
@@ -593,55 +594,40 @@ int handle_x_error(Display *dpy, XErrorEvent *evt)
     return 0;
 }
 
-static void mainwindow_tab_moved(GtkWidget *notebook, GtkWidget *page, guint page_num, gpointer user_data)
-{
-    GList *children = gtk_container_get_children(GTK_CONTAINER(page));
-    GtkWidget *term = GTK_WIDGET(children->data);
-       
-    GArray *newtabs = g_array_new(TRUE, FALSE, sizeof(VteTerminal*));
-    
-    int i;
-    
-    for(i = 0; i < tabcount; i++)
-    {
-        GtkWidget *element = g_array_index(tabs, GtkWidget *, i);
-        
-        if(i == page_num)
-        {
-            g_array_append_val(newtabs, term);
-            g_array_append_val(newtabs, element);
-        }
-        else if(element == term)
-            continue;
-        else
-            g_array_append_val(newtabs, element);
-    }
-    
-    g_array_free(tabs, TRUE);
-    tabs = newtabs;
-    activetab = page_num;
-}
-
 static void mainwindow_focus_terminal(void)
 {
     if (activetab >= 0)
-        gtk_window_set_focus(GTK_WINDOW(mainwindow), 
-            GTK_WIDGET(g_array_index(tabs, VteTerminal*, activetab)));
+        gtk_window_set_focus(GTK_WINDOW(mainwindow), mainwindow_get_terminal_at(activetab));
 }
 
 static gint mainwindow_copy(GtkWidget *widget, gpointer user_data)
 {
-    vte_terminal_copy_clipboard
-        (g_array_index(tabs, VteTerminal*, activetab));
-
+    vte_terminal_copy_clipboard(
+        VTE_TERMINAL(mainwindow_get_terminal_at(activetab))
+    );
     return TRUE;
 }
 
 static gint mainwindow_paste(GtkWidget *widget, gpointer user_data) 
 {
-    vte_terminal_paste_clipboard
-        (g_array_index(tabs, VteTerminal*, activetab));
-
+    vte_terminal_paste_clipboard(
+        VTE_TERMINAL(mainwindow_get_terminal_at(activetab))
+    );
     return TRUE;
 }
 
+GtkWidget* mainwindow_get_terminal_at(int index)
+{
+    GtkWidget *page = gtk_notebook_get_nth_page(tabbar, index);
+    GtkWidget *term = NULL;
+
+    GList *children = gtk_container_get_children(GTK_CONTAINER(page));
+        
+    if (conf_get_scrollbar() == POS_LEFT) {
+        term = g_list_nth_data(children, 1);
+    } else {
+        term = g_list_nth_data(children, 0);
+    }
+    
+    return term;
+}
