@@ -1,4 +1,4 @@
-## 19 May 2013 Version 0.16.4 Released
+## 19 May 2013 Version 0.16.3 Released
  * fixed compilation failure
  * require newer versions of glib, gtk+ and vte
  * fixed some compilation warnings
