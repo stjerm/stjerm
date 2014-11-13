@@ -1,5 +1,7 @@
 # stjerm Terminal Emulator
 
+## This project is in need of a steward. If you are interested in helping maintain stjerm, please reach out.
+
 ## Requirements
 
 pkgconfig, gtk2, vte
