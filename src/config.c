@@ -139,7 +139,7 @@ Option options[OPTION_COUNT] = {
     {"scrollbar", "-s", "POSITION", "Scrollbar position: left, right, none. Default: none."},
     {"shell", "-sh", "STRING", "Terminal Shell. Default: the user's default shell."},
     {"emulation", "-e", "STRING", "Terminal Emulation. Default: xterm"},
-    {"lines", "-l", "NUMBER", "Scrollback lines. 0 to disable scrollback. Default: 1000."},
+    {"lines", "-l", "NUMBER", "Scrollback lines. 0 to disable scrollback, negative values mean unlimited. Default: 1000."},
     {"showtab", "-st", "VALUE", "Tabbar visibility (one: only visible when > 1 tabs): never, one, always."},
     {"tabpos", "-tp", "POSITION", "Tabbar position: top, bottom, left, right. Default: bottom."},
     {"tablabel", "-tl", "STRING", "Label of the tabs. Default: term."},
@@ -592,12 +592,6 @@ void conf_init(void)
     if(stat(_shell, &st) != 0)
     {
         fprintf(stderr, "error: the shell '%s' can't be opened\n", _shell);
-        exit(1);
-    }
-
-    if(_lines < 0)
-    {
-        fprintf(stderr, "error: a scrollback line count < 0 is not allowed\n");
         exit(1);
     }
 
