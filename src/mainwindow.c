@@ -66,7 +66,7 @@ static gboolean mainwindow_expose_event(GtkWidget*, GdkEventExpose*, gpointer);
 static void mainwindow_destroy(GtkWidget*, gpointer);
 static void mainwindow_window_title_changed(VteTerminal *vteterminal,
     gpointer user_data);
-static void mainwindow_switch_tab(GtkNotebook *notebook, GtkNotebookPage *page,
+static void mainwindow_switch_tab(GtkNotebook *notebook, GtkWidget *page,
     guint page_num, gpointer user_data);
 static void mainwindow_goto_tab(gint i);
 static void mainwindow_next_tab(GtkWidget *widget, gpointer user_data);
@@ -227,7 +227,7 @@ void build_mainwindow(void)
     if (conf_get_show_tab() == TABS_ONE|| conf_get_show_tab() == TABS_NEVER)
         gtk_notebook_set_show_tabs(tabbar, FALSE);
     gtk_notebook_set_tab_pos(tabbar, conf_get_tab_pos());
-    gtk_notebook_set_homogeneous_tabs(tabbar, FALSE);
+    g_object_set(tabbar, "homogeneous", FALSE, NULL);
 
     XSetErrorHandler(handle_x_error);
     init_key();
@@ -277,7 +277,7 @@ static gint mainwindow_tab_at_xy(GtkNotebook *notebook, gint x, gint y)
         screen = gtk_notebook_get_tab_label(notebook, page);
         g_return_val_if_fail(screen != NULL, -1);
 
-        if(!GTK_WIDGET_MAPPED(GTK_WIDGET(screen)))
+        if(!gtk_widget_get_mapped(GTK_WIDGET(screen)))
         {
             page_num++;
             continue;
@@ -420,7 +420,7 @@ void mainwindow_close_tab(GtkWidget *term)
 
 void mainwindow_toggle(int sig)
 {
-    if((!sig && GTK_WIDGET_VISIBLE(mainwindow)) || (sig && toggled))
+    if((!sig && gtk_widget_get_visible(mainwindow)) || (sig && toggled))
     {
         gdk_threads_enter();
         gtk_widget_hide(GTK_WIDGET(mainwindow));
@@ -533,7 +533,7 @@ static void mainwindow_window_title_changed(VteTerminal *vteterminal, gpointer u
         gtk_label_set_label(GTK_LABEL(user_data), vte_terminal_get_window_title(vteterminal));
 }
 
-static void mainwindow_switch_tab(GtkNotebook *notebook, GtkNotebookPage *page,
+static void mainwindow_switch_tab(GtkNotebook *notebook, GtkWidget *page,
     guint page_num, gpointer user_data)
 {
     activetab = page_num;
