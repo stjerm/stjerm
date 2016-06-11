@@ -511,18 +511,34 @@ static gboolean mainwindow_expose_event(GtkWidget *widget, GdkEventExpose *event
     GdkWindow *window = gtk_widget_get_window(widget);
     GtkStyle  *style  = gtk_widget_get_style(widget);
 
-    gdk_draw_rectangle(window, style->black_gc, FALSE, 0, 0,
-        winw-1, winh-1);
+    cairo_t *cr = gdk_cairo_create(window);
+    GdkRectangle rect;
 
-    if(conf_get_border() == BORDER_THIN)
-        return FALSE;
+    gdk_cairo_set_source_color(cr, &(style->black));
+    rect.x = rect.y = 0;
+    rect.height = winh - 1;
+    rect.width  = winw - 1;
+    gdk_cairo_rectangle(cr, &rect);
+    cairo_stroke(cr);
 
-    gdk_draw_rectangle(window,
-        style->bg_gc[GTK_STATE_SELECTED], TRUE, 1, 1, winw -2, winh -2);
+    if(conf_get_border() != BORDER_THIN)
+    {
+        gdk_cairo_set_source_color(cr, &(style->bg[GTK_STATE_SELECTED]));
+        rect.x = rect.y = 1;
+        rect.height = winh - 2;
+        rect.width  = winw - 2;
+        gdk_cairo_rectangle(cr, &rect);
+        cairo_fill(cr);
 
-    gdk_draw_rectangle(window, style->bg_gc[GTK_STATE_NORMAL],
-        TRUE, 5, 5, winw-10, winh-10);
+        gdk_cairo_set_source_color(cr, &(style->bg[GTK_STATE_NORMAL]));
+        rect.x = rect.y = 5;
+        rect.height = winh - 10;
+        rect.width  = winw - 10;
+        gdk_cairo_rectangle(cr, &rect);
+        cairo_fill(cr);
+    }
 
+    cairo_destroy(cr);
     return FALSE;
 }
 
