@@ -181,33 +181,36 @@ static void term_eof_or_child_exited(VteTerminal *term, gpointer user_data)
 static void term_app_request(VteTerminal *term, gpointer user_data)
 {
     int event = GPOINTER_TO_INT(user_data);
+    GdkWindow *window = gtk_widget_get_window(GTK_WIDGET(mainwindow));
 
     if(event == TERM_ICONIFY_WINDOW)
-        gdk_window_iconify(GTK_WIDGET(mainwindow)->window);
+        gdk_window_iconify(window);
     
     if(event == TERM_DEICONIFY_WINDOW)
-        gdk_window_deiconify(GTK_WIDGET(mainwindow)->window);
+        gdk_window_deiconify(window);
     
     if(event == TERM_RAISE_WINDOW)
-        gdk_window_raise(GTK_WIDGET(mainwindow)->window);
+        gdk_window_raise(window);
     
     if(event == TERM_LOWER_WINDOW)
-        gdk_window_lower(GTK_WIDGET(mainwindow)->window);
+        gdk_window_lower(window);
     
     if(event == TERM_MAXIMIZE_WINDOW)
-        gdk_window_maximize(GTK_WIDGET(mainwindow)->window);
+        gdk_window_maximize(window);
     
     if(event == TERM_RESTORE_WINDOW)
-        gdk_window_unmaximize(GTK_WIDGET(mainwindow)->window);
+        gdk_window_unmaximize(window);
     
     if(event == TERM_REFRESH_WINDOW)
     {
         GdkRectangle rect;
+        GtkAllocation allocation;
      
+        gtk_widget_get_allocation(GTK_WIDGET(mainwindow), &allocation);
         rect.x = rect.y = 0;
-        rect.width = mainwindow->allocation.width;
-        rect.height = mainwindow->allocation.height;
-        gdk_window_invalidate_rect(GTK_WIDGET(mainwindow)->window, &rect, TRUE);
+        rect.width = allocation.width;
+        rect.height = allocation.height;
+        gdk_window_invalidate_rect(window, &rect, TRUE);
     }
 }
 

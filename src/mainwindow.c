@@ -263,10 +263,11 @@ static gint mainwindow_tab_at_xy(GtkNotebook *notebook, gint x, gint y)
     GtkPositionType tab_pos;
     int page_num = 0;
     GtkWidget *page;
+    GtkAllocation allocation;
     
     tab_pos = gtk_notebook_get_tab_pos(notebook);
     
-    if(notebook->first_tab == NULL)
+    if(gtk_notebook_get_n_pages(notebook) == 0)
         return -1;
 
     while((page = gtk_notebook_get_nth_page(notebook, page_num)))
@@ -283,8 +284,9 @@ static gint mainwindow_tab_at_xy(GtkNotebook *notebook, gint x, gint y)
             continue;
         }
 
-        max_x = screen->allocation.x + screen->allocation.width;
-        max_y = screen->allocation.y + screen->allocation.height;
+        gtk_widget_get_allocation(screen, &allocation);
+        max_x = allocation.x + allocation.width;
+        max_y = allocation.y + allocation.height;
 
         if(((tab_pos == GTK_POS_TOP) || (tab_pos == GTK_POS_BOTTOM)) && (x <= max_x))
             return page_num;
@@ -444,7 +446,7 @@ void mainwindow_toggle(int sig)
     
     gtk_window_stick(GTK_WINDOW(mainwindow));
     gtk_window_set_keep_above(GTK_WINDOW(mainwindow), TRUE);
-    gdk_window_focus(mainwindow->window, gtk_get_current_event_time());
+    gdk_window_focus(gtk_widget_get_window(mainwindow), gtk_get_current_event_time());
     gdk_flush();
     gdk_threads_leave();
 }
@@ -477,7 +479,7 @@ static void mainwindow_show(GtkWidget *widget, gpointer userdata)
     if(dpy != NULL)
         return;
 
-    mw_xwin = GDK_WINDOW_XWINDOW(GTK_WIDGET(mainwindow)->window);
+    mw_xwin = GDK_WINDOW_XWINDOW(gtk_widget_get_window(mainwindow));
     dpy = GDK_DISPLAY_XDISPLAY(gdk_display_get_default());
 }
 
@@ -506,17 +508,19 @@ static gboolean mainwindow_expose_event(GtkWidget *widget, GdkEventExpose *event
 {
     gint winw, winh;
     gtk_window_get_size(GTK_WINDOW(widget), &winw, &winh);
+    GdkWindow *window = gtk_widget_get_window(widget);
+    GtkStyle  *style  = gtk_widget_get_style(widget);
 
-    gdk_draw_rectangle(widget->window, widget->style->black_gc, FALSE, 0, 0,
+    gdk_draw_rectangle(window, style->black_gc, FALSE, 0, 0,
         winw-1, winh-1);
 
     if(conf_get_border() == BORDER_THIN)
         return FALSE;
 
-    gdk_draw_rectangle(widget->window,
-        widget->style->bg_gc[GTK_STATE_SELECTED], TRUE, 1, 1, winw -2, winh -2);
+    gdk_draw_rectangle(window,
+        style->bg_gc[GTK_STATE_SELECTED], TRUE, 1, 1, winw -2, winh -2);
 
-    gdk_draw_rectangle(widget->window, widget->style->bg_gc[GTK_STATE_NORMAL],
+    gdk_draw_rectangle(window, style->bg_gc[GTK_STATE_NORMAL],
         TRUE, 5, 5, winw-10, winh-10);
 
     return FALSE;
