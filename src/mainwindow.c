@@ -125,7 +125,7 @@ void build_mainwindow(void)
 
     maximize = g_cclosure_new_swap(G_CALLBACK(mainwindow_toggle_fullscreen),
         NULL, NULL);
-    gtk_accel_group_connect(accel_group, GDK_F11, 0,
+    gtk_accel_group_connect(accel_group, GDK_KEY_F11, 0,
         GTK_ACCEL_VISIBLE, maximize);
 
     new_tab = g_cclosure_new_swap(G_CALLBACK(mainwindow_new_tab), 
@@ -140,12 +140,12 @@ void build_mainwindow(void)
 
     next_tab = g_cclosure_new_swap(G_CALLBACK(mainwindow_next_tab), 
         NULL, NULL);
-    gtk_accel_group_connect(accel_group, GDK_Page_Up, conf_get_key_mod(),
+    gtk_accel_group_connect(accel_group, GDK_KEY_Page_Up, conf_get_key_mod(),
         GTK_ACCEL_VISIBLE, next_tab);
 
     prev_tab = g_cclosure_new_swap(G_CALLBACK(mainwindow_prev_tab), 
         NULL, NULL);
-    gtk_accel_group_connect(accel_group, GDK_Page_Down, conf_get_key_mod(),
+    gtk_accel_group_connect(accel_group, GDK_KEY_Page_Down, conf_get_key_mod(),
         GTK_ACCEL_VISIBLE, prev_tab);
 
     delete_all = g_cclosure_new_swap(G_CALLBACK(mainwindow_destroy), 
