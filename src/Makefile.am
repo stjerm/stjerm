@@ -5,8 +5,8 @@ bin_PROGRAMS = stjerm
 stjerm_SOURCES = main.c mainwindow.c config.c term.c \
 	popupmenu.c shortcut.c
 
-INCLUDES= -Wall\
-          -DSTJERM_VERSION=\"$(STJERM_VERSION)\"
+AM_CPPFLAGS= -Wall\
+             -DSTJERM_VERSION=\"$(STJERM_VERSION)\"
 		 
 LIBS = @glib_LIBS@ @LIBS@\
        @gtk_LIBS@\
