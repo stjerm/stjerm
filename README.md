@@ -1,6 +1,6 @@
 # stjerm Terminal Emulator
 
-## This project is in need of a steward. If you are interested in helping maintain stjerm, please reach out.
+## ABANDONED - This project is no longer maintained. If you are interested in taking over, please reach out.
 
 ## Requirements
 
