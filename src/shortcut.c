@@ -21,6 +21,7 @@
  */
 
 #include <X11/Xlib.h>
+#include <X11/XKBlib.h>
 #include <X11/keysym.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -94,7 +95,7 @@ void wait_key(void)
 
         if(event.type == KeyPress)
         {
-            if(XKeycodeToKeysym(dpy, event.xkey.keycode, 0) == opt_key)
+            if(XkbKeycodeToKeysym(dpy, event.xkey.keycode, 0, 0) == opt_key)
                 mainwindow_toggle(0);
         }
     }

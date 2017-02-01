@@ -66,7 +66,7 @@ static gboolean mainwindow_expose_event(GtkWidget*, GdkEventExpose*, gpointer);
 static void mainwindow_destroy(GtkWidget*, gpointer);
 static void mainwindow_window_title_changed(VteTerminal *vteterminal,
     gpointer user_data);
-static void mainwindow_switch_tab(GtkNotebook *notebook, GtkNotebookPage *page,
+static void mainwindow_switch_tab(GtkNotebook *notebook, GtkWidget *page,
     guint page_num, gpointer user_data);
 static void mainwindow_goto_tab(gint i);
 static void mainwindow_next_tab(GtkWidget *widget, gpointer user_data);
@@ -125,7 +125,7 @@ void build_mainwindow(void)
 
     maximize = g_cclosure_new_swap(G_CALLBACK(mainwindow_toggle_fullscreen),
         NULL, NULL);
-    gtk_accel_group_connect(accel_group, GDK_F11, 0,
+    gtk_accel_group_connect(accel_group, GDK_KEY_F11, 0,
         GTK_ACCEL_VISIBLE, maximize);
 
     new_tab = g_cclosure_new_swap(G_CALLBACK(mainwindow_new_tab), 
@@ -140,12 +140,12 @@ void build_mainwindow(void)
 
     next_tab = g_cclosure_new_swap(G_CALLBACK(mainwindow_next_tab), 
         NULL, NULL);
-    gtk_accel_group_connect(accel_group, GDK_Page_Up, conf_get_key_mod(),
+    gtk_accel_group_connect(accel_group, GDK_KEY_Page_Up, conf_get_key_mod(),
         GTK_ACCEL_VISIBLE, next_tab);
 
     prev_tab = g_cclosure_new_swap(G_CALLBACK(mainwindow_prev_tab), 
         NULL, NULL);
-    gtk_accel_group_connect(accel_group, GDK_Page_Down, conf_get_key_mod(),
+    gtk_accel_group_connect(accel_group, GDK_KEY_Page_Down, conf_get_key_mod(),
         GTK_ACCEL_VISIBLE, prev_tab);
 
     delete_all = g_cclosure_new_swap(G_CALLBACK(mainwindow_destroy), 
@@ -227,7 +227,7 @@ void build_mainwindow(void)
     if (conf_get_show_tab() == TABS_ONE|| conf_get_show_tab() == TABS_NEVER)
         gtk_notebook_set_show_tabs(tabbar, FALSE);
     gtk_notebook_set_tab_pos(tabbar, conf_get_tab_pos());
-    gtk_notebook_set_homogeneous_tabs(tabbar, FALSE);
+    g_object_set(tabbar, "homogeneous", FALSE, NULL);
 
     XSetErrorHandler(handle_x_error);
     init_key();
@@ -263,10 +263,11 @@ static gint mainwindow_tab_at_xy(GtkNotebook *notebook, gint x, gint y)
     GtkPositionType tab_pos;
     int page_num = 0;
     GtkWidget *page;
+    GtkAllocation allocation;
     
     tab_pos = gtk_notebook_get_tab_pos(notebook);
     
-    if(notebook->first_tab == NULL)
+    if(gtk_notebook_get_n_pages(notebook) == 0)
         return -1;
 
     while((page = gtk_notebook_get_nth_page(notebook, page_num)))
@@ -277,14 +278,15 @@ static gint mainwindow_tab_at_xy(GtkNotebook *notebook, gint x, gint y)
         screen = gtk_notebook_get_tab_label(notebook, page);
         g_return_val_if_fail(screen != NULL, -1);
 
-        if(!GTK_WIDGET_MAPPED(GTK_WIDGET(screen)))
+        if(!gtk_widget_get_mapped(GTK_WIDGET(screen)))
         {
             page_num++;
             continue;
         }
 
-        max_x = screen->allocation.x + screen->allocation.width;
-        max_y = screen->allocation.y + screen->allocation.height;
+        gtk_widget_get_allocation(screen, &allocation);
+        max_x = allocation.x + allocation.width;
+        max_y = allocation.y + allocation.height;
 
         if(((tab_pos == GTK_POS_TOP) || (tab_pos == GTK_POS_BOTTOM)) && (x <= max_x))
             return page_num;
@@ -420,7 +422,7 @@ void mainwindow_close_tab(GtkWidget *term)
 
 void mainwindow_toggle(int sig)
 {
-    if((!sig && GTK_WIDGET_VISIBLE(mainwindow)) || (sig && toggled))
+    if((!sig && gtk_widget_get_visible(mainwindow)) || (sig && toggled))
     {
         gdk_threads_enter();
         gtk_widget_hide(GTK_WIDGET(mainwindow));
@@ -444,7 +446,7 @@ void mainwindow_toggle(int sig)
     
     gtk_window_stick(GTK_WINDOW(mainwindow));
     gtk_window_set_keep_above(GTK_WINDOW(mainwindow), TRUE);
-    gdk_window_focus(mainwindow->window, gtk_get_current_event_time());
+    gdk_window_focus(gtk_widget_get_window(mainwindow), gtk_get_current_event_time());
     gdk_flush();
     gdk_threads_leave();
 }
@@ -477,7 +479,7 @@ static void mainwindow_show(GtkWidget *widget, gpointer userdata)
     if(dpy != NULL)
         return;
 
-    mw_xwin = GDK_WINDOW_XWINDOW(GTK_WIDGET(mainwindow)->window);
+    mw_xwin = GDK_WINDOW_XWINDOW(gtk_widget_get_window(mainwindow));
     dpy = GDK_DISPLAY_XDISPLAY(gdk_display_get_default());
 }
 
@@ -506,19 +508,37 @@ static gboolean mainwindow_expose_event(GtkWidget *widget, GdkEventExpose *event
 {
     gint winw, winh;
     gtk_window_get_size(GTK_WINDOW(widget), &winw, &winh);
+    GdkWindow *window = gtk_widget_get_window(widget);
+    GtkStyle  *style  = gtk_widget_get_style(widget);
 
-    gdk_draw_rectangle(widget->window, widget->style->black_gc, FALSE, 0, 0,
-        winw-1, winh-1);
+    cairo_t *cr = gdk_cairo_create(window);
+    GdkRectangle rect;
 
-    if(conf_get_border() == BORDER_THIN)
-        return FALSE;
+    gdk_cairo_set_source_color(cr, &(style->black));
+    rect.x = rect.y = 0;
+    rect.height = winh - 1;
+    rect.width  = winw - 1;
+    gdk_cairo_rectangle(cr, &rect);
+    cairo_stroke(cr);
 
-    gdk_draw_rectangle(widget->window,
-        widget->style->bg_gc[GTK_STATE_SELECTED], TRUE, 1, 1, winw -2, winh -2);
+    if(conf_get_border() != BORDER_THIN)
+    {
+        gdk_cairo_set_source_color(cr, &(style->bg[GTK_STATE_SELECTED]));
+        rect.x = rect.y = 1;
+        rect.height = winh - 2;
+        rect.width  = winw - 2;
+        gdk_cairo_rectangle(cr, &rect);
+        cairo_fill(cr);
 
-    gdk_draw_rectangle(widget->window, widget->style->bg_gc[GTK_STATE_NORMAL],
-        TRUE, 5, 5, winw-10, winh-10);
+        gdk_cairo_set_source_color(cr, &(style->bg[GTK_STATE_NORMAL]));
+        rect.x = rect.y = 5;
+        rect.height = winh - 10;
+        rect.width  = winw - 10;
+        gdk_cairo_rectangle(cr, &rect);
+        cairo_fill(cr);
+    }
 
+    cairo_destroy(cr);
     return FALSE;
 }
 
@@ -533,7 +553,7 @@ static void mainwindow_window_title_changed(VteTerminal *vteterminal, gpointer u
         gtk_label_set_label(GTK_LABEL(user_data), vte_terminal_get_window_title(vteterminal));
 }
 
-static void mainwindow_switch_tab(GtkNotebook *notebook, GtkNotebookPage *page,
+static void mainwindow_switch_tab(GtkNotebook *notebook, GtkWidget *page,
     guint page_num, gpointer user_data)
 {
     activetab = page_num;
