@@ -46,15 +46,15 @@ void build_popupmenu(void)
     GtkWidget *menuitem;
     GtkWidget *img;
 
-    gchar *labels[] = {"New Tab", "Close Tab", "Copy", "Paste", "Toggle Fullscreen", "Quit"};
+    gchar *labels[] = {"New Tab", "Close Tab", "Copy", "Paste", "Toggle Fullscreen", "Clean Scrollback Lines", "Quit"};
     gchar *stocks[] = {GTK_STOCK_ADD, GTK_STOCK_CLOSE, GTK_STOCK_COPY,
-        GTK_STOCK_PASTE, GTK_STOCK_FULLSCREEN, GTK_STOCK_QUIT};
+        GTK_STOCK_PASTE, GTK_STOCK_FULLSCREEN, GTK_STOCK_CLEAR, GTK_STOCK_QUIT};
 
     int i;
     
-    for(i = 0; i < 6; i++)
+    for(i = 0; i < 7; i++)
     {
-        if(i == 2 || i == 4 || i == 5)
+        if(i == 2 || i == 4 || i == 6)
         {
             menuitem = gtk_separator_menu_item_new();
             gtk_menu_shell_append(GTK_MENU_SHELL(popupmenu), menuitem);
@@ -105,6 +105,11 @@ static void popupmenu_activate(gchar *label)
     else if(!strcmp(label, "Toggle Fullscreen"))
     {
         mainwindow_toggle_fullscreen();
+    }
+    else if(!strcmp(label, "Clean Scrollback Lines"))
+    {
+        vte_terminal_set_scrollback_lines (VTE_TERMINAL(mainwindow_get_terminal_at(activetab)), 0);
+        vte_terminal_set_scrollback_lines (VTE_TERMINAL(mainwindow_get_terminal_at(activetab)), conf_get_lines());
     }
     else if(!strcmp(label, "Quit"))
     {
