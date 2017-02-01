@@ -23,6 +23,7 @@ If you're compiling from source on Ubuntu, you'll need:
 ## Running
 
 Simply run:
+
     stjerm
 
 and all available options will be listed.
